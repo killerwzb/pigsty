@@ -63,7 +63,7 @@ check_utils      # check ansible sshpass and other utils installed
 
 ```bash
 $ ./configure
-configure pigsty v1.4.1 begin
+configure pigsty v1.5.0-beta begin
 [ OK ] kernel = Linux
 [ OK ] machine = x86_64
 [ OK ] release = 7.8.2003 , perfect
@@ -188,8 +188,6 @@ Pigsty包含了220个固定[配置项](#配置项清单)，分为四个部分：
 | [`INFRA`](v-infra.md) | [`GRAFANA`](v-infra.md#GRAFANA)                 | Grafana可视化平台     | 9     |
 | [`INFRA`](v-infra.md) | [`LOKI`](v-infra.md#LOKI)                       | Loki日志收集平台       | 5     |
 | [`INFRA`](v-infra.md) | [`DCS`](v-infra.md#DCS)                         | 分布式配置存储元数据库      | 8     |
-| [`INFRA`](v-infra.md) | [`JUPYTER`](v-infra.md#JUPYTER)                 | JupyterLab数据分析环境 | 3     |
-| [`INFRA`](v-infra.md) | [`PGWEB`](v-infra.md#PGWEB)                     | PGWeb网页客户端工具     | 2     |
 | [`NODES`](v-nodes.md) | [`NODE_IDENTITY`](v-nodes.md#NODE_IDENTITY)     | 节点身份参数           | 5     |
 | [`NODES`](v-nodes.md) | [`NODE_DNS`](v-nodes.md#NODE_DNS)               | 节点域名解析           | 5     |
 | [`NODES`](v-nodes.md) | [`NODE_REPO`](v-nodes.md#NODE_REPO)             | 节点软件源            | 3     |
@@ -219,11 +217,11 @@ Pigsty包含了220个固定[配置项](#配置项清单)，分为四个部分：
 | ID   | Name                                                         | Section                                         | Level | Description                          |
 | ---- | ------------------------------------------------------------ | ----------------------------------------------- | ----- | ------------------------------------ |
 | 100  | [`proxy_env`](v-infra.md#proxy_env)                          | [`CONNECT`](v-infra.md#CONNECT)                 | G     | 代理服务器配置                       |
-| 110  | [`repo_enabled`](v-infra.md#repo_enabled)                    | [`REPO`](v-infra.md#REPO)                       | G     | 是否启用本地源                       |
+| 110  | [`nginx_enabled`](v-infra.md#nginx_enabled)                    | [`REPO`](v-infra.md#REPO)                       | G     | 是否启用本地源                       |
 | 111  | [`repo_name`](v-infra.md#repo_name)                          | [`REPO`](v-infra.md#REPO)                       | G     | 本地源名称                           |
 | 112  | [`repo_address`](v-infra.md#repo_address)                    | [`REPO`](v-infra.md#REPO)                       | G     | 本地源外部访问地址                   |
-| 113  | [`repo_port`](v-infra.md#repo_port)                          | [`REPO`](v-infra.md#REPO)                       | G     | 本地源端口                           |
-| 114  | [`repo_home`](v-infra.md#repo_home)                          | [`REPO`](v-infra.md#REPO)                       | G     | 本地源文件根目录                     |
+| 113  | [`nginx_port`](v-infra.md#nginx_port)                          | [`REPO`](v-infra.md#REPO)                       | G     | 本地源端口                           |
+| 114  | [`nginx_home`](v-infra.md#nginx_home)                          | [`REPO`](v-infra.md#REPO)                       | G     | 本地源文件根目录                     |
 | 115  | [`repo_rebuild`](v-infra.md#repo_rebuild)                    | [`REPO`](v-infra.md#REPO)                       | A     | 是否重建Yum源                        |
 | 116  | [`repo_remove`](v-infra.md#repo_remove)                      | [`REPO`](v-infra.md#REPO)                       | A     | 是否移除已有REPO文件                 |
 | 117  | [`repo_upstreams`](v-infra.md#repo_upstreams)                | [`REPO`](v-infra.md#REPO)                       | G     | Yum源的上游来源                      |
@@ -235,7 +233,7 @@ Pigsty包含了220个固定[配置项](#配置项清单)，分为四个部分：
 | 123  | [`ca_cert`](v-infra.md#ca_cert)                              | [`CA`](v-infra.md#CA)                           | G     | CA证书                               |
 | 124  | [`ca_key`](v-infra.md#ca_key)                                | [`CA`](v-infra.md#CA)                           | G     | CA私钥名称                           |
 | 130  | [`nginx_upstream`](v-infra.md#nginx_upstream)                | [`NGINX`](v-infra.md#NGINX)                     | G     | Nginx上游服务器                      |
-| 131  | [`app_list`](v-infra.md#app_list)                            | [`NGINX`](v-infra.md#NGINX)                     | G     | 首页导航栏显示的应用列表             |
+| 131  | [`nginx_indexes`](v-infra.md#nginx_indexes)                            | [`NGINX`](v-infra.md#NGINX)                     | G     | 首页导航栏显示的应用列表             |
 | 132  | [`docs_enabled`](v-infra.md#docs_enabled)                    | [`NGINX`](v-infra.md#NGINX)                     | G     | 是否启用本地文档                     |
 | 133  | [`pev2_enabled`](v-infra.md#pev2_enabled)                    | [`NGINX`](v-infra.md#NGINX)                     | G     | 是否启用PEV2组件                     |
 | 134  | [`pgbadger_enabled`](v-infra.md#pgbadger_enabled)            | [`NGINX`](v-infra.md#NGINX)                     | G     | 是否启用Pgbadger                     |
@@ -255,45 +253,40 @@ Pigsty包含了220个固定[配置项](#配置项清单)，分为四个部分：
 | 172  | [`grafana_admin_password`](v-infra.md#grafana_admin_password) | [`GRAFANA`](v-infra.md#GRAFANA)                 | G     | Grafana管理员密码                    |
 | 173  | [`grafana_database`](v-infra.md#grafana_database)            | [`GRAFANA`](v-infra.md#GRAFANA)                 | G     | Grafana后端数据库类型                |
 | 174  | [`grafana_pgurl`](v-infra.md#grafana_pgurl)                  | [`GRAFANA`](v-infra.md#GRAFANA)                 | G     | Grafana的PG数据库连接串              |
-| 175  | [`grafana_plugin`](v-infra.md#grafana_plugin)                | [`GRAFANA`](v-infra.md#GRAFANA)                 | G     | 如何安装Grafana插件                  |
-| 176  | [`grafana_cache`](v-infra.md#grafana_cache)                  | [`GRAFANA`](v-infra.md#GRAFANA)                 | G     | Grafana插件缓存地址                  |
-| 177  | [`grafana_plugins`](v-infra.md#grafana_plugins)              | [`GRAFANA`](v-infra.md#GRAFANA)                 | G     | 安装的Grafana插件列表                |
-| 178  | [`grafana_git_plugins`](v-infra.md#grafana_git_plugins)      | [`GRAFANA`](v-infra.md#GRAFANA)                 | G     | 从Git安装的Grafana插件               |
+| 175  | [`grafana_plugin_method`](v-infra.md#grafana_plugin_method)                | [`GRAFANA`](v-infra.md#GRAFANA)                 | G     | 如何安装Grafana插件                  |
+| 176  | [`grafana_plugin_cache`](v-infra.md#grafana_plugin_cache)                  | [`GRAFANA`](v-infra.md#GRAFANA)                 | G     | Grafana插件缓存地址                  |
+| 177  | [`grafana_plugin_list`](v-infra.md#grafana_plugin_list)              | [`GRAFANA`](v-infra.md#GRAFANA)                 | G     | 安装的Grafana插件列表                |
+| 178  | [`grafana_plugin_git`](v-infra.md#grafana_plugin_git)      | [`GRAFANA`](v-infra.md#GRAFANA)                 | G     | 从Git安装的Grafana插件               |
 | 180  | [`loki_endpoint`](v-infra.md#loki_endpoint)                  | [`LOKI`](v-infra.md#LOKI)                       | G     | 用于接收日志的loki服务endpoint       |
 | 181  | [`loki_clean`](v-infra.md#loki_clean)                        | [`LOKI`](v-infra.md#LOKI)                       | A     | 是否在安装Loki时清理数据库目录       |
 | 182  | [`loki_options`](v-infra.md#loki_options)                    | [`LOKI`](v-infra.md#LOKI)                       | G     | Loki的命令行参数                     |
 | 183  | [`loki_data_dir`](v-infra.md#loki_data_dir)                  | [`LOKI`](v-infra.md#LOKI)                       | G     | Loki的数据目录                       |
 | 184  | [`loki_retention`](v-infra.md#loki_retention)                | [`LOKI`](v-infra.md#LOKI)                       | G     | Loki日志默认保留天数                 |
 | 200  | [`dcs_servers`](v-infra.md#dcs_servers)                      | [`DCS`](v-infra.md#DCS)                         | G     | DCS服务器名称:IP列表                 |
-| 201  | [`service_registry`](v-infra.md#service_registry)            | [`DCS`](v-infra.md#DCS)                         | G     | 服务注册的位置                       |
+| 201  | [`dcs_registry`](v-infra.md#dcs_registry)            | [`DCS`](v-infra.md#DCS)                         | G     | 服务注册的位置                       |
 | 202  | [`dcs_type`](v-infra.md#dcs_type)                            | [`DCS`](v-infra.md#DCS)                         | G     | 使用的DCS类型                        |
-| 203  | [`dcs_name`](v-infra.md#dcs_name)                            | [`DCS`](v-infra.md#DCS)                         | G     | DCS集群名称                          |
-| 204  | [`dcs_exists_action`](v-infra.md#dcs_exists_action)          | [`DCS`](v-infra.md#DCS)                         | C/A   | 若DCS实例存在如何处理                |
-| 205  | [`dcs_disable_purge`](v-infra.md#dcs_disable_purge)          | [`DCS`](v-infra.md#DCS)                         | C/A   | 完全禁止清理DCS实例                  |
+| 203  | [`consul_name`](v-infra.md#consul_name)                            | [`DCS`](v-infra.md#DCS)                         | G     | DCS集群名称                          |
+| 204  | [`consul_clean`](v-infra.md#consul_clean)          | [`DCS`](v-infra.md#DCS)                         | C/A   | 若DCS实例存在如何处理                |
+| 205  | [`consul_safeguard`](v-infra.md#consul_safeguard)          | [`DCS`](v-infra.md#DCS)                         | C/A   | 完全禁止清理DCS实例                  |
 | 206  | [`consul_data_dir`](v-infra.md#consul_data_dir)              | [`DCS`](v-infra.md#DCS)                         | G     | Consul数据目录                       |
 | 207  | [`etcd_data_dir`](v-infra.md#etcd_data_dir)                  | [`DCS`](v-infra.md#DCS)                         | G     | Etcd数据目录                         |
-| 220  | [`jupyter_enabled`](v-infra.md#jupyter_enabled)              | [`JUPYTER`](v-infra.md#JUPYTER)                 | G     | 是否启用JupyterLab                   |
-| 221  | [`jupyter_username`](v-infra.md#jupyter_username)            | [`JUPYTER`](v-infra.md#JUPYTER)                 | G     | Jupyter使用的操作系统用户            |
-| 222  | [`jupyter_password`](v-infra.md#jupyter_password)            | [`JUPYTER`](v-infra.md#JUPYTER)                 | G     | Jupyter Lab的密码                    |
-| 230  | [`pgweb_enabled`](v-infra.md#pgweb_enabled)                  | [`PGWEB`](v-infra.md#PGWEB)                     | G     | 是否启用PgWeb                        |
-| 231  | [`pgweb_username`](v-infra.md#pgweb_username)                | [`PGWEB`](v-infra.md#PGWEB)                     | G     | PgWeb使用的操作系统用户              |
 | 300  | [`meta_node`](v-nodes.md#meta_node)                          | [`NODE_IDENTITY`](v-nodes.md#NODE_IDENTITY)     | C     | 表示此节点为元节点                   |
 | 301  | [`nodename`](v-nodes.md#nodename)                            | [`NODE_IDENTITY`](v-nodes.md#NODE_IDENTITY)     | I     | 指定节点实例标识                     |
 | 302  | [`node_cluster`](v-nodes.md#node_cluster)                    | [`NODE_IDENTITY`](v-nodes.md#NODE_IDENTITY)     | C     | 节点集群名，默认名为nodes            |
 | 303  | [`nodename_overwrite`](v-nodes.md#nodename_overwrite)        | [`NODE_IDENTITY`](v-nodes.md#NODE_IDENTITY)     | C     | 用Nodename覆盖机器HOSTNAME           |
 | 304  | [`nodename_exchange`](v-nodes.md#nodename_exchange)          | [`NODE_IDENTITY`](v-nodes.md#NODE_IDENTITY)     | C     | 是否在剧本节点间交换主机名           |
-| 310  | [`node_dns_hosts`](v-nodes.md#node_dns_hosts)                | [`NODE_DNS`](v-nodes.md#NODE_DNS)               | C     | 写入机器的静态DNS解析                |
-| 311  | [`node_dns_hosts_extra`](v-nodes.md#node_dns_hosts_extra)    | [`NODE_DNS`](v-nodes.md#NODE_DNS)               | C/I   | 同上，用于集群实例层级               |
-| 312  | [`node_dns_server`](v-nodes.md#node_dns_server)              | [`NODE_DNS`](v-nodes.md#NODE_DNS)               | C     | 如何配置DNS服务器？                  |
+| 310  | [`node_etc_hosts_default`](v-nodes.md#node_etc_hosts_default)                | [`NODE_DNS`](v-nodes.md#NODE_DNS)               | C     | 写入机器的静态DNS解析                |
+| 311  | [`node_etc_hosts`](v-nodes.md#node_etc_hosts)    | [`NODE_DNS`](v-nodes.md#NODE_DNS)               | C/I   | 同上，用于集群实例层级               |
+| 312  | [`node_dns_method`](v-nodes.md#node_dns_method)              | [`NODE_DNS`](v-nodes.md#NODE_DNS)               | C     | 如何配置DNS服务器？                  |
 | 313  | [`node_dns_servers`](v-nodes.md#node_dns_servers)            | [`NODE_DNS`](v-nodes.md#NODE_DNS)               | C     | 配置动态DNS服务器列表                |
 | 314  | [`node_dns_options`](v-nodes.md#node_dns_options)            | [`NODE_DNS`](v-nodes.md#NODE_DNS)               | C     | 配置/etc/resolv.conf                 |
 | 320  | [`node_repo_method`](v-nodes.md#node_repo_method)            | [`NODE_REPO`](v-nodes.md#NODE_REPO)             | C     | 节点使用Yum源的方式                  |
 | 321  | [`node_repo_remove`](v-nodes.md#node_repo_remove)            | [`NODE_REPO`](v-nodes.md#NODE_REPO)             | C     | 是否移除节点已有Yum源                |
-| 322  | [`node_local_repo_url`](v-nodes.md#node_local_repo_url)      | [`NODE_REPO`](v-nodes.md#NODE_REPO)             | C     | 本地源的URL地址                      |
-| 330  | [`node_packages`](v-nodes.md#node_packages)                  | [`NODE_PACKAGES`](v-nodes.md#NODE_PACKAGES)     | C     | 节点安装软件列表                     |
-| 331  | [`node_extra_packages`](v-nodes.md#node_extra_packages)      | [`NODE_PACKAGES`](v-nodes.md#NODE_PACKAGES)     | C     | 节点额外安装的软件列表               |
-| 332  | [`node_meta_packages`](v-nodes.md#node_meta_packages)        | [`NODE_PACKAGES`](v-nodes.md#NODE_PACKAGES)     | G     | 元节点所需的软件列表                 |
-| 333  | [`node_meta_pip_install`](v-nodes.md#node_meta_pip_install)  | [`NODE_PACKAGES`](v-nodes.md#NODE_PACKAGES)     | G     | 元节点上通过pip3安装的软件包         |
+| 322  | [`node_repo_local_urls`](v-nodes.md#node_repo_local_urls)      | [`NODE_REPO`](v-nodes.md#NODE_REPO)             | C     | 本地源的URL地址                      |
+| 330  | [`node_packages_default`](v-nodes.md#node_packages_default)                  | [`NODE_PACKAGES`](v-nodes.md#NODE_PACKAGES)     | C     | 节点安装软件列表                     |
+| 331  | [`node_packages`](v-nodes.md#node_packages)      | [`NODE_PACKAGES`](v-nodes.md#NODE_PACKAGES)     | C     | 节点额外安装的软件列表               |
+| 332  | [`node_packages_meta`](v-nodes.md#node_packages_meta)        | [`NODE_PACKAGES`](v-nodes.md#NODE_PACKAGES)     | G     | 元节点所需的软件列表                 |
+| 333  | [`node_packages_meta_pip`](v-nodes.md#node_packages_meta_pip)  | [`NODE_PACKAGES`](v-nodes.md#NODE_PACKAGES)     | G     | 元节点上通过pip3安装的软件包         |
 | 340  | [`node_disable_numa`](v-nodes.md#node_disable_numa)          | [`NODE_FEATURES`](v-nodes.md#NODE_FEATURES)     | C     | 关闭节点NUMA                         |
 | 341  | [`node_disable_swap`](v-nodes.md#node_disable_swap)          | [`NODE_FEATURES`](v-nodes.md#NODE_FEATURES)     | C     | 关闭节点SWAP                         |
 | 342  | [`node_disable_firewall`](v-nodes.md#node_disable_firewall)  | [`NODE_FEATURES`](v-nodes.md#NODE_FEATURES)     | C     | 关闭节点防火墙                       |
@@ -303,14 +296,14 @@ Pigsty包含了220个固定[配置项](#配置项清单)，分为四个部分：
 | 346  | [`node_kernel_modules`](v-nodes.md#node_kernel_modules)      | [`NODE_MODULES`](v-nodes.md#NODE_MODULES)       | C     | 启用的内核模块                       |
 | 350  | [`node_tune`](v-nodes.md#node_tune)                          | [`NODE_TUNE`](v-nodes.md#NODE_TUNE)             | C     | 节点调优模式                         |
 | 351  | [`node_sysctl_params`](v-nodes.md#node_sysctl_params)        | [`NODE_TUNE`](v-nodes.md#NODE_TUNE)             | C     | 操作系统内核参数                     |
-| 360  | [`node_admin_setup`](v-nodes.md#node_admin_setup)            | [`NODE_ADMIN`](v-nodes.md#NODE_ADMIN)           | G     | 是否创建管理员用户                   |
+| 360  | [`node_admin_enabled`](v-nodes.md#node_admin_enabled)            | [`NODE_ADMIN`](v-nodes.md#NODE_ADMIN)           | G     | 是否创建管理员用户                   |
 | 361  | [`node_admin_uid`](v-nodes.md#node_admin_uid)                | [`NODE_ADMIN`](v-nodes.md#NODE_ADMIN)           | G     | 管理员用户UID                        |
 | 362  | [`node_admin_username`](v-nodes.md#node_admin_username)      | [`NODE_ADMIN`](v-nodes.md#NODE_ADMIN)           | G     | 管理员用户名                         |
 | 363  | [`node_admin_ssh_exchange`](v-nodes.md#node_admin_ssh_exchange) | [`NODE_ADMIN`](v-nodes.md#NODE_ADMIN)           | C     | 在实例间交换管理员SSH密钥            |
 | 364  | [`node_admin_pk_current`](v-nodes.md#node_admin_pk_current)  | [`NODE_ADMIN`](v-nodes.md#NODE_ADMIN)           | A     | 是否将当前用户的公钥加入管理员账户   |
-| 365  | [`node_admin_pks`](v-nodes.md#node_admin_pks)                | [`NODE_ADMIN`](v-nodes.md#NODE_ADMIN)           | C     | 可登陆管理员的公钥列表               |
+| 365  | [`node_admin_pk_list`](v-nodes.md#node_admin_pk_list)                | [`NODE_ADMIN`](v-nodes.md#NODE_ADMIN)           | C     | 可登陆管理员的公钥列表               |
 | 370  | [`node_timezone`](v-nodes.md#node_timezone)                  | [`NODE_TIME`](v-nodes.md#NODE_TIME)             | C     | NTP时区设置                          |
-| 371  | [`node_ntp_config`](v-nodes.md#node_ntp_config)              | [`NODE_TIME`](v-nodes.md#NODE_TIME)             | C     | 是否配置NTP服务？                    |
+| 371  | [`node_ntp_enabled`](v-nodes.md#node_ntp_enabled)              | [`NODE_TIME`](v-nodes.md#NODE_TIME)             | C     | 是否配置NTP服务？                    |
 | 372  | [`node_ntp_service`](v-nodes.md#node_ntp_service)            | [`NODE_TIME`](v-nodes.md#NODE_TIME)             | C     | NTP服务类型：ntp或chrony             |
 | 373  | [`node_ntp_servers`](v-nodes.md#node_ntp_servers)            | [`NODE_TIME`](v-nodes.md#NODE_TIME)             | C     | NTP服务器列表                        |
 | 380  | [`node_exporter_enabled`](v-nodes.md#node_exporter_enabled)  | [`NODE_EXPORTER`](v-nodes.md#NODE_EXPORTER)     | C     | 启用节点指标收集器                   |
@@ -356,8 +349,8 @@ Pigsty包含了220个固定[配置项](#配置项清单)，分为四个部分：
 | 548  | [`pg_bin_dir`](v-pgsql.md#pg_bin_dir)                        | [`PG_INSTALL`](v-pgsql.md#PG_INSTALL)           | C     | PG二进制目录                         |
 | 549  | [`pg_packages`](v-pgsql.md#pg_packages)                      | [`PG_INSTALL`](v-pgsql.md#PG_INSTALL)           | C     | 安装的PG软件包列表                   |
 | 550  | [`pg_extensions`](v-pgsql.md#pg_extensions)                  | [`PG_INSTALL`](v-pgsql.md#PG_INSTALL)           | C     | 安装的PG插件列表                     |
-| 560  | [`pg_exists_action`](v-pgsql.md#pg_exists_action)            | [`PG_BOOTSTRAP`](v-pgsql.md#PG_BOOTSTRAP)       | C/A   | PG存在时如何处理                     |
-| 561  | [`pg_disable_purge`](v-pgsql.md#pg_disable_purge)            | [`PG_BOOTSTRAP`](v-pgsql.md#PG_BOOTSTRAP)       | C/A   | 禁止清除存在的PG实例                 |
+| 560  | [`pg_clean`](v-pgsql.md#pg_clean)            | [`PG_BOOTSTRAP`](v-pgsql.md#PG_BOOTSTRAP)       | C/A   | PG存在时如何处理                     |
+| 561  | [`pg_safeguard`](v-pgsql.md#pg_safeguard)            | [`PG_BOOTSTRAP`](v-pgsql.md#PG_BOOTSTRAP)       | C/A   | 禁止清除存在的PG实例                 |
 | 562  | [`pg_data`](v-pgsql.md#pg_data)                              | [`PG_BOOTSTRAP`](v-pgsql.md#PG_BOOTSTRAP)       | C     | PG数据目录                           |
 | 563  | [`pg_fs_main`](v-pgsql.md#pg_fs_main)                        | [`PG_BOOTSTRAP`](v-pgsql.md#PG_BOOTSTRAP)       | C     | PG主数据盘挂载点                     |
 | 564  | [`pg_fs_bkup`](v-pgsql.md#pg_fs_bkup)                        | [`PG_BOOTSTRAP`](v-pgsql.md#PG_BOOTSTRAP)       | C     | PG备份盘挂载点                       |
@@ -371,7 +364,7 @@ Pigsty包含了220个固定[配置项](#配置项清单)，分为四个部分：
 | 583  | [`patroni_port`](v-pgsql.md#patroni_port)                    | [`PG_BOOTSTRAP`](v-pgsql.md#PG_BOOTSTRAP)       | C     | Patroni服务端口                      |
 | 584  | [`patroni_watchdog_mode`](v-pgsql.md#patroni_watchdog_mode)  | [`PG_BOOTSTRAP`](v-pgsql.md#PG_BOOTSTRAP)       | C     | Patroni Watchdog模式                 |
 | 585  | [`pg_conf`](v-pgsql.md#pg_conf)                              | [`PG_BOOTSTRAP`](v-pgsql.md#PG_BOOTSTRAP)       | C     | Patroni使用的配置模板                |
-| 586  | [`pg_shared_libraries`](v-pgsql.md#pg_shared_libraries)      | [`PG_BOOTSTRAP`](v-pgsql.md#PG_BOOTSTRAP)       | C     | PG默认加载的共享库                   |
+| 586  | [`pg_libs`](v-pgsql.md#pg_libs)      | [`PG_BOOTSTRAP`](v-pgsql.md#PG_BOOTSTRAP)       | C     | PG默认加载的共享库                   |
 | 587  | [`pg_encoding`](v-pgsql.md#pg_encoding)                      | [`PG_BOOTSTRAP`](v-pgsql.md#PG_BOOTSTRAP)       | C     | PG字符集编码                         |
 | 588  | [`pg_locale`](v-pgsql.md#pg_locale)                          | [`PG_BOOTSTRAP`](v-pgsql.md#PG_BOOTSTRAP)       | C     | PG使用的本地化规则                   |
 | 589  | [`pg_lc_collate`](v-pgsql.md#pg_lc_collate)                  | [`PG_BOOTSTRAP`](v-pgsql.md#PG_BOOTSTRAP)       | C     | PG使用的本地化排序规则               |
@@ -405,7 +398,7 @@ Pigsty包含了220个固定[配置项](#配置项清单)，分为四个部分：
 | 640  | [`pg_services`](v-pgsql.md#pg_services)                      | [`PG_SERVICE`](v-pgsql.md#PG_SERVICE)           | G/C   | 全局通用服务定义                     |
 | 641  | [`haproxy_enabled`](v-pgsql.md#haproxy_enabled)              | [`PG_SERVICE`](v-pgsql.md#PG_SERVICE)           | C/I   | 是否启用Haproxy                      |
 | 642  | [`haproxy_reload`](v-pgsql.md#haproxy_reload)                | [`PG_SERVICE`](v-pgsql.md#PG_SERVICE)           | A     | 是否重载Haproxy配置                  |
-| 643  | [`haproxy_admin_auth_enabled`](v-pgsql.md#haproxy_admin_auth_enabled) | [`PG_SERVICE`](v-pgsql.md#PG_SERVICE)           | G/C   | 是否对Haproxy管理界面启用认证        |
+| 643  | [`haproxy_auth_enabled`](v-pgsql.md#haproxy_auth_enabled) | [`PG_SERVICE`](v-pgsql.md#PG_SERVICE)           | G/C   | 是否对Haproxy管理界面启用认证        |
 | 644  | [`haproxy_admin_username`](v-pgsql.md#haproxy_admin_username) | [`PG_SERVICE`](v-pgsql.md#PG_SERVICE)           | G     | HAproxy管理员名称                    |
 | 645  | [`haproxy_admin_password`](v-pgsql.md#haproxy_admin_password) | [`PG_SERVICE`](v-pgsql.md#PG_SERVICE)           | G     | HAproxy管理员密码                    |
 | 646  | [`haproxy_exporter_port`](v-pgsql.md#haproxy_exporter_port)  | [`PG_SERVICE`](v-pgsql.md#PG_SERVICE)           | C     | HAproxy指标暴露器端口                |
@@ -421,13 +414,13 @@ Pigsty包含了220个固定[配置项](#配置项清单)，分为四个部分：
 | 700  | [`redis_cluster`](v-redis.md#redis_cluster)                  | [`REDIS_IDENTITY`](v-redis.md#REDIS_IDENTITY)   | C     | Redis数据库集群名称                  |
 | 701  | [`redis_node`](v-redis.md#redis_node)                        | [`REDIS_IDENTITY`](v-redis.md#REDIS_IDENTITY)   | I     | Redis节点序列号                      |
 | 702  | [`redis_instances`](v-redis.md#redis_instances)              | [`REDIS_IDENTITY`](v-redis.md#REDIS_IDENTITY)   | I     | Redis实例定义                        |
-| 720  | [`redis_install`](v-redis.md#redis_install)                  | [`REDIS_PROVISION`](v-redis.md#REDIS_PROVISION) | C     | 安装Redis的方式                      |
+| 720  | [`redis_install_method`](v-redis.md#redis_install_method)                  | [`REDIS_PROVISION`](v-redis.md#REDIS_PROVISION) | C     | 安装Redis的方式                      |
 | 721  | [`redis_mode`](v-redis.md#redis_mode)                        | [`REDIS_PROVISION`](v-redis.md#REDIS_PROVISION) | C     | Redis集群模式                        |
 | 722  | [`redis_conf`](v-redis.md#redis_conf)                        | [`REDIS_PROVISION`](v-redis.md#REDIS_PROVISION) | C     | Redis配置文件模板                    |
 | 723  | [`redis_fs_main`](v-redis.md#redis_fs_main)                  | [`REDIS_PROVISION`](v-redis.md#REDIS_PROVISION) | C     | PG数据库实例角色                     |
 | 724  | [`redis_bind_address`](v-redis.md#redis_bind_address)        | [`REDIS_PROVISION`](v-redis.md#REDIS_PROVISION) | C     | Redis监听的端口地址                  |
-| 725  | [`redis_exists_action`](v-redis.md#redis_exists_action)      | [`REDIS_PROVISION`](v-redis.md#REDIS_PROVISION) | C     | Redis存在时执行何种操作              |
-| 726  | [`redis_disable_purge`](v-redis.md#redis_disable_purge)      | [`REDIS_PROVISION`](v-redis.md#REDIS_PROVISION) | C     | 禁止抹除现存的Redis                  |
+| 725  | [`redis_clean`](v-redis.md#redis_clean)      | [`REDIS_PROVISION`](v-redis.md#REDIS_PROVISION) | C     | Redis存在时执行何种操作              |
+| 726  | [`redis_safeguard`](v-redis.md#redis_safeguard)      | [`REDIS_PROVISION`](v-redis.md#REDIS_PROVISION) | C     | 禁止抹除现存的Redis                  |
 | 727  | [`redis_max_memory`](v-redis.md#redis_max_memory)            | [`REDIS_PROVISION`](v-redis.md#REDIS_PROVISION) | C/I   | Redis可用的最大内存                  |
 | 728  | [`redis_mem_policy`](v-redis.md#redis_mem_policy)            | [`REDIS_PROVISION`](v-redis.md#REDIS_PROVISION) | C     | 内存逐出策略                         |
 | 729  | [`redis_password`](v-redis.md#redis_password)                | [`REDIS_PROVISION`](v-redis.md#REDIS_PROVISION) | C     | Redis密码                            |

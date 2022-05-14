@@ -1,8 +1,8 @@
-# Playbook：NODES
+# Playbook: NODES
 
-> Use the `NODES` [playbooks](p-playbook.md) to bring more nodes to Pigsty, adjusting nodes to the state described in the [config](v-nodes.md).
+> Use the `NODES` [playbook](p-playbook.md) to bring more nodes to Pigsty, adjusting nodes to the state described in the [config](v-nodes.md).
 
-Once pigsty is installed on the meta node with [`infra.yml`](p-infra.md), You can add more nodes to Pigsty with [`nodes.yml`](#nodes), or remove them from Pigsty with [`nodes-remove.yml`](#nodes-remove) .
+Once pigsty is installed on the meta node with [`infra.yml`](p-infra.md), You can add more nodes to Pigsty with [`nodes.yml`](#nodes) or remove them from Pigsty with [`nodes-remove.yml`](#nodes-remove).
 
 | Playbook                                  | Function                                                     | Link                                                         |
 | ----------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
@@ -13,16 +13,15 @@ Once pigsty is installed on the meta node with [`infra.yml`](p-infra.md), You ca
 
 
 
-
 ---------------
 
 ## `nodes`
 
-The [`nodes.yml`](p-nodes.md) playbook will register nodes to Pigsty.
+The [`nodes.yml`](https://github.com/vonng/pigsty/blob/master/nodes.yml) playbook will register nodes to Pigsty.
 
 This playbook adjusts the target nodes to the state described in the [inventory](v-nodes.md), installs the Consul service, and incorporates it into the Pigsty monitoring system. Nodes can be used for database deployment once provisioning is complete.
 
-The behavior of this playbook is determined by the [Config: NODES](v-nodes.md). The full execution of this playbook may take 1 to 3 minutes when using the local yum repo, depending on the machine spec.
+The behavior of this playbook is determined by the [Config: NODES](v-nodes.md). The complete execution of this playbook may take 1 to 3 minutes when using the local yum repo, depending on the machine spec.
 
 ```bash
 ./nodes.yml             # init all nodes in inventory    (danger!)
@@ -36,7 +35,7 @@ The behavior of this playbook is determined by the [Config: NODES](v-nodes.md). 
 
 This playbook will run the following tasks:
 
-* Generate node [identity](v-nodes.md#NODE_IDENTITY) parameters
+* Generate node [identity parameters](v-nodes.md#NODE_IDENTITY) 
 * Provisioning Node
   * Configure the node's hostname
   * Configure static DNS records
@@ -50,7 +49,7 @@ This playbook will run the following tasks:
   * Configure timezone
   * Configure NTP service
 * Initialize the DCS service on the node: Consul
-  * Erase existing Consul if exists (with protection disabled)
+  * Erase existing Consul if it exists (with protection disabled)
   * Initialize the Consul Agent or Server service for the current node
 * Initialize the node monitoring component and incorporate Pigsty
   * Install Node Exporter
@@ -58,28 +57,42 @@ This playbook will run the following tasks:
 
 
 
-!> Be careful when running this playbook on provisioned nodes. It may lead to database temporarily unavailable because of the removal of the consul service. 
+!> **Be careful when running this playbook on provisioned nodes. It may lead to the database being temporarily unavailable because of the removal of the consul service.** 
 
-The [`dcs_exists_action`](v-nodes.md#dcs_exists_action) parameter provides a [SafeGuard](#SafeGuard) to avoid accidental purge. When existing Consul Instance is detected during playbook execution. It will take action about it.
+The [`consul_clean`](v-nodes.md#consul_clean) provides a [SafeGuard](#SafeGuard) to avoid accidental purge. When existing Consul Instance is detected during playbook execution. It will take action about it.
 
-!> When using the full `nodes.yml` playbook or just the section on `dcs|consul` therein, please double-check that the `-tags|-t` and `-limit|-l` is correct. Make sure you are running the right tasks on the right targets. 
+!> When using the complete `nodes.yml` playbook or just the section on `dcs|consul`, please double-check that the `-tags|-t` and `-limit|-l` is correct. Make sure you are running the right tasks on the correct targets. 
 
 
 
 ### SafeGuard
 
-The `nodes.yml` provides a **SafeGuard** config entry [`dcs_exists_action`](v-nodes.md#dcs_exists_action). When there is a running Consul instance on the target node, Pigsty will take action according to its value: `abort|clean|skip`.
+Pigsty provides a SafeGuard to avoid purging running consul instances with fat fingers. There are two parameters.
 
-* `abort`: Default option. Abort play immediately to avoid purging the consul by accident.
-* `clean`: PURGE the existing DCS instance.
-* `skip`: Skip this **host** and continue on other hosts.
-* Use `./nodes.yml -e pg_exists_action=clean` to overwrite the configuration file option and force the existing instance to be erased.
+* [`consul_safeguard`](v-nodes.md#consul_safeguard): Disabled by default, if enabled, running consul will not be purged by any circumstance.
+* [`consul_clean`](v-nodes.md#consul_clean): disabled by default, [`nodes.yml`](#nodes) will purge running consul during node init.
 
-The [`dcs_disable_purge`](v-nodes.md#dcs_disable_purge) parameter is yet another safeguard, If enabled, the [`dcs_exists_action`](v-nodes.md#dcs_exists_action) will be forcibly set to `abort`, and no running DCS instances will be purged unless  [`nodes-remove.yml`](#nodes-remove) is explicitly used.
+When running consul exists, [`nodes.yml`](#nodes) will act as:
+
+| `consul_safeguard` / `pg_clean` | `consul_clean=true` | `consul_clean=false` |
+| :-----------------------------: | :-----------------: | :------------------: |
+|     `consul_safeguard=true`     |        ABORT        |        ABORT         |
+|    `consul_safeguard=false`     |      **PURGE**      |        ABORT         |
+
+When running consul exists,  [`nodes-remove.yml`](#nodes-remove) will act as:
+
+| `consul_safeguard` / `pg_clean` | `consul_clean=true` | `consul_clean=false` |
+| :-----------------------------: | :-----------------: | :------------------: |
+|     `consul_safeguard=true`     |        ABORT        |        ABORT         |
+|    `consul_safeguard=false`     |      **PURGE**      |      **PURGE**       |
 
 
 
-### Selective execution
+
+
+
+
+### Selective Execution
 
 You can **selectively** execute a subset of this playbook through **tags**.
 
@@ -110,8 +123,9 @@ Common tasks are listed below:
 ./nodes.yml --tags=node_admin      # Create node admin user and configure SSH access
 ./nodes.yml --tags=node_timezone   # Configure node time zone
 ./nodes.yml --tags=node_ntp        # Configure NTP service
+./nodes.yml --tags=docker          # Configure dockerd daemon
 ./nodes.yml --tags=consul          # Configure consul agent/server
-./nodes.yml --tags=consul -e dcs_exists_action=clean   # Force node reinit
+./nodes.yml --tags=consul -e consul_clean=clean   # Force consul reinit
 
 ./nodes.yml --tags=node_exporter   # Configure node_exporter on the node and register it
 ./nodes.yml --tags=node_register   # Registering node monitoring to a meta node
@@ -124,31 +138,33 @@ Common tasks are listed below:
 
 ### Admin User Provision
 
-Admin user provisioning is a chicken-and-egg problem. In order to execute playbooks, you need to have an admin user. In order to create a dedicated admin user, you need to execute this playbook.
+Admin user provisioning is a chicken-and-egg problem. To execute playbooks, you need to have an admin user. To create a dedicated admin user, you need to run this playbook.
 
 Pigsty recommends leaving admin user provisioning to your vendor. It's common to deliver the node with an admin user with ssh & sudo access.
 
-It may require a password to execute ssh & sudo. You can pass them via additional args  `--ask-pass|-k` and `--ask-become-pass|-K`,  Entering SSH and sudo password when prompted. You can create a dedicated admin user (with nopass sudo & ssh) with another admin user (with password sudo & ssh).
+It may require a password to execute ssh & sudo. You can pass them via extra params  `--ask-pass|-k` and `--ask-become-pass|-K`,  entering SSH and sudo password when prompted. You can create a dedicated admin user (with no pass sudo & ssh) with another admin user (with password sudo & ssh).
 
 The following parameters are used to describe the dedicated admin user.
 
-* [`node_admin_setup`](v-nodes.md#node_admin_setup)
+* [`node_admin_enabled`](v-nodes.md#node_admin_enabled)
 * [`node_admin_uid`](v-nodes.md#node_admin_uid)
 * [`node_admin_username`](v-nodes.md#node_admin_username)
-* [`node_admin_pks`](v-nodes.md#node_admin_pks)
+* [`node_admin_pk_list`](v-nodes.md#node_admin_pk_list)
+
+```bash
+./nodes.yml -t node_admin -l <target_hosts> --ask-pass --ask-become-pass
+```
+
+The default admin user is dba (uid=88). Please **do not** use `postgres` or `{{ dbsu }}` as the admin user. Please try to avoid using root as the admin user directly.
+
+The default user `vagrant` in the local [sandbox](d-sandbox.md) has been provisioned with nopass ssh & sudo. You can use `vagrant` to ssh to all other nodes from the sandbox meta node.
 
 ```bash
 ./nodes.yml --limit <target_hosts>  --tags node_admin  \
             -e ansible_user=<another_admin> --ask-pass --ask-become-pass 
 ```
 
-The default admin user is dba (uid=88), please **do not** use `postgres` or `{{ dbsu }}` as the admin user, please try to avoid using root as the admin user directly.
-
-The default user `vagrant` in the local [sandbox](d-sandbox.md) environment has been provisioned with nopass ssh & sudo. You can use `vagrant` to ssh to all other nodes from the sandbox meta node.
-
 Refer to: [Prepare: Admin User](d-prepare.md#Admin-Provisioning) for more details.
-
-
 
 
 
@@ -158,9 +174,9 @@ Refer to: [Prepare: Admin User](d-prepare.md#Admin-Provisioning) for more detail
 
 ## `nodes-remove`
 
-The [`nodes-remove.yml`](#nodes-remove) playbook is the reverse of the [`nodes`](#nodes) playbook, used to remove nodes from Pigsty.
+The [`nodes-remove.yml`](https://github.com/vonng/pigsty/blob/master/nodes-remove.yml) playbook is used to remove nodes from Pigsty.
 
-The playbook needs to be executed on **meta nodes** and targeting nodes need to be removed.
+The playbook needs to be executed on **meta nodes**, and targeting nodes need to be removed.
 
 ```bash
 ./nodes.yml                      # Remove all nodes (dangerous!)
@@ -171,7 +187,9 @@ The playbook needs to be executed on **meta nodes** and targeting nodes need to 
 
 ![](_media/playbook/nodes-remove.svg)
 
-### Task subset
+
+
+### Task Subsets
 
 ```bash
 # play
@@ -179,6 +197,7 @@ The playbook needs to be executed on **meta nodes** and targeting nodes need to 
 ./nodes-remove.yml --tags=node-exporter # Remove node metrics collector
 ./nodes-remove.yml --tags=promtail      # Remove Promtail log agent
 ./nodes-remove.yml --tags=consul        # Remove Consul Agent service
+./nodes-remove.yml --tags=docker        # Remove Docker service
 ./nodes-remove.yml --tags=consul -e rm_dcs_servers=true # Remove Consul (Including Server!)
 ```
 

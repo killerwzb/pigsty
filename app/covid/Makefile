@@ -1,10 +1,10 @@
 #==============================================================#
 # File      :   Makefile
 # Ctime     :   2020-11-03
-# Mtime     :   2021-07-25
+# Mtime     :   2022-03-30
 # Desc      :   Makefile shortcuts
 # Path      :   Makefile
-# Copyright (C) 2019-2020 Ruohang Feng
+# Copyright (C) 2019-2022 Ruohang Feng
 #==============================================================#
 
 # pigsty environment
@@ -14,11 +14,16 @@ GRAFANA_PASSWORD?=pigsty
 GRAFANA_ENDPOINT?=http://10.10.10.10:3000
 
 #-----------------------------#
-# entry
+# entrypoint
 #-----------------------------#
-default: all
-all: sql ui reload    # if data is NOT downloaded
-all2: sql ui load     # if data already downloaded
+default: install
+
+# if local data available, use `make install`
+install: sql ui data-local
+
+# if local data unavailable, use `make all` to download
+all: sql ui data
+
 
 #-----------------------------#
 # install
@@ -29,24 +34,25 @@ ui:
 sql:
 	psql ${METADB_URL-''} -f sql/000_base.sql    # baseline schema
 
-#-----------------------------#
-# download data
-#-----------------------------#
-reload: download load
-download:
-	mkdir -p data/
-	# curl -fSL https://covid19.who.int/WHO-COVID-19-global-table-data.csv -o data/latest.csv
-	curl -fSL https://covid19.who.int/WHO-COVID-19-global-data.csv       -o data/history.csv
+data-local: load
+data: reload
+
 
 #-----------------------------#
-# load / clean data
+# data
 #-----------------------------#
+download:
+	mkdir -p data/
+	curl -fSL https://covid19.who.int/WHO-COVID-19-global-data.csv       -o data/history.csv
+
 load: clean
-	# cat data/latest.csv  | psql ${METADB_URL} -c "COPY covid.country_latest FROM STDIN CSV HEADER;";
 	cat data/history.csv | psql ${METADB_URL} -c "COPY covid.country_history FROM STDIN CSV HEADER;";
 
 clean:
 	psql ${METADB_URL} -c 'TRUNCATE covid.country_history, covid.country_latest;';
 
+reload: download load
 
-.PHONY: default all ui sql download load trunc
+
+
+.PHONY: default install all ui sql data-local data-fetch download load clean reload

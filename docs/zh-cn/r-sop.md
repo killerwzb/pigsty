@@ -223,10 +223,10 @@ bin/createpg 10.10.10.13
 
 Pigsty使用安全保险机制来避免误删运行中的PGSQL数据库，请使用 [`pgsql-remove`](p-pgsql.md#pgsql-remove) 剧本先完成数据库实例下线，再复用该节点。如需进行紧急覆盖式安装，可使用以下参数在安装过程中强制抹除运行中实例（危险！！！）
 
-* [`pg_exists_action`](v-pgsql.md#pg_exists_action) = clean
-* [`pg_disable_purge`](v-pgsql.md#pg_disable_purge) = false
+* [`pg_clean`](v-pgsql.md#pg_clean) = clean
+* [`pg_safeguard`](v-pgsql.md#pg_safeguard) = false
 
-例如：`./pgsql.yml -l pg-test -e pg_exists_action=clean` 将强制对 `pg-test`集群进行覆盖式安装。
+例如：`./pgsql.yml -l pg-test -e pg_clean=clean` 将强制对 `pg-test`集群进行覆盖式安装。
 
 </details>
 
@@ -234,9 +234,8 @@ Pigsty使用安全保险机制来避免误删运行中的PGSQL数据库，请使
 
 Pigsty使用安全保险机制来避免误删运行中的Consul实例，请使用 [`nodes-remove`](p-nodes.md#nodes-remove) 剧本先完成节点下线，确保Consul已经移除，再复用该节点。如需进行紧急覆盖式安装，可使用以下参数在安装过程中强制抹除运行中实例（危险！！！）
 
-* [`dcs_exists_action`](v-pgsql.md#pg_exists_action) = clean
-* [`dcs_disable_purge`](v-pgsql.md#pg_disable_purge) = false
-* [`rm_dcs_servers`](v-pgsql.md#rm_dcs_servers) = true （仅当移除DCS Server时需要）
+* [`consul_clean`](v-pgsql.md#pg_clean) = clean
+* [`consul_safeguard`](v-pgsql.md#pg_safeguard) = false
 
 </details>
 
@@ -264,8 +263,8 @@ Pigsty使用安全保险机制来避免误删运行中的Consul实例，请使�
 
 </details>
 
+<details><summary>常见问题5：集群从库带有`clonefrom`标签，但因数据损坏不宜使用或拉取失败</summary>
 
-<details><summary>常见问题4：集群从库带有`clonefrom`标签，但因数据损坏不宜使用或拉取失败</summary>
 
 找到问题机器，切换至`postgres`用户，修改 patroni 配置文件并重载生效
 
@@ -277,8 +276,8 @@ pg list -W # 查阅集群状态，确认故障实例没有clonefrom标签
 ```
 </details>
 
+<details><summary>常见问题6：如何使用现有用户创建固定的管理员用户</summary>
 
-<details><summary>常见问题5：如何使用现有用户创建固定的管理员用户</summary>
 系统默认使用 `dba` 作为管理员用户，该用户应当可以从管理机通过ssh免密码登陆远程数据库节点，并免密码执行sudo命令。
 
 如果分配的机器默认没有该用户，但您有其他的管理用户（例如`vagrant`）可以ssh登陆远程节点并执行sudo，则可以执行以下命令，使用其他的用户登陆远程机器并自动创建标准的管理用户：
@@ -295,8 +294,8 @@ BECOME password[defaults to SSH password]:
 
 </details>
 
+<details><summary>偶见问题7：集群从库带有clonefrom标签，但因数据损坏不宜使用或拉取失败</summary>
 
-<details><summary>偶见问题6：集群从库带有clonefrom标签，但因数据损坏不宜使用或拉取失败</summary>
 
 找到问题机器，切换至`postgres`用户，修改 patroni 配置文件并重载生效
 
@@ -488,7 +487,7 @@ Pigsty中PostgreSQL的集群流量默认由HAProxy控制，用户可以直接通
 
 **使用HAProxy Admin UI控制流量**
 
-Pigsty的HAProxy默认在9101端口（[`haproxy_exporter_port`](v-pgsql.md#haproxy_exporter_port)）提供了管理UI，该管理UI默认可以通过Pigsty的默认域名，后缀以实例名（[`pg_cluster`](v-pgsql.md#pg_cluster)-[`pg_seq`](v-pgsql.md#pg_seq)）访问。管理界面带有可选的认证选项，由参数（[`haproxy_admin_auth_enabled`](v-pgsql#haproxy_admin_auth_enabled)）启用。管理界面认证默认不启用，启用时则需要使用由 [`haproxy_admin_username`](v-pgsql.md#haproxy_admin_username) 与 [`haproxy_admin_password`](v-pgsql.md#haproxy_admin_password)的用户名与密码登陆。
+Pigsty的HAProxy默认在9101端口（[`haproxy_exporter_port`](v-pgsql.md#haproxy_exporter_port)）提供了管理UI，该管理UI默认可以通过Pigsty的默认域名，后缀以实例名（[`pg_cluster`](v-pgsql.md#pg_cluster)-[`pg_seq`](v-pgsql.md#pg_seq)）访问。管理界面带有可选的认证选项，由参数（[`haproxy_auth_enabled`](v-pgsql#haproxy_auth_enabled)）启用。管理界面认证默认不启用，启用时则需要使用由 [`haproxy_admin_username`](v-pgsql.md#haproxy_admin_username) 与 [`haproxy_admin_password`](v-pgsql.md#haproxy_admin_password)的用户名与密码登陆。
 
 使用浏览器访问 `http://pigsty/<ins>`（该域名因配置而变化，亦可从PGSQL Cluster Dashboard中点击前往），即可访问对应实例上的负载均衡器管理界面。[样例界面](http://home.pigsty.cc/pg-meta-1/)
 
@@ -738,7 +737,7 @@ $ pg list pg-test
 # 较为常用，安全的重置命令，重装监控与重新注册不会影响服务
 ./pgsql.yml -l pg-test -t=monitor  # 重新部署监控
 ./pgsql.yml -l pg-test -t=register # 重新将服务注册至基础设施（Nginx, Prometheus, Grafana, CMDB...）
-./nodes.yml -l pg-test -t=consul -e dcs_exists_action=clean # 在维护模式下重置DCS Agent
+./nodes.yml -l pg-test -t=consul -e consul_clean=clean # 在维护模式下重置DCS Agent
 
 # 略有风险的重置操作
 ./pgsql.yml -l pg-test -t=service    # 重新部署负载均衡，可能导致服务闪断
@@ -799,7 +798,7 @@ pg resume pg-test
 
 ```bash
 # 强制重置目标集群上的Consul Agent（因为HA处于维护模式，不会影响新数据库集群）
-./nodes.yml -l pg-test -t consul -e dcs_exists_action=clean
+./nodes.yml -l pg-test -t consul -e consul_clean=clean
 ```
 
 当Patroni完成重启后（维护模式中，Patroni重启不会导致Postgres关停），会将集群元数据KV写入新的Consul集群中，所以必须确保原主库上的Patroni服务首先完成重启。

@@ -1,19 +1,274 @@
-# v1.4.0 Nodes Monitor & MatrixDB Support
+# v1.5.0-beta
 
-[Monitor]
+## Highlights
+
+* Complete Docker Support
+* New CMDB schema compatible with redis & greenplum
+* Infra self-monitoring
+* Monitoring for consul, docker, promtail
+* Consul Service Discovery now works again
+* Customize Meta Nodes with infra components
+* Redis playbook now support working on single instance
+* Add node crontab variables and default backup tasks
+* Complete translation of EN docs
+* Simplified purge & safeguard options for consul, pgsql and redis
 
 
-[Deploy]
-* New `infra-demo.yml` playbook for one-pass bootstrap
-* Use `infra-jupyter.yml` playbook to deploy optional jupyter lab server
+## New Features
+
+New software / application based on docker:
+* bytebase : DDL Schema Migrator
+* pgadmin4 : Web Admin UI for PostgreSQL 
+* pgweb : Web Console for PostgreSQL
+* postgrest : Auto generated REST API for PostgreSQL
+* kong : API Gateway which use PostgreSQL as backend storage
+* swagger openapi : API Specification Generator
 
 
-[BugFix]
-* Grafana's security breach (upgrade to v8.3.1 [issue](https://grafana.com/blog/2021/12/07/grafana-8.3.1-8.2.7-8.1.8-and-8.0.7-released-with-high-severity-security-fix/))
+## Software Upgrade
+
+* Upgrade PostgreSQL to 14.3
+* Upgrade Redis to 6.2.7
+* Upgrade PG Exporter to 0.5.0
+* Upgrade Consul to 1.12.0
+* Upgrade vip-manager to v1.0.2
+* Upgrade Grafana to v8.5.2
+* Upgrade Loki & Promtail to v2.5.0 with RPM packages
+
+## Bug Fix
+
+* Fix loki & promtail `/etc/default` config file name issue
+* Now `node_data_dir (/data)` is created before consul init if not exists
+
+
+## API Change
+
+**New Variable**
+
+* `node_data_dir` : major data mount path, will be created if not exist. 
+* `node_crontab_overwrite` : overwrite `/etc/crontab` instead of append
+* `node_crontab`: node crontab to be appended or overwritten
+* `nameserver_enabled`: enable nameserver on this meta node?
+* `prometheus_enabled`: enable prometheus on this meta node?
+* `grafana_enabled`: enable grafana on this meta node?
+* `loki_enabled`: enable loki on this meta node?
+* `docker_enable`: enable docker on this node?
+
+
+**Reforge**
+
+Now `*_clean` are boolean flags to clean up existing instance during init.
+
+And `*_safeguard` are boolean flags to avoid purging running instance when executing any playbook.
+
+- `dcs_exists_action` -> `consul_clean`
+- `dcs_disable_purge` -> `consul_safeguard`
+- `pg_exists_action` -> `pg_clean`
+- `pg_disable_purge` -> `pg_safeguard`
+
+**Rename**
+
+- `node_ntp_config` -> `node_ntp_enabled`
+- `node_admin_setup` -> `node_admin_enabled`
+- `node_admin_pks` -> `node_admin_pk_list`
+- `node_dns_hosts` -> `node_etc_hosts_default`
+- `node_dns_hosts_extra` -> `node_etc_hosts`
+- `node_dns_server` -> `node_dns_method`
+- `node_local_repo_url` -> `node_repo_local_urls`
+- `node_packages` -> `node_packages_default`
+- `node_extra_packages` -> `node_packages`
+- `node_packages_meta` -> `node_packages_meta`
+- `node_meta_pip_install` -> `node_packages_meta_pip`
+- `node_sysctl_params` -> `node_tune_params`
+- `dcs_name` -> `consul_name`
+- `app_list` -> `nginx_indexes`
+- `grafana_plugin` -> `grafana_plugin_method`
+- `grafana_cache` -> `grafana_plugin_cache`
+- `grafana_plugins` -> `grafana_plugin_list`
+- `grafana_git_plugin_git` -> `grafana_plugin_git`
+- `haproxy_admin_auth_enabled` -> `haproxy_auth_enabled`
+- `pg_shared_libraries` -> `pg_libs`
 
 
 
-# v1.3.1 Bug fix & Dashboard Adjust 
+```bash
+MD5 (app.tgz) = 86f875061d50784b32ec2e6340c92fdc
+MD5 (docker.tgz) = f6a5cbf9c906156235dbe7e505fab154
+MD5 (matrix.tgz) = 3d063437c482d94bd7e35df1a08bbc84
+MD5 (pigsty.tgz) = 88bf5c54093d2470c1dc226f4eeb7e34
+MD5 (pkg.tgz) = ee4e447ba12c7fed34d4dfab62afbc6e
+```
+
+
+
+
+------------------------
+
+
+# v1.4.1
+
+Routine bug fix / Docker Support / English Docs
+
+Now docker is enabled on meta node by default. You can launch ton's of SaaS with it
+
+English document is available now.
+
+* [add docker to default packages](https://github.com/Vonng/pigsty/commit/68f8c8da0576e043686137aca47bad01dd4e82c0)
+* [add docker-compose to default pacakge list](https://github.com/Vonng/pigsty/commit/765077744836d8600a8703dce8623182784d65a7)
+* [disable nameserver by default & enable docker role by default](https://github.com/Vonng/pigsty/commit/9b8b7c5209d09049716318b624001de3b567452a)
+
+
+**Bug Fix**
+
+* [fix promtail & loki config var issue](https://github.com/Vonng/pigsty/commit/100f31842d473001f946200d9b8e2e3e89add35a)
+* Fix grafana legacy alerts.
+* Disable nameserver by default
+* Rename pg-alias.sh for patroni shortcuts
+* [disable exemplars queries for all dashboards](https://github.com/Vonng/pigsty/commit/62d74f15f8c164e5971d9d1d1215869359267b53)
+* [fix loki data dir issue](https://github.com/Vonng/pigsty/commit/b277f488b7ed0fd0a7eeeb995e2efd75a048e0ef) https://github.com/Vonng/pigsty/issues/100
+* [change autovacuum_freeze_max_age from 100000000 to 1000000000](https://github.com/Vonng/pigsty/commit/1690b490205af24d5f0394aba99007c0d9ebc49d)
+
+
+
+------------------------
+
+
+# v1.4.0
+
+**Architecture**
+
+* Decouple system into 4 major categories:  `INFRA`, `NODES`, `PGSQL`, `REDIS`, which makes pigsty far more clear and more extensible.
+* Single Node Deployment = `INFRA` + `NODES` + `PGSQL`
+* Deploy pgsql clusters = `NODES` + `PGSQL`
+* Deploy redis clusters = `NODES` + `REDIS`
+* Deploy other databases = `NODES` + xxx (e.g `MONGO`, `KAFKA`, ... TBD)
+
+
+**Accessibility**
+
+* CDN for mainland China.
+* Get the latest source with `bash -c "$(curl -fsSL http://download.pigsty.cc/get)"`
+* Download & Extract packages with new `download` script.
+
+
+**Monitor Enhancement**
+
+* Split monitoring system into 5 major categories:  `INFRA`, `NODES`, `REDIS`, `PGSQL`, `APP`
+* Logging enabled by default
+  * now `loki` and `promtail` are enabled by default. with prebuilt [loki-rpm](https://github.com/Vonng/loki-rpm)
+* Models & Labels
+  * A hidden `ds` prometheus datasource variable is added for all dashboards, so you can easily switch different datasource simply by select a new one rather than modifying Grafana Datasources & Dashboards
+  * An `ip` label is added for all metrics, and will be used as join key between database metrics & nodes metrics
+* INFRA Monitoring
+  * Home dashboard for infra: INFRA Overview
+  * Add logging Dashboards : Logs Instance
+  * PGLOG Analysis & PGLOG Session now treated as an example Pigsty APP.
+* NODES Monitoring Application
+  * If you don't care database at all, Pigsty now can be used as host monitoring software alone!
+  * Consist of 4 core dashboards: Nodes Overview & Nodes Cluster & Nodes Instance & Nodes Alert
+  * Introduce new identity variables for nodes: `node_cluster` and `nodename`
+  * Variable `pg_hostname` now means set hostname same as postgres instance name to keep backward-compatible
+  * Variable `nodename_overwrite` control whether overwrite node's hostname with nodename
+  * Variable `nodename_exchange` will write nodename to each other's `/etc/hosts`
+  * All nodes metrics reference are overhauled, join by `ip`
+  * Nodes monitoring targets are managed alone under `/etc/prometheus/targets/nodes`
+* PGSQL Monitoring Enhancement
+  * Complete new PGSQL Cluster which simplify and focus on important stuff among cluster.
+  * New Dashboard PGSQL Databases which is cluster level object monitoring. Such as tables & queries among the entire cluster rather than single instance.
+  * PGSQL Alert dashboard now only focus on pgsql alerts.
+  * PGSQL Shard are added to PGSQL
+* Redis Monitoring Enhancement
+  * Add nodes monitoring for all redis dashboards.
+
+
+**MatrixDB Support**
+
+* MatrixDB (Greenplum 7) can be deployed via `pigsty-matrix.yml` playbook
+* MatrixDB Monitor Dashboards : PGSQL MatrixDB
+* Example configuration added: `pigsty-mxdb.yml`
+
+
+## Provisioning Enhancement
+
+Now pigsty work flow works as this:
+
+```bash
+ infra.yml ---> install pigsty on single meta node
+      |          then add more nodes under pigsty's management
+      |
+ nodes.yml ---> prepare nodes for pigsty (node setup, dcs, node_exporter, promtail)
+      |          then choose one playbook to deploy database clusters on those nodes
+      |
+      ^--> pgsql.yml   install postgres on prepared nodes
+      ^--> redis.yml   install redis on prepared nodes
+
+infra-demo.yml = 
+           infra.yml -l meta     +
+           nodes.yml -l pg-test  +
+           pgsql.yml -l pg-test +
+           infra-loki.yml + infra-jupyter.yml + infra-pgweb.yml
+ 
+```
+
+* `nodes.yml` to setup & prepare nodes for pigsty
+  *  setup node, node_exporter, consul agent on nodes
+  * `node-remove.yml` are used for node de-register
+* `pgsql.yml` now only works on prepared nodes
+  * `pgsql-remove` now  only responsible for postgres itself. (dcs and node monitor are taken by `node.yml`)
+  * Add a series of new options to reuse `postgres` role in greenplum/matrixdb
+* `redis.yml` now works on prepared nodes
+  * and `redis-remove.yml` now remove redis from nodes.
+* `pgsql-matrix.yml` now install matrixdb (Greenplum 7) on prepared nodes.
+
+**Software Upgrade**
+
+* PostgreSQL  14.2
+* PostGIS 3.2
+* TimescaleDB 2.6
+* Patroni 2.1.3 (Prometheus Metrics + Failover Slots)
+* HAProxy 2.5.5  (Fix stats error, more metrics)
+* PG Exporter 0.4.1 (Timeout Parameters, and)
+* Grafana 8.4.4
+* Prometheus 2.33.4
+* Greenplum 6.19.4 / MatrixDB 4.4.0
+* Loki are now shipped as rpm packages instead of zip archives
+
+
+**Bug Fix**
+
+* Remove consul dependency for patroni , which makes it much more easier to migrate to a new consul cluster
+* Fix prometheus bin/new scripts default data dir path : `/export/prometheus` to `/data/prometheus`
+* Fix typos and tasks
+* Add restart seconds to vip-manager systemd service
+
+
+**API Changes**
+
+New Variable
+
+* `node_cluster`: Identity variable for node cluster
+* `nodename_overwrite`: If set, nodename will be set to node's hostname
+* `nodename_exchange` : exchange node hostname (in `/etc/hosts`) among play hosts
+* `node_dns_hosts_extra` : extra static dns records which can be easily overwritten by single instance/cluster
+* `patroni_enabled`: if disabled, postgres & patroni bootstrap will not be performed during role `postgres`
+* `pgbouncer_enabled` : if disabled, pgbouncer will not be launched during role `postgres`
+* `pg_exporter_params`: extra url parameters for pg_exporter when generating monitor target url.
+* `pg_provision`: bool var to indicate whether perform provision part of role `postgres` (template, db,user)
+* `no_cmdb`: cli args for `infra.yml` and `infra-demo.yml` playbook which will not create cmdb on meta node.
+
+```
+MD5 (app.tgz) = f887313767982b31a2b094e5589a75ea
+MD5 (matrix.tgz) = 3d063437c482d94bd7e35df1a08bbc84
+MD5 (pigsty.tgz) = e143b88ebea1474f9ebaffddc6072c49
+MD5 (pkg.tgz) = 73e8f5ce995b1f1760cb63c1904fb91b
+```
+
+
+
+------------------------
+
+
+# v1.3.1
 
 [Monitor]
 * PGSQL & PGCAT Dashboard polish
@@ -22,11 +277,11 @@
 * add table/index bloat panels to pgcat database, remove pgcat bloat dashboard.
 * add index information in pgcat database dashboard
 * fix broken panels in grafana 8.3
-* add redis index in nginx homepage 
+* add redis index in nginx homepage
 
 [Deploy]
 * New `infra-demo.yml` playbook for one-pass bootstrap
-* Use `infra-jupyter.yml` playbook to deploy optional jupyter lab server  
+* Use `infra-jupyter.yml` playbook to deploy optional jupyter lab server
 * Use `infra-pgweb.yml` playbook to deploy optional pgweb server
 * New `pg` alias on meta node, can initiate postgres cluster from admin user (in addition to postgres)
 * Adjust all patroni conf templates's `max_locks_per_transactions` according to `timescaledb-tune` 's advise
@@ -52,18 +307,18 @@
   * Redis Cluster Dashboard
   * Redis Instance Dashboard
 
-* [ENHANCEMENT] monitor: PGCAT Overhaul 
-  * New Dashboard: PGCAT Instance 
+* [ENHANCEMENT] monitor: PGCAT Overhaul
+  * New Dashboard: PGCAT Instance
   * New Dashboard: PGCAT Database Dashboard
   * Remake Dashboard: PGCAT Table
 
 * [ENHANCEMENT] monitor: PGSQL Enhancement
-  * New Panels: PGSQL Cluster, add 10 key metrics panel (toggled by default) 
+  * New Panels: PGSQL Cluster, add 10 key metrics panel (toggled by default)
   * New Panels: PGSQL Instance, add 10 key metrics panel (toggled by default)
   * Simplify & Redesign: PGSQL Service
   * Add cross-references between PGCAT & PGSL dashboards
 
-* [ENHANCEMENT] monitor deploy 
+* [ENHANCEMENT] monitor deploy
   * Now grafana datasource is automatically registered during monly deployment
 
 * [ENHANCEMENT] software upgrade
@@ -74,12 +329,14 @@
   * add perf as default packages
 
 
+------------------------
+
 # v1.2.0
- 
+
 * [ENHANCEMENT] Use PostgreSQL 14 as default version
 * [ENHANCEMENT] Use TimescaleDB 2.5 as default extension
   * now timescaledb & postgis are enabled in cmdb by default
-* [ENHANCEMENT] new monitor-only mode: 
+* [ENHANCEMENT] new monitor-only mode:
   * you can use pigsty to monitor existing pg instances with a connectable url only
   * pg_exporter will be deployed on meta node locally
   * new dashboard PGSQL Cluster Monly for remote clusters
@@ -88,14 +345,14 @@
   * pev2 to v0.11.9
   * promscale to 0.6.2
   * pgweb to 0.11.9
-  * Add new extensions: pglogical pg_stat_monitor orafce 
-* [ENHANCEMENT] Automatic detect machine spec and use proper `node_tune` and `pg_conf` templates 
+  * Add new extensions: pglogical pg_stat_monitor orafce
+* [ENHANCEMENT] Automatic detect machine spec and use proper `node_tune` and `pg_conf` templates
 * [ENHANCEMENT] Rework on bloat related views, now more information are exposed
 * [ENHANCEMENT] Remove timescale & citus internal monitoring
 * [ENHANCEMENT] New playbook `pgsql-audit.yml` to create audit report.
 * [BUG FIX] now pgbouncer_exporter resource owner are {{ pg_dbsu }} instead of postgres
 * [BUG FIX] fix pg_exporter duplicate metrics on pg_table pg_index while executing `REINDEX TABLE CONCURRENTLY`
-* [CHANGE] now all config templates are minimize into two: auto & demo. (removed: `pub4, pg14, demo4, tiny, oltp` ) 
+* [CHANGE] now all config templates are minimize into two: auto & demo. (removed: `pub4, pg14, demo4, tiny, oltp` )
   * `pigsty-demo` is configured if `vagrant` is the default user, otherwise `pigsty-auto` is used.
 
 
@@ -107,21 +364,22 @@ For the infrastructure part. Re-execution of `repo` will do most of the parts
 
 As for the database. You can still use the existing PG13 instances. In-place upgrade is quite
 tricky especially when involving extensions such as PostGIS & Timescale. I would highly recommend
-performing a database migration with logical replication. 
+performing a database migration with logical replication.
 
 The new playbook `pgsql-migration.yml` will make this a lot easier. It will create a series of
-scripts which will help you to migrate your cluster with near-zero downtime. 
+scripts which will help you to migrate your cluster with near-zero downtime.
 
 
-
+------------------------
 
 # v1.1.1
+
 * [ENHANCEMENT] replace timescaledb `apache` version with `timescale` version
 * [ENHANCEMENT] upgrade prometheus to 2.30
 * [BUG FIX] now pg_exporter config dir's owner are {{ pg_dbsu }} instead of prometheus
 
 **How to upgrade from v1.1.0**
-  The major change in this release is timescaledb. Which replace old `apache` license version with `timescale` license version
+The major change in this release is timescaledb. Which replace old `apache` license version with `timescale` license version
 
 ```bash
 stop/pause postgres instance with timescaledb
@@ -139,7 +397,7 @@ yum install timescaledb-2-postgresql13
 
 # v1.1.0
 
-* [ENHANCEMENT] add `pg_dummy_filesize` to create fs space placeholder 
+* [ENHANCEMENT] add `pg_dummy_filesize` to create fs space placeholder
 * [ENHANCEMENT] home page overhaul
 * [ENHANCEMENT] add jupyter lab integration
 * [ENHANCEMENT] add pgweb console integration
@@ -163,7 +421,7 @@ yum install timescaledb-2-postgresql13
 * new config entries: `docs_enabled`, setup local docs on default server.
 * new config entries: `pev2_enabled`, setup local pev2 utils.
 * new config entries: `pgbadger_enabled`, create log summary/report dir
-* new config entries: `jupyter_enabled`, enable jupyter lab server on meta node 
+* new config entries: `jupyter_enabled`, enable jupyter lab server on meta node
 * new config entries: `jupyter_username`, specify which user to run jupyter lab
 * new config entries: `jupyter_password`, specify jupyter lab default password
 * new config entries: `pgweb_enabled`, enable pgweb server on meta node
@@ -173,6 +431,8 @@ yum install timescaledb-2-postgresql13
 * now default value for `repo_address` is `pigsty` instead of `yum.pigsty`
 * now haproxy access point is `http://pigsty` instead of `http://h.pigsty`
 
+
+------------------------
 
 # v1.0.1
 
@@ -188,9 +448,12 @@ yum install timescaledb-2-postgresql13
   * citus will force max_prepared_transaction to non-zero value
 * Bug Fix: ssh sudo checking in `configure`:
   * now `ssh -t sudo -n ls` is used for privilege checking
-* Typo Fix: `pg-backup` script typo   
+* Typo Fix: `pg-backup` script typo
 * Alert Adjust: Remove ntp sanity check alert (dupe with ClockSkew)
 * Exporter Adjust: remove collector.systemd to reduce overhead
+
+
+------------------------
 
 # v1.0.0
 
@@ -208,17 +471,17 @@ yum install timescaledb-2-postgresql13
 * Architecture Changes
   * Add citus & timescaledb as part of default installation
   * Add PostgreSQL 14beta2 support
-  * Simply haproxy admin page index 
+  * Simply haproxy admin page index
   * Decouple infra & pgsql by adding a new role `register`
-  * Add new role `loki` and `promtail` for logging 
+  * Add new role `loki` and `promtail` for logging
   * Add new role `environ` for setting up environment for admin user on admin node
   * Using `static` service-discovery for prometheus by default (instead of `consul`)
   * Add new role `remove` to gracefully remove cluster & instance
   * Upgrade prometheus & grafana provisioning logics.
-  * Upgrade to vip-manager 1.0 , node_exporter 1.2 , pg_exporter 0.4, grafana 8.0  
-  * Now every database on every instance can be auto-registered as grafana datasource  
+  * Upgrade to vip-manager 1.0 , node_exporter 1.2 , pg_exporter 0.4, grafana 8.0
+  * Now every database on every instance can be auto-registered as grafana datasource
   * Move consul register tasks to role `register`, change consul service tags
-  * Add cmdb.sql as pg-meta baseline definition (CMDB & PGLOG) 
+  * Add cmdb.sql as pg-meta baseline definition (CMDB & PGLOG)
 
 * Application Framework
   * Extensible framework for new functionalities
@@ -227,12 +490,12 @@ yum install timescaledb-2-postgresql13
   * core app: PostgreSQL Csvlog Analyzer: `pglog`
   * add example app `covid` for visualizing covid-19 data.
   * add example app `isd` for visualizing isd data.
-    
+
 * Misc
   * Add jupyterlab which brings entire python environment for data science
   * Add `vonng-echarts-panel` to bring Echarts support back.
   * Add wrap script `createpg` , `createdb`, `createuser`
-  * Add cmdb dynamic inventory scripts: `load_conf.py`, `inventory_cmdb`, `inventory_conf`   
+  * Add cmdb dynamic inventory scripts: `load_conf.py`, `inventory_cmdb`, `inventory_conf`
   * Remove obsolete playbooks: `pgsql-monitor`, `pgsql-service`, `node-remove`, etc....
 
 
@@ -255,6 +518,7 @@ yum install timescaledb-2-postgresql13
 * Fix nofile limit for pgbouncer & patroni
 * Pgbouncer userlist & database list will be generated when executing tag `pgbouncer`
 
+------------------------
 
 
 # v0.9.0
@@ -267,7 +531,7 @@ yum install timescaledb-2-postgresql13
 
 * MetaDB provisioning
 
-  Now you can use pgsql database on meta node as inventory instead of static yaml file affter bootstrap. 
+  Now you can use pgsql database on meta node as inventory instead of static yaml file affter bootstrap.
 
 * Add Loki & Prometail as optinal logging collector
 
@@ -275,15 +539,15 @@ yum install timescaledb-2-postgresql13
 
 * Pigsty CLI/GUI (beta)
 
-  Mange you pigsty deployment with much more human-friendly command line interface. 
+  Mange you pigsty deployment with much more human-friendly command line interface.
 
 ## Bug Fix
 
 * Log related issues
   * fix `connection reset by peer` entries in postgres log caused by Haproxy health check.
   * fix `Connect Reset Exception` in patroni logs caused by haproxy health check
-  * fix patroni log time format (remove mill seconds, add timezone) 
-  * set `log_min_duration_statement=1s` for `dbuser_monitor` to get ride of monitor logs. 
+  * fix patroni log time format (remove mill seconds, add timezone)
+  * set `log_min_duration_statement=1s` for `dbuser_monitor` to get ride of monitor logs.
 * Fix `pgbouncer-create-user` does not handle md5 password properly
 * Fix obsolete `Makefile` entries
 * Fix node dns nameserver lost when abort during resolv.conf rewrite
@@ -447,9 +711,9 @@ A service has some mandatory fields:
 
 ## Database
 
-Add additional locale support: `lc_ctype` and `lc_collate`. 
+Add additional locale support: `lc_ctype` and `lc_collate`.
 
-It's mainly because of `pg_trgm` 's weird behavior on i18n characters. 
+It's mainly because of `pg_trgm` 's weird behavior on i18n characters.
 
 ```yaml
 pg_databases:
@@ -480,12 +744,12 @@ pg_databases:
 ## Overview
 
 * Monitor Only Deployment
-      * Now you can monitoring existing postgres clusters without Pigsty provisioning solution.
-      * Intergration with other provisioning solution is available and under further test.
+  * Now you can monitoring existing postgres clusters without Pigsty provisioning solution.
+  * Intergration with other provisioning solution is available and under further test.
 
 * Database/User Management
-      * Update user/database definition schema to cover more usecases.
-      * Add `pgsql-createdb.yml` and `pgsql-createuser.yml` to mange user/db on running clusters.
+  * Update user/database definition schema to cover more usecases.
+  * Add `pgsql-createdb.yml` and `pgsql-createuser.yml` to mange user/db on running clusters.
 
 ## Features
 
@@ -1040,4 +1304,3 @@ The first public beta (v0.3.0) of pigsty is available now ! 🎉
 ## **Offline Installation**
 
 * [pkg.tgz](https://github.com/Vonng/pigsty/releases/download/v0.3.0/pkg.tgz) is the latest offline install package (1GB rpm packages, made under CentOS 7.8)
-

@@ -3,11 +3,20 @@
         "list": [
             {
                 "builtIn": 1,
-                "datasource": "-- Grafana --",
+                "datasource": {
+                    "type": "datasource",
+                    "uid": "grafana"
+                },
                 "enable": true,
                 "hide": true,
                 "iconColor": "rgba(0, 211, 255, 1)",
                 "name": "Annotations & Alerts",
+                "target": {
+                    "limit": 100,
+                    "matchAny": false,
+                    "tags": [],
+                    "type": "dashboard"
+                },
                 "type": "dashboard"
             }
         ]
@@ -15,10 +24,10 @@
     "author": "Vonng (rh@vonng.com)",
     "description": "PostgreSQL Session of Single Instance",
     "editable": true,
-    "gnetId": null,
+    "fiscalYearStartMonth": 0,
     "graphTooltip": 0,
     "id": null,
-    "iteration": 1626260896178,
+    "iteration": 1652401544913,
     "links": [
         {
             "asDropdown": true,
@@ -85,6 +94,7 @@
             "url": ""
         }
     ],
+    "liveNow": false,
     "panels": [
         {
             "collapsed": false,
@@ -195,7 +205,8 @@
                     "placement": "bottom"
                 },
                 "tooltip": {
-                    "mode": "multi"
+                    "mode": "multi",
+                    "sort": "none"
                 }
             },
             "targets": [
@@ -357,7 +368,8 @@
                     "placement": "right"
                 },
                 "tooltip": {
-                    "mode": "multi"
+                    "mode": "multi",
+                    "sort": "none"
                 }
             },
             "targets": [
@@ -534,7 +546,8 @@
                     "placement": "right"
                 },
                 "tooltip": {
-                    "mode": "multi"
+                    "mode": "multi",
+                    "sort": "none"
                 }
             },
             "targets": [
@@ -616,7 +629,8 @@
                     "placement": "right"
                 },
                 "tooltip": {
-                    "mode": "single"
+                    "mode": "single",
+                    "sort": "none"
                 }
             },
             "targets": [
@@ -868,7 +882,8 @@
                     "placement": "right"
                 },
                 "tooltip": {
-                    "mode": "multi"
+                    "mode": "multi",
+                    "sort": "none"
                 }
             },
             "targets": [
@@ -952,7 +967,8 @@
                     "placement": "right"
                 },
                 "tooltip": {
-                    "mode": "single"
+                    "mode": "single",
+                    "sort": "none"
                 }
             },
             "targets": [
@@ -1043,7 +1059,7 @@
                 "text": {},
                 "textMode": "value_and_name"
             },
-            "pluginVersion": "8.0.5",
+            "pluginVersion": "8.5.2",
             "targets": [
                 {
                     "exemplar": false,
@@ -1078,7 +1094,8 @@
                     },
                     "custom": {
                         "align": "center",
-                        "displayMode": "auto"
+                        "displayMode": "auto",
+                        "inspect": false
                     },
                     "mappings": [],
                     "thresholds": {
@@ -1612,6 +1629,13 @@
             },
             "id": 97,
             "options": {
+                "footer": {
+                    "fields": "",
+                    "reducer": [
+                        "sum"
+                    ],
+                    "show": false
+                },
                 "showHeader": true,
                 "sortBy": [
                     {
@@ -1620,7 +1644,7 @@
                     }
                 ]
             },
-            "pluginVersion": "8.0.5",
+            "pluginVersion": "8.5.2",
             "targets": [
                 {
                     "exemplar": false,
@@ -1885,7 +1909,8 @@
                     "placement": "right"
                 },
                 "tooltip": {
-                    "mode": "multi"
+                    "mode": "multi",
+                    "sort": "none"
                 }
             },
             "targets": [
@@ -1996,7 +2021,8 @@
                     "placement": "right"
                 },
                 "tooltip": {
-                    "mode": "multi"
+                    "mode": "multi",
+                    "sort": "none"
                 }
             },
             "targets": [
@@ -2248,7 +2274,8 @@
                     "placement": "right"
                 },
                 "tooltip": {
-                    "mode": "multi"
+                    "mode": "multi",
+                    "sort": "none"
                 }
             },
             "targets": [
@@ -2331,7 +2358,8 @@
                     "placement": "bottom"
                 },
                 "tooltip": {
-                    "mode": "multi"
+                    "mode": "multi",
+                    "sort": "none"
                 }
             },
             "targets": [
@@ -2417,7 +2445,8 @@
                     "placement": "right"
                 },
                 "tooltip": {
-                    "mode": "multi"
+                    "mode": "multi",
+                    "sort": "none"
                 }
             },
             "targets": [
@@ -2504,7 +2533,8 @@
                     "placement": "right"
                 },
                 "tooltip": {
-                    "mode": "multi"
+                    "mode": "multi",
+                    "sort": "none"
                 }
             },
             "targets": [
@@ -2520,7 +2550,7 @@
             "type": "timeseries"
         },
         {
-            "collapsed": true,
+            "collapsed": false,
             "datasource": {
                 "type": "prometheus",
                 "uid": "${ds}"
@@ -2532,1065 +2562,1107 @@
                 "y": 50
             },
             "id": 145,
-            "panels": [
-                {
-                    "datasource": {
-                        "type": "prometheus",
-                        "uid": "${ds}"
+            "panels": [],
+            "title": "Session Time",
+            "type": "row"
+        },
+        {
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${ds}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
                     },
-                    "fieldConfig": {
-                        "defaults": {
-                            "color": {
-                                "mode": "palette-classic"
-                            },
-                            "custom": {
-                                "axisLabel": "",
-                                "axisPlacement": "auto",
-                                "barAlignment": 0,
-                                "drawStyle": "line",
-                                "fillOpacity": 71,
-                                "gradientMode": "hue",
-                                "hideFrom": {
-                                    "legend": false,
-                                    "tooltip": false,
-                                    "viz": false
-                                },
-                                "lineInterpolation": "stepBefore",
-                                "lineWidth": 0,
-                                "pointSize": 2,
-                                "scaleDistribution": {
-                                    "type": "linear"
-                                },
-                                "showPoints": "auto",
-                                "spanNulls": false,
-                                "stacking": {
-                                    "group": "A",
-                                    "mode": "normal"
-                                },
-                                "thresholdsStyle": {
-                                    "mode": "off"
-                                }
-                            },
-                            "mappings": [],
-                            "min": 0,
-                            "thresholds": {
-                                "mode": "absolute",
-                                "steps": [
-                                    {
-                                        "color": "super-light-green",
-                                        "value": null
-                                    }
-                                ]
-                            }
+                    "custom": {
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "drawStyle": "line",
+                        "fillOpacity": 71,
+                        "gradientMode": "hue",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
                         },
-                        "overrides": []
-                    },
-                    "gridPos": {
-                        "h": 7,
-                        "w": 12,
-                        "x": 0,
-                        "y": 51
-                    },
-                    "id": 146,
-                    "options": {
-                        "legend": {
-                            "calcs": [
-                                "mean"
-                            ],
-                            "displayMode": "table",
-                            "placement": "right"
+                        "lineInterpolation": "stepBefore",
+                        "lineWidth": 0,
+                        "pointSize": 2,
+                        "scaleDistribution": {
+                            "type": "linear"
                         },
-                        "tooltip": {
-                            "mode": "multi"
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "normal"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
                         }
                     },
-                    "targets": [
-                        {
-                            "exemplar": false,
-                            "expr": "increase(pg_db_sessions{ins=\"$ins\"}[1m])",
-                            "interval": "",
-                            "legendFormat": "{{ datname }}",
-                            "refId": "A"
-                        }
-                    ],
-                    "title": "New Sessions 1m (PG14)",
-                    "type": "timeseries"
-                },
-                {
-                    "datasource": {
-                        "type": "prometheus",
-                        "uid": "${ds}"
-                    },
-                    "fieldConfig": {
-                        "defaults": {
-                            "color": {
-                                "mode": "palette-classic"
-                            },
-                            "custom": {
-                                "axisLabel": "",
-                                "axisPlacement": "auto",
-                                "barAlignment": 0,
-                                "drawStyle": "line",
-                                "fillOpacity": 71,
-                                "gradientMode": "hue",
-                                "hideFrom": {
-                                    "legend": false,
-                                    "tooltip": false,
-                                    "viz": false
-                                },
-                                "lineInterpolation": "stepBefore",
-                                "lineWidth": 0,
-                                "pointSize": 2,
-                                "scaleDistribution": {
-                                    "type": "linear"
-                                },
-                                "showPoints": "auto",
-                                "spanNulls": false,
-                                "stacking": {
-                                    "group": "A",
-                                    "mode": "normal"
-                                },
-                                "thresholdsStyle": {
-                                    "mode": "off"
-                                }
-                            },
-                            "mappings": [],
-                            "min": 0,
-                            "thresholds": {
-                                "mode": "absolute",
-                                "steps": [
-                                    {
-                                        "color": "super-light-green",
-                                        "value": null
-                                    }
-                                ]
-                            }
-                        },
-                        "overrides": []
-                    },
-                    "gridPos": {
-                        "h": 7,
-                        "w": 12,
-                        "x": 12,
-                        "y": 51
-                    },
-                    "id": 147,
-                    "options": {
-                        "legend": {
-                            "calcs": [
-                                "mean"
-                            ],
-                            "displayMode": "table",
-                            "placement": "right"
-                        },
-                        "tooltip": {
-                            "mode": "multi"
-                        }
-                    },
-                    "targets": [
-                        {
-                            "exemplar": false,
-                            "expr": "increase(pg_db_sessions_abandoned{ins=\"$ins\"}[1m])",
-                            "interval": "",
-                            "legendFormat": "[Abandoned] : {{ datname }}",
-                            "refId": "A"
-                        },
-                        {
-                            "exemplar": false,
-                            "expr": "increase(pg_db_sessions_fatal{ins=\"$ins\"}[1m])",
-                            "hide": false,
-                            "interval": "",
-                            "legendFormat": "[Fatal] : {{ datname }}",
-                            "refId": "B"
-                        },
-                        {
-                            "exemplar": false,
-                            "expr": "increase(pg_db_sessions_killed{ins=\"$ins\"}[1m])",
-                            "hide": false,
-                            "interval": "",
-                            "legendFormat": "[Killed] : {{ datname }}",
-                            "refId": "C"
-                        }
-                    ],
-                    "title": "Sessions Failure 1m (PG14)",
-                    "type": "timeseries"
-                },
-                {
-                    "datasource": {
-                        "type": "prometheus",
-                        "uid": "${ds}"
-                    },
-                    "description": "Time spent by database sessions in this database",
-                    "fieldConfig": {
-                        "defaults": {
-                            "color": {
-                                "mode": "palette-classic"
-                            },
-                            "custom": {
-                                "axisLabel": "",
-                                "axisPlacement": "auto",
-                                "barAlignment": 0,
-                                "drawStyle": "line",
-                                "fillOpacity": 47,
-                                "gradientMode": "none",
-                                "hideFrom": {
-                                    "legend": false,
-                                    "tooltip": false,
-                                    "viz": false
-                                },
-                                "lineInterpolation": "linear",
-                                "lineWidth": 0,
-                                "pointSize": 2,
-                                "scaleDistribution": {
-                                    "type": "linear"
-                                },
-                                "showPoints": "auto",
-                                "spanNulls": false,
-                                "stacking": {
-                                    "group": "A",
-                                    "mode": "normal"
-                                },
-                                "thresholdsStyle": {
-                                    "mode": "off"
-                                }
-                            },
-                            "links": [
-                                {
-                                    "title": "PGSQL Database for ${__field.labels.datname}",
-                                    "url": "/d/pgsql-database?var-ins=${ins}&var-datname=${__field.labels.datname}"
-                                }
-                            ],
-                            "mappings": [],
-                            "min": 0,
-                            "thresholds": {
-                                "mode": "absolute",
-                                "steps": [
-                                    {
-                                        "color": "green",
-                                        "value": null
-                                    }
-                                ]
-                            },
-                            "unit": "s"
-                        },
-                        "overrides": []
-                    },
-                    "gridPos": {
-                        "h": 7,
-                        "w": 8,
-                        "x": 0,
-                        "y": 58
-                    },
-                    "id": 148,
-                    "options": {
-                        "legend": {
-                            "calcs": [],
-                            "displayMode": "table",
-                            "placement": "right"
-                        },
-                        "tooltip": {
-                            "mode": "single"
-                        }
-                    },
-                    "targets": [
-                        {
-                            "exemplar": false,
-                            "expr": "rate(pg_db_session_time{ins=\"$ins\"}[1m]) / 1000",
-                            "interval": "",
-                            "legendFormat": "{{ datname }}",
-                            "refId": "A"
-                        }
-                    ],
-                    "title": "Session Time",
-                    "type": "timeseries"
-                },
-                {
-                    "datasource": {
-                        "type": "prometheus",
-                        "uid": "${ds}"
-                    },
-                    "description": "Time spent executing SQL statements in this database",
-                    "fieldConfig": {
-                        "defaults": {
-                            "color": {
-                                "mode": "palette-classic"
-                            },
-                            "custom": {
-                                "axisLabel": "",
-                                "axisPlacement": "auto",
-                                "barAlignment": 0,
-                                "drawStyle": "line",
-                                "fillOpacity": 47,
-                                "gradientMode": "none",
-                                "hideFrom": {
-                                    "legend": false,
-                                    "tooltip": false,
-                                    "viz": false
-                                },
-                                "lineInterpolation": "linear",
-                                "lineWidth": 0,
-                                "pointSize": 2,
-                                "scaleDistribution": {
-                                    "type": "linear"
-                                },
-                                "showPoints": "auto",
-                                "spanNulls": false,
-                                "stacking": {
-                                    "group": "A",
-                                    "mode": "normal"
-                                },
-                                "thresholdsStyle": {
-                                    "mode": "off"
-                                }
-                            },
-                            "links": [
-                                {
-                                    "title": "PGSQL Database for ${__field.labels.datname}",
-                                    "url": "/d/pgsql-database?var-ins=${ins}&var-datname=${__field.labels.datname}"
-                                }
-                            ],
-                            "mappings": [],
-                            "min": 0,
-                            "thresholds": {
-                                "mode": "absolute",
-                                "steps": [
-                                    {
-                                        "color": "green",
-                                        "value": null
-                                    }
-                                ]
-                            },
-                            "unit": "s"
-                        },
-                        "overrides": []
-                    },
-                    "gridPos": {
-                        "h": 7,
-                        "w": 8,
-                        "x": 8,
-                        "y": 58
-                    },
-                    "id": 151,
-                    "options": {
-                        "legend": {
-                            "calcs": [],
-                            "displayMode": "table",
-                            "placement": "right"
-                        },
-                        "tooltip": {
-                            "mode": "single"
-                        }
-                    },
-                    "targets": [
-                        {
-                            "exemplar": false,
-                            "expr": "rate(pg_db_active_time{ins=\"$ins\"}[1m]) / 1000",
-                            "interval": "",
-                            "legendFormat": "{{ datname }}",
-                            "refId": "A"
-                        }
-                    ],
-                    "title": "Active Time",
-                    "type": "timeseries"
-                },
-                {
-                    "datasource": {
-                        "type": "prometheus",
-                        "uid": "${ds}"
-                    },
-                    "description": "Time spent idling while in a transaction in this database",
-                    "fieldConfig": {
-                        "defaults": {
-                            "color": {
-                                "mode": "palette-classic"
-                            },
-                            "custom": {
-                                "axisLabel": "",
-                                "axisPlacement": "auto",
-                                "barAlignment": 0,
-                                "drawStyle": "line",
-                                "fillOpacity": 47,
-                                "gradientMode": "none",
-                                "hideFrom": {
-                                    "legend": false,
-                                    "tooltip": false,
-                                    "viz": false
-                                },
-                                "lineInterpolation": "linear",
-                                "lineWidth": 0,
-                                "pointSize": 2,
-                                "scaleDistribution": {
-                                    "type": "linear"
-                                },
-                                "showPoints": "auto",
-                                "spanNulls": false,
-                                "stacking": {
-                                    "group": "A",
-                                    "mode": "normal"
-                                },
-                                "thresholdsStyle": {
-                                    "mode": "off"
-                                }
-                            },
-                            "links": [
-                                {
-                                    "title": "PGSQL Database for ${__field.labels.datname}",
-                                    "url": "/d/pgsql-database?var-ins=${ins}&var-datname=${__field.labels.datname}"
-                                }
-                            ],
-                            "mappings": [],
-                            "min": 0,
-                            "thresholds": {
-                                "mode": "absolute",
-                                "steps": [
-                                    {
-                                        "color": "green",
-                                        "value": null
-                                    }
-                                ]
-                            },
-                            "unit": "s"
-                        },
-                        "overrides": []
-                    },
-                    "gridPos": {
-                        "h": 7,
-                        "w": 8,
-                        "x": 16,
-                        "y": 58
-                    },
-                    "id": 152,
-                    "options": {
-                        "legend": {
-                            "calcs": [],
-                            "displayMode": "table",
-                            "placement": "right"
-                        },
-                        "tooltip": {
-                            "mode": "single"
-                        }
-                    },
-                    "targets": [
-                        {
-                            "exemplar": false,
-                            "expr": "rate(pg_db_ixact_time{ins=\"$ins\"}[1m]) / 1000",
-                            "interval": "",
-                            "legendFormat": "{{ datname }}",
-                            "refId": "A"
-                        }
-                    ],
-                    "title": "Idle in Xact Time",
-                    "type": "timeseries"
-                },
-                {
-                    "datasource": {
-                        "type": "prometheus",
-                        "uid": "${ds}"
-                    },
-                    "description": "Time spent by database sessions in this database",
-                    "fieldConfig": {
-                        "defaults": {
-                            "color": {
-                                "mode": "palette-classic"
-                            },
-                            "custom": {
-                                "axisLabel": "",
-                                "axisPlacement": "auto",
-                                "axisSoftMax": 2,
-                                "barAlignment": 0,
-                                "drawStyle": "line",
-                                "fillOpacity": 47,
-                                "gradientMode": "none",
-                                "hideFrom": {
-                                    "legend": false,
-                                    "tooltip": false,
-                                    "viz": false
-                                },
-                                "lineInterpolation": "linear",
-                                "lineWidth": 0,
-                                "pointSize": 2,
-                                "scaleDistribution": {
-                                    "type": "linear"
-                                },
-                                "showPoints": "auto",
-                                "spanNulls": false,
-                                "stacking": {
-                                    "group": "A",
-                                    "mode": "normal"
-                                },
-                                "thresholdsStyle": {
-                                    "mode": "off"
-                                }
-                            },
-                            "links": [
-                                {
-                                    "title": "PGSQL Database for ${__field.labels.datname}",
-                                    "url": "/d/pgsql-database?var-ins=${ins}&var-datname=${__field.labels.datname}"
-                                }
-                            ],
-                            "mappings": [],
-                            "min": 0,
-                            "thresholds": {
-                                "mode": "absolute",
-                                "steps": [
-                                    {
-                                        "color": "green",
-                                        "value": null
-                                    }
-                                ]
-                            },
-                            "unit": "s"
-                        },
-                        "overrides": [
+                    "mappings": [],
+                    "min": 0,
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
                             {
-                                "matcher": {
-                                    "id": "byName",
-                                    "options": "1"
-                                },
-                                "properties": [
-                                    {
-                                        "id": "color",
-                                        "value": {
-                                            "fixedColor": "red",
-                                            "mode": "fixed"
-                                        }
-                                    },
-                                    {
-                                        "id": "custom.stacking",
-                                        "value": {
-                                            "group": "A",
-                                            "mode": "none"
-                                        }
-                                    },
-                                    {
-                                        "id": "custom.lineWidth",
-                                        "value": 1
-                                    },
-                                    {
-                                        "id": "custom.fillOpacity",
-                                        "value": 0
-                                    }
-                                ]
+                                "color": "super-light-green",
+                                "value": null
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 7,
+                "w": 12,
+                "x": 0,
+                "y": 51
+            },
+            "id": 146,
+            "options": {
+                "legend": {
+                    "calcs": [
+                        "mean"
+                    ],
+                    "displayMode": "table",
+                    "placement": "right"
+                },
+                "tooltip": {
+                    "mode": "multi",
+                    "sort": "none"
+                }
+            },
+            "targets": [
+                {
+                    "exemplar": false,
+                    "expr": "increase(pg_db_sessions{ins=\"$ins\"}[1m])",
+                    "interval": "",
+                    "legendFormat": "{{ datname }}",
+                    "refId": "A"
+                }
+            ],
+            "title": "New Sessions in 1m",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${ds}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "drawStyle": "line",
+                        "fillOpacity": 71,
+                        "gradientMode": "hue",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineInterpolation": "stepBefore",
+                        "lineWidth": 0,
+                        "pointSize": 2,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "normal"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "min": 0,
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "super-light-green",
+                                "value": null
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 7,
+                "w": 12,
+                "x": 12,
+                "y": 51
+            },
+            "id": 147,
+            "options": {
+                "legend": {
+                    "calcs": [
+                        "mean"
+                    ],
+                    "displayMode": "table",
+                    "placement": "right"
+                },
+                "tooltip": {
+                    "mode": "multi",
+                    "sort": "none"
+                }
+            },
+            "targets": [
+                {
+                    "exemplar": false,
+                    "expr": "increase(pg_db_sessions_abandoned{ins=\"$ins\"}[1m])",
+                    "interval": "",
+                    "legendFormat": "[Abandoned] : {{ datname }}",
+                    "refId": "A"
+                },
+                {
+                    "exemplar": false,
+                    "expr": "increase(pg_db_sessions_fatal{ins=\"$ins\"}[1m])",
+                    "hide": false,
+                    "interval": "",
+                    "legendFormat": "[Fatal] : {{ datname }}",
+                    "refId": "B"
+                },
+                {
+                    "exemplar": false,
+                    "expr": "increase(pg_db_sessions_killed{ins=\"$ins\"}[1m])",
+                    "hide": false,
+                    "interval": "",
+                    "legendFormat": "[Killed] : {{ datname }}",
+                    "refId": "C"
+                }
+            ],
+            "title": "Sessions Failure in 1m",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${ds}"
+            },
+            "description": "Time spent by database sessions in this database",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "drawStyle": "line",
+                        "fillOpacity": 47,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineInterpolation": "linear",
+                        "lineWidth": 0,
+                        "pointSize": 2,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "normal"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "links": [
+                        {
+                            "title": "PGSQL Database for ${__field.labels.datname}",
+                            "url": "/d/pgsql-database?var-ins=${ins}&var-datname=${__field.labels.datname}"
+                        }
+                    ],
+                    "mappings": [],
+                    "min": 0,
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
                             }
                         ]
                     },
-                    "gridPos": {
-                        "h": 7,
-                        "w": 8,
-                        "x": 0,
-                        "y": 65
-                    },
-                    "id": 153,
-                    "options": {
-                        "legend": {
-                            "calcs": [],
-                            "displayMode": "table",
-                            "placement": "right"
-                        },
-                        "tooltip": {
-                            "mode": "single"
-                        }
-                    },
-                    "targets": [
-                        {
-                            "exemplar": false,
-                            "expr": "rate(pg_db_session_time{ins=\"$ins\"}[1m]) / on(ins) group_left() pg:ins:num_backends / 1000",
-                            "interval": "",
-                            "legendFormat": "{{ datname }}",
-                            "refId": "A"
-                        },
-                        {
-                            "exemplar": false,
-                            "expr": "1",
-                            "hide": false,
-                            "interval": "",
-                            "legendFormat": "1",
-                            "refId": "B"
-                        }
-                    ],
-                    "title": "Session Time (avg by backend)",
-                    "type": "timeseries"
+                    "unit": "s"
                 },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 7,
+                "w": 8,
+                "x": 0,
+                "y": 58
+            },
+            "id": 148,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "table",
+                    "placement": "right"
+                },
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "targets": [
                 {
                     "datasource": {
                         "type": "prometheus",
                         "uid": "${ds}"
                     },
-                    "description": "Time spent executing SQL statements in this database",
-                    "fieldConfig": {
-                        "defaults": {
-                            "color": {
-                                "mode": "palette-classic"
-                            },
-                            "custom": {
-                                "axisLabel": "",
-                                "axisPlacement": "auto",
-                                "barAlignment": 0,
-                                "drawStyle": "line",
-                                "fillOpacity": 47,
-                                "gradientMode": "none",
-                                "hideFrom": {
-                                    "legend": false,
-                                    "tooltip": false,
-                                    "viz": false
-                                },
-                                "lineInterpolation": "linear",
-                                "lineWidth": 0,
-                                "pointSize": 2,
-                                "scaleDistribution": {
-                                    "type": "linear"
-                                },
-                                "showPoints": "auto",
-                                "spanNulls": false,
-                                "stacking": {
-                                    "group": "A",
-                                    "mode": "normal"
-                                },
-                                "thresholdsStyle": {
-                                    "mode": "off"
-                                }
-                            },
-                            "links": [
-                                {
-                                    "title": "PGSQL Database for ${__field.labels.datname}",
-                                    "url": "/d/pgsql-database?var-ins=${ins}&var-datname=${__field.labels.datname}"
-                                }
-                            ],
-                            "mappings": [],
-                            "min": 0,
-                            "thresholds": {
-                                "mode": "absolute",
-                                "steps": [
-                                    {
-                                        "color": "green",
-                                        "value": null
-                                    }
-                                ]
-                            },
-                            "unit": "s"
-                        },
-                        "overrides": []
-                    },
-                    "gridPos": {
-                        "h": 7,
-                        "w": 8,
-                        "x": 8,
-                        "y": 65
-                    },
-                    "id": 154,
-                    "options": {
-                        "legend": {
-                            "calcs": [],
-                            "displayMode": "table",
-                            "placement": "right"
-                        },
-                        "tooltip": {
-                            "mode": "single"
-                        }
-                    },
-                    "targets": [
-                        {
-                            "exemplar": false,
-                            "expr": "rate(pg_db_active_time{ins=\"$ins\"}[1m]) / on(ins) group_left() pg:ins:num_backends / 1000",
-                            "interval": "",
-                            "legendFormat": "{{ datname }}",
-                            "refId": "A"
-                        }
-                    ],
-                    "title": "Active Time  (avg by backend)",
-                    "type": "timeseries"
-                },
-                {
-                    "datasource": {
-                        "type": "prometheus",
-                        "uid": "${ds}"
-                    },
-                    "description": "Time spent idling while in a transaction in this database",
-                    "fieldConfig": {
-                        "defaults": {
-                            "color": {
-                                "mode": "palette-classic"
-                            },
-                            "custom": {
-                                "axisLabel": "",
-                                "axisPlacement": "auto",
-                                "barAlignment": 0,
-                                "drawStyle": "line",
-                                "fillOpacity": 47,
-                                "gradientMode": "none",
-                                "hideFrom": {
-                                    "legend": false,
-                                    "tooltip": false,
-                                    "viz": false
-                                },
-                                "lineInterpolation": "linear",
-                                "lineWidth": 0,
-                                "pointSize": 2,
-                                "scaleDistribution": {
-                                    "type": "linear"
-                                },
-                                "showPoints": "auto",
-                                "spanNulls": false,
-                                "stacking": {
-                                    "group": "A",
-                                    "mode": "normal"
-                                },
-                                "thresholdsStyle": {
-                                    "mode": "off"
-                                }
-                            },
-                            "links": [
-                                {
-                                    "title": "PGSQL Database for ${__field.labels.datname}",
-                                    "url": "/d/pgsql-database?var-ins=${ins}&var-datname=${__field.labels.datname}"
-                                }
-                            ],
-                            "mappings": [],
-                            "min": 0,
-                            "thresholds": {
-                                "mode": "absolute",
-                                "steps": [
-                                    {
-                                        "color": "green",
-                                        "value": null
-                                    }
-                                ]
-                            },
-                            "unit": "s"
-                        },
-                        "overrides": []
-                    },
-                    "gridPos": {
-                        "h": 7,
-                        "w": 8,
-                        "x": 16,
-                        "y": 65
-                    },
-                    "id": 155,
-                    "options": {
-                        "legend": {
-                            "calcs": [],
-                            "displayMode": "table",
-                            "placement": "right"
-                        },
-                        "tooltip": {
-                            "mode": "single"
-                        }
-                    },
-                    "targets": [
-                        {
-                            "exemplar": false,
-                            "expr": "rate(pg_db_ixact_time{ins=\"$ins\"}[1m]) / on(ins) group_left() pg:ins:num_backends / 1000",
-                            "interval": "",
-                            "legendFormat": "{{ datname }}",
-                            "refId": "A"
-                        }
-                    ],
-                    "title": "Idle in Xact Time  (avg by backend)",
-                    "type": "timeseries"
-                },
-                {
-                    "datasource": {
-                        "type": "prometheus",
-                        "uid": "${ds}"
-                    },
-                    "description": "Time spent executing SQL statements in this database",
-                    "fieldConfig": {
-                        "defaults": {
-                            "color": {
-                                "mode": "palette-classic"
-                            },
-                            "custom": {
-                                "axisLabel": "",
-                                "axisPlacement": "auto",
-                                "barAlignment": 0,
-                                "drawStyle": "line",
-                                "fillOpacity": 47,
-                                "gradientMode": "none",
-                                "hideFrom": {
-                                    "legend": false,
-                                    "tooltip": false,
-                                    "viz": false
-                                },
-                                "lineInterpolation": "linear",
-                                "lineWidth": 0,
-                                "pointSize": 2,
-                                "scaleDistribution": {
-                                    "type": "linear"
-                                },
-                                "showPoints": "auto",
-                                "spanNulls": false,
-                                "stacking": {
-                                    "group": "A",
-                                    "mode": "normal"
-                                },
-                                "thresholdsStyle": {
-                                    "mode": "area"
-                                }
-                            },
-                            "links": [
-                                {
-                                    "title": "PGSQL Database for ${__field.labels.datname}",
-                                    "url": "/d/pgsql-database?var-ins=${ins}&var-datname=${__field.labels.datname}"
-                                }
-                            ],
-                            "mappings": [],
-                            "min": 0,
-                            "thresholds": {
-                                "mode": "absolute",
-                                "steps": [
-                                    {
-                                        "color": "green",
-                                        "value": null
-                                    },
-                                    {
-                                        "color": "orange",
-                                        "value": 0.5
-                                    },
-                                    {
-                                        "color": "red",
-                                        "value": 0.7
-                                    },
-                                    {
-                                        "color": "purple",
-                                        "value": 0.9
-                                    }
-                                ]
-                            },
-                            "unit": "percentunit"
-                        },
-                        "overrides": []
-                    },
-                    "gridPos": {
-                        "h": 7,
-                        "w": 8,
-                        "x": 0,
-                        "y": 72
-                    },
-                    "id": 157,
-                    "options": {
-                        "legend": {
-                            "calcs": [],
-                            "displayMode": "table",
-                            "placement": "right"
-                        },
-                        "tooltip": {
-                            "mode": "single"
-                        }
-                    },
-                    "targets": [
-                        {
-                            "exemplar": false,
-                            "expr": "rate(pg_db_active_time{ins=\"$ins\"}[1m]) / on(ins) group_left() sum by (ins)(rate(node_cpu_seconds_total{ins=\"$ins\"}[1m]))  / 1000",
-                            "interval": "",
-                            "legendFormat": "{{ datname }}",
-                            "refId": "A"
-                        }
-                    ],
-                    "title": "Active Ratio (of CPU Time)",
-                    "type": "timeseries"
-                },
-                {
-                    "datasource": {
-                        "type": "prometheus",
-                        "uid": "${ds}"
-                    },
-                    "description": "Time spent executing SQL statements in this database",
-                    "fieldConfig": {
-                        "defaults": {
-                            "color": {
-                                "mode": "palette-classic"
-                            },
-                            "custom": {
-                                "axisLabel": "",
-                                "axisPlacement": "auto",
-                                "barAlignment": 0,
-                                "drawStyle": "line",
-                                "fillOpacity": 47,
-                                "gradientMode": "none",
-                                "hideFrom": {
-                                    "legend": false,
-                                    "tooltip": false,
-                                    "viz": false
-                                },
-                                "lineInterpolation": "linear",
-                                "lineWidth": 0,
-                                "pointSize": 2,
-                                "scaleDistribution": {
-                                    "type": "linear"
-                                },
-                                "showPoints": "auto",
-                                "spanNulls": false,
-                                "stacking": {
-                                    "group": "A",
-                                    "mode": "normal"
-                                },
-                                "thresholdsStyle": {
-                                    "mode": "area"
-                                }
-                            },
-                            "links": [
-                                {
-                                    "title": "PGSQL Database for ${__field.labels.datname}",
-                                    "url": "/d/pgsql-database?var-ins=${ins}&var-datname=${__field.labels.datname}"
-                                }
-                            ],
-                            "mappings": [],
-                            "min": 0,
-                            "thresholds": {
-                                "mode": "absolute",
-                                "steps": [
-                                    {
-                                        "color": "green",
-                                        "value": null
-                                    },
-                                    {
-                                        "color": "orange",
-                                        "value": 0.5
-                                    },
-                                    {
-                                        "color": "red",
-                                        "value": 0.7
-                                    },
-                                    {
-                                        "color": "purple",
-                                        "value": 0.9
-                                    }
-                                ]
-                            },
-                            "unit": "percentunit"
-                        },
-                        "overrides": []
-                    },
-                    "gridPos": {
-                        "h": 7,
-                        "w": 8,
-                        "x": 8,
-                        "y": 72
-                    },
-                    "id": 156,
-                    "options": {
-                        "legend": {
-                            "calcs": [],
-                            "displayMode": "table",
-                            "placement": "right"
-                        },
-                        "tooltip": {
-                            "mode": "single"
-                        }
-                    },
-                    "targets": [
-                        {
-                            "exemplar": false,
-                            "expr": "rate(pg_db_active_time{ins=\"$ins\"}[1m]) / rate(pg_db_session_time{ins=\"$ins\"}[1m])",
-                            "interval": "",
-                            "legendFormat": "{{ datname }}",
-                            "refId": "A"
-                        }
-                    ],
-                    "title": "Active Ratio (of Session Time)",
-                    "type": "timeseries"
-                },
-                {
-                    "datasource": {
-                        "type": "prometheus",
-                        "uid": "${ds}"
-                    },
-                    "description": "Time spent executing SQL statements in this database",
-                    "fieldConfig": {
-                        "defaults": {
-                            "color": {
-                                "mode": "palette-classic"
-                            },
-                            "custom": {
-                                "axisLabel": "",
-                                "axisPlacement": "auto",
-                                "barAlignment": 0,
-                                "drawStyle": "line",
-                                "fillOpacity": 47,
-                                "gradientMode": "none",
-                                "hideFrom": {
-                                    "legend": false,
-                                    "tooltip": false,
-                                    "viz": false
-                                },
-                                "lineInterpolation": "linear",
-                                "lineWidth": 0,
-                                "pointSize": 2,
-                                "scaleDistribution": {
-                                    "type": "linear"
-                                },
-                                "showPoints": "auto",
-                                "spanNulls": false,
-                                "stacking": {
-                                    "group": "A",
-                                    "mode": "normal"
-                                },
-                                "thresholdsStyle": {
-                                    "mode": "area"
-                                }
-                            },
-                            "links": [
-                                {
-                                    "title": "PGSQL Database for ${__field.labels.datname}",
-                                    "url": "/d/pgsql-database?var-ins=${ins}&var-datname=${__field.labels.datname}"
-                                }
-                            ],
-                            "mappings": [],
-                            "min": 0,
-                            "thresholds": {
-                                "mode": "absolute",
-                                "steps": [
-                                    {
-                                        "color": "green",
-                                        "value": null
-                                    },
-                                    {
-                                        "color": "orange",
-                                        "value": 0.01
-                                    },
-                                    {
-                                        "color": "red",
-                                        "value": 0.1
-                                    }
-                                ]
-                            },
-                            "unit": "percentunit"
-                        },
-                        "overrides": []
-                    },
-                    "gridPos": {
-                        "h": 7,
-                        "w": 8,
-                        "x": 16,
-                        "y": 72
-                    },
-                    "id": 158,
-                    "options": {
-                        "legend": {
-                            "calcs": [],
-                            "displayMode": "table",
-                            "placement": "right"
-                        },
-                        "tooltip": {
-                            "mode": "single"
-                        }
-                    },
-                    "targets": [
-                        {
-                            "exemplar": false,
-                            "expr": "rate(pg_db_ixact_time{ins=\"$ins\"}[1m]) / rate(pg_db_session_time{ins=\"$ins\"}[1m])",
-                            "interval": "",
-                            "legendFormat": "{{ datname }}",
-                            "refId": "A"
-                        }
-                    ],
-                    "title": "Idle in Xact Ratio (of Session Time)",
-                    "type": "timeseries"
+                    "exemplar": false,
+                    "expr": "rate(pg_db_session_time{ins=\"$ins\"}[1m])",
+                    "interval": "",
+                    "legendFormat": "{{ datname }}",
+                    "refId": "A"
                 }
             ],
-            "title": "Session Time (PG14)",
-            "type": "row"
+            "title": "Session Time",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${ds}"
+            },
+            "description": "Time spent executing SQL statements in this database",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "drawStyle": "line",
+                        "fillOpacity": 47,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineInterpolation": "linear",
+                        "lineWidth": 0,
+                        "pointSize": 2,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "normal"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "links": [
+                        {
+                            "title": "PGSQL Database for ${__field.labels.datname}",
+                            "url": "/d/pgsql-database?var-ins=${ins}&var-datname=${__field.labels.datname}"
+                        }
+                    ],
+                    "mappings": [],
+                    "min": 0,
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    },
+                    "unit": "s"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 7,
+                "w": 8,
+                "x": 8,
+                "y": 58
+            },
+            "id": 151,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "table",
+                    "placement": "right"
+                },
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "${ds}"
+                    },
+                    "exemplar": false,
+                    "expr": "rate(pg_db_active_time{ins=\"$ins\"}[1m])",
+                    "interval": "",
+                    "legendFormat": "{{ datname }}",
+                    "refId": "A"
+                }
+            ],
+            "title": "Active Time",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${ds}"
+            },
+            "description": "Time spent idling while in a transaction in this database",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "drawStyle": "line",
+                        "fillOpacity": 47,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineInterpolation": "linear",
+                        "lineWidth": 0,
+                        "pointSize": 2,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "normal"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "links": [
+                        {
+                            "title": "PGSQL Database for ${__field.labels.datname}",
+                            "url": "/d/pgsql-database?var-ins=${ins}&var-datname=${__field.labels.datname}"
+                        }
+                    ],
+                    "mappings": [],
+                    "min": 0,
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    },
+                    "unit": "s"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 7,
+                "w": 8,
+                "x": 16,
+                "y": 58
+            },
+            "id": 152,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "table",
+                    "placement": "right"
+                },
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "${ds}"
+                    },
+                    "exemplar": false,
+                    "expr": "rate(pg_db_ixact_time{ins=\"$ins\"}[1m])",
+                    "interval": "",
+                    "legendFormat": "{{ datname }}",
+                    "refId": "A"
+                }
+            ],
+            "title": "Idle in Xact Time",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${ds}"
+            },
+            "description": "Time spent by database sessions in this database",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "axisSoftMax": 2,
+                        "barAlignment": 0,
+                        "drawStyle": "line",
+                        "fillOpacity": 47,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineInterpolation": "linear",
+                        "lineWidth": 0,
+                        "pointSize": 2,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "normal"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "links": [
+                        {
+                            "title": "PGSQL Database for ${__field.labels.datname}",
+                            "url": "/d/pgsql-database?var-ins=${ins}&var-datname=${__field.labels.datname}"
+                        }
+                    ],
+                    "mappings": [],
+                    "min": 0,
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    },
+                    "unit": "s"
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "1"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "red",
+                                    "mode": "fixed"
+                                }
+                            },
+                            {
+                                "id": "custom.stacking",
+                                "value": {
+                                    "group": "A",
+                                    "mode": "none"
+                                }
+                            },
+                            {
+                                "id": "custom.lineWidth",
+                                "value": 1
+                            },
+                            {
+                                "id": "custom.fillOpacity",
+                                "value": 0
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 7,
+                "w": 8,
+                "x": 0,
+                "y": 65
+            },
+            "id": 153,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "table",
+                    "placement": "right"
+                },
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "${ds}"
+                    },
+                    "exemplar": false,
+                    "expr": "rate(pg_db_session_time{ins=\"$ins\"}[1m]) / on(ins) group_left() pg:ins:num_backends{ins=\"$ins\"}",
+                    "interval": "",
+                    "legendFormat": "{{ datname }}",
+                    "refId": "A"
+                },
+                {
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "${ds}"
+                    },
+                    "exemplar": false,
+                    "expr": "1",
+                    "hide": false,
+                    "interval": "",
+                    "legendFormat": "1",
+                    "refId": "B"
+                }
+            ],
+            "title": "Session Time (avg by backend)",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${ds}"
+            },
+            "description": "Time spent executing SQL statements in this database",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "drawStyle": "line",
+                        "fillOpacity": 47,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineInterpolation": "linear",
+                        "lineWidth": 0,
+                        "pointSize": 2,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "normal"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "links": [
+                        {
+                            "title": "PGSQL Database for ${__field.labels.datname}",
+                            "url": "/d/pgsql-database?var-ins=${ins}&var-datname=${__field.labels.datname}"
+                        }
+                    ],
+                    "mappings": [],
+                    "min": 0,
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    },
+                    "unit": "s"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 7,
+                "w": 8,
+                "x": 8,
+                "y": 65
+            },
+            "id": 154,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "table",
+                    "placement": "right"
+                },
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "${ds}"
+                    },
+                    "exemplar": false,
+                    "expr": "rate(pg_db_active_time{ins=\"$ins\"}[1m]) / on(ins) group_left() pg:ins:num_backends{ins=\"$ins\"}",
+                    "interval": "",
+                    "legendFormat": "{{ datname }}",
+                    "refId": "A"
+                }
+            ],
+            "title": "Active Time  (avg by backend)",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${ds}"
+            },
+            "description": "Time spent idling while in a transaction in this database",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "drawStyle": "line",
+                        "fillOpacity": 47,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineInterpolation": "linear",
+                        "lineWidth": 0,
+                        "pointSize": 2,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "normal"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "links": [
+                        {
+                            "title": "PGSQL Database for ${__field.labels.datname}",
+                            "url": "/d/pgsql-database?var-ins=${ins}&var-datname=${__field.labels.datname}"
+                        }
+                    ],
+                    "mappings": [],
+                    "min": 0,
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    },
+                    "unit": "s"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 7,
+                "w": 8,
+                "x": 16,
+                "y": 65
+            },
+            "id": 155,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "table",
+                    "placement": "right"
+                },
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "${ds}"
+                    },
+                    "exemplar": false,
+                    "expr": "rate(pg_db_ixact_time{ins=\"$ins\"}[1m]) / on(ins) group_left() pg:ins:num_backends{ins=\"$ins\"}",
+                    "interval": "",
+                    "legendFormat": "{{ datname }}",
+                    "refId": "A"
+                }
+            ],
+            "title": "Idle in Xact Time  (avg by backend)",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${ds}"
+            },
+            "description": "Time spent executing SQL statements in this database",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "drawStyle": "line",
+                        "fillOpacity": 47,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineInterpolation": "linear",
+                        "lineWidth": 0,
+                        "pointSize": 2,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "normal"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "area"
+                        }
+                    },
+                    "links": [
+                        {
+                            "title": "PGSQL Database for ${__field.labels.datname}",
+                            "url": "/d/pgsql-database?var-ins=${ins}&var-datname=${__field.labels.datname}"
+                        }
+                    ],
+                    "mappings": [],
+                    "min": 0,
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "orange",
+                                "value": 0.5
+                            },
+                            {
+                                "color": "red",
+                                "value": 0.7
+                            },
+                            {
+                                "color": "purple",
+                                "value": 0.9
+                            }
+                        ]
+                    },
+                    "unit": "percentunit"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 7,
+                "w": 8,
+                "x": 0,
+                "y": 72
+            },
+            "id": 157,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "table",
+                    "placement": "right"
+                },
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "${ds}"
+                    },
+                    "exemplar": false,
+                    "expr": "rate(pg_db_active_time{ins=\"$ins\"}[1m]) / on(ins) group_left() sum by (ins)(rate(node_cpu_seconds_total{ins=\"$ins\"}[1m]))",
+                    "interval": "",
+                    "legendFormat": "{{ datname }}",
+                    "refId": "A"
+                }
+            ],
+            "title": "Active Ratio (of CPU Time)",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${ds}"
+            },
+            "description": "Time spent executing SQL statements in this database",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "drawStyle": "line",
+                        "fillOpacity": 47,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineInterpolation": "linear",
+                        "lineWidth": 0,
+                        "pointSize": 2,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "normal"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "area"
+                        }
+                    },
+                    "links": [
+                        {
+                            "title": "PGSQL Database for ${__field.labels.datname}",
+                            "url": "/d/pgsql-database?var-ins=${ins}&var-datname=${__field.labels.datname}"
+                        }
+                    ],
+                    "mappings": [],
+                    "min": 0,
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "orange",
+                                "value": 0.5
+                            },
+                            {
+                                "color": "red",
+                                "value": 0.7
+                            },
+                            {
+                                "color": "purple",
+                                "value": 0.9
+                            }
+                        ]
+                    },
+                    "unit": "percentunit"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 7,
+                "w": 8,
+                "x": 8,
+                "y": 72
+            },
+            "id": 156,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "table",
+                    "placement": "right"
+                },
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "targets": [
+                {
+                    "exemplar": false,
+                    "expr": "rate(pg_db_active_time{ins=\"$ins\"}[1m]) / rate(pg_db_session_time{ins=\"$ins\"}[1m])",
+                    "interval": "",
+                    "legendFormat": "{{ datname }}",
+                    "refId": "A"
+                }
+            ],
+            "title": "Active Ratio (of Session Time)",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${ds}"
+            },
+            "description": "Time spent executing SQL statements in this database",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "drawStyle": "line",
+                        "fillOpacity": 47,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineInterpolation": "linear",
+                        "lineWidth": 0,
+                        "pointSize": 2,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "normal"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "area"
+                        }
+                    },
+                    "links": [
+                        {
+                            "title": "PGSQL Database for ${__field.labels.datname}",
+                            "url": "/d/pgsql-database?var-ins=${ins}&var-datname=${__field.labels.datname}"
+                        }
+                    ],
+                    "mappings": [],
+                    "min": 0,
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "orange",
+                                "value": 0.01
+                            },
+                            {
+                                "color": "red",
+                                "value": 0.1
+                            }
+                        ]
+                    },
+                    "unit": "percentunit"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 7,
+                "w": 8,
+                "x": 16,
+                "y": 72
+            },
+            "id": 158,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "table",
+                    "placement": "right"
+                },
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "targets": [
+                {
+                    "exemplar": false,
+                    "expr": "rate(pg_db_ixact_time{ins=\"$ins\"}[1m]) / rate(pg_db_session_time{ins=\"$ins\"}[1m])",
+                    "interval": "",
+                    "legendFormat": "{{ datname }}",
+                    "refId": "A"
+                }
+            ],
+            "title": "Idle in Xact Ratio (of Session Time)",
+            "type": "timeseries"
         },
         {
             "collapsed": false,
@@ -3602,7 +3674,7 @@
                 "h": 1,
                 "w": 24,
                 "x": 0,
-                "y": 51
+                "y": 79
             },
             "id": 121,
             "panels": [],
@@ -3622,7 +3694,8 @@
                     },
                     "custom": {
                         "align": "center",
-                        "displayMode": "auto"
+                        "displayMode": "auto",
+                        "inspect": false
                     },
                     "mappings": [],
                     "thresholds": {
@@ -3919,8 +3992,7 @@
                         },
                         "properties": [
                             {
-                                "id": "custom.width",
-                                "value": null
+                                "id": "custom.width"
                             }
                         ]
                     }
@@ -3930,10 +4002,17 @@
                 "h": 6,
                 "w": 24,
                 "x": 0,
-                "y": 52
+                "y": 80
             },
             "id": 137,
             "options": {
+                "footer": {
+                    "fields": "",
+                    "reducer": [
+                        "sum"
+                    ],
+                    "show": false
+                },
                 "showHeader": true,
                 "sortBy": [
                     {
@@ -3942,7 +4021,7 @@
                     }
                 ]
             },
-            "pluginVersion": "8.0.5",
+            "pluginVersion": "8.5.2",
             "targets": [
                 {
                     "exemplar": false,
@@ -4124,7 +4203,7 @@
                 "h": 3,
                 "w": 24,
                 "x": 0,
-                "y": 58
+                "y": 86
             },
             "id": 132,
             "options": {
@@ -4142,7 +4221,7 @@
                 "text": {},
                 "textMode": "auto"
             },
-            "pluginVersion": "8.0.5",
+            "pluginVersion": "8.5.2",
             "targets": [
                 {
                     "exemplar": false,
@@ -4305,7 +4384,7 @@
                 "h": 7,
                 "w": 12,
                 "x": 0,
-                "y": 61
+                "y": 89
             },
             "id": 125,
             "options": {
@@ -4317,7 +4396,8 @@
                     "placement": "right"
                 },
                 "tooltip": {
-                    "mode": "multi"
+                    "mode": "multi",
+                    "sort": "none"
                 }
             },
             "targets": [
@@ -4410,7 +4490,7 @@
                 "h": 7,
                 "w": 12,
                 "x": 12,
-                "y": 61
+                "y": 89
             },
             "id": 126,
             "options": {
@@ -4422,7 +4502,8 @@
                     "placement": "right"
                 },
                 "tooltip": {
-                    "mode": "single"
+                    "mode": "single",
+                    "sort": "none"
                 }
             },
             "targets": [
@@ -4569,7 +4650,7 @@
                 "h": 7,
                 "w": 12,
                 "x": 0,
-                "y": 68
+                "y": 96
             },
             "id": 102,
             "options": {
@@ -4581,7 +4662,8 @@
                     "placement": "right"
                 },
                 "tooltip": {
-                    "mode": "multi"
+                    "mode": "multi",
+                    "sort": "none"
                 }
             },
             "targets": [
@@ -4715,7 +4797,7 @@
                 "h": 7,
                 "w": 12,
                 "x": 12,
-                "y": 68
+                "y": 96
             },
             "id": 123,
             "options": {
@@ -4727,7 +4809,8 @@
                     "placement": "right"
                 },
                 "tooltip": {
-                    "mode": "multi"
+                    "mode": "multi",
+                    "sort": "none"
                 }
             },
             "targets": [
@@ -4882,7 +4965,7 @@
                 "h": 7,
                 "w": 12,
                 "x": 0,
-                "y": 75
+                "y": 103
             },
             "id": 140,
             "options": {
@@ -4894,7 +4977,8 @@
                     "placement": "right"
                 },
                 "tooltip": {
-                    "mode": "multi"
+                    "mode": "multi",
+                    "sort": "none"
                 }
             },
             "targets": [
@@ -5041,7 +5125,7 @@
                 "h": 7,
                 "w": 12,
                 "x": 12,
-                "y": 75
+                "y": 103
             },
             "id": 141,
             "options": {
@@ -5053,7 +5137,8 @@
                     "placement": "right"
                 },
                 "tooltip": {
-                    "mode": "multi"
+                    "mode": "multi",
+                    "sort": "none"
                 }
             },
             "targets": [
@@ -5078,7 +5163,7 @@
                 "h": 1,
                 "w": 24,
                 "x": 0,
-                "y": 82
+                "y": 110
             },
             "id": 130,
             "panels": [],
@@ -5158,7 +5243,7 @@
                 "h": 7,
                 "w": 12,
                 "x": 0,
-                "y": 83
+                "y": 111
             },
             "id": 139,
             "options": {
@@ -5178,7 +5263,7 @@
                 },
                 "textMode": "auto"
             },
-            "pluginVersion": "8.0.5",
+            "pluginVersion": "8.5.2",
             "targets": [
                 {
                     "exemplar": false,
@@ -5292,7 +5377,7 @@
                 "h": 7,
                 "w": 12,
                 "x": 12,
-                "y": 83
+                "y": 111
             },
             "id": 128,
             "options": {
@@ -5304,7 +5389,8 @@
                     "placement": "right"
                 },
                 "tooltip": {
-                    "mode": "multi"
+                    "mode": "multi",
+                    "sort": "none"
                 }
             },
             "targets": [
@@ -5421,7 +5507,7 @@
                 "h": 7,
                 "w": 12,
                 "x": 0,
-                "y": 90
+                "y": 118
             },
             "id": 124,
             "options": {
@@ -5433,7 +5519,8 @@
                     "placement": "right"
                 },
                 "tooltip": {
-                    "mode": "multi"
+                    "mode": "multi",
+                    "sort": "none"
                 }
             },
             "targets": [
@@ -5550,7 +5637,7 @@
                 "h": 7,
                 "w": 12,
                 "x": 12,
-                "y": 90
+                "y": 118
             },
             "id": 127,
             "options": {
@@ -5562,7 +5649,8 @@
                     "placement": "right"
                 },
                 "tooltip": {
-                    "mode": "multi"
+                    "mode": "multi",
+                    "sort": "none"
                 }
             },
             "targets": [
@@ -5579,7 +5667,7 @@
         }
     ],
     "refresh": false,
-    "schemaVersion": 30,
+    "schemaVersion": 36,
     "style": "light",
     "tags": [
         "Pigsty",
@@ -5604,7 +5692,6 @@
                 "type": "datasource"
             },
             {
-                "allValue": null,
                 "current": {},
                 "datasource": {
                     "type": "prometheus",
@@ -5612,7 +5699,6 @@
                 },
                 "definition": "label_values(pg_up, ins)",
                 "description": "Unique instance identifier (e.g pg-meta-1)",
-                "error": null,
                 "hide": 0,
                 "includeAll": false,
                 "label": "Instance",
@@ -5630,7 +5716,6 @@
                 "type": "query"
             },
             {
-                "allValue": null,
                 "current": {},
                 "datasource": {
                     "type": "prometheus",
@@ -5638,7 +5723,6 @@
                 },
                 "definition": "label_values(pg_up{ins=\"$ins\"} , instance)",
                 "description": "IP address of this postgres instance",
-                "error": null,
                 "hide": 2,
                 "includeAll": false,
                 "label": "IP",
@@ -5656,7 +5740,6 @@
                 "type": "query"
             },
             {
-                "allValue": null,
                 "current": {},
                 "datasource": {
                     "type": "prometheus",
@@ -5664,7 +5747,6 @@
                 },
                 "definition": "label_values(pg_up{ins=\"$ins\"},  ins)",
                 "description": "Sequence number of this instance, which is an unique integer among a postgres cluster",
-                "error": null,
                 "hide": 2,
                 "includeAll": false,
                 "label": "Sequence",
@@ -5682,7 +5764,6 @@
                 "type": "query"
             },
             {
-                "allValue": null,
                 "current": {},
                 "datasource": {
                     "type": "prometheus",
@@ -5690,7 +5771,6 @@
                 },
                 "definition": "label_values(pg_up{ins=\"$ins\"}, cls)",
                 "description": "Cluster identifier for this postgres instance, cls should be unique among entire environment. such as pg-meta, pg-test",
-                "error": null,
                 "hide": 2,
                 "includeAll": false,
                 "label": "Cluster",
@@ -5708,7 +5788,6 @@
                 "type": "query"
             },
             {
-                "allValue": null,
                 "current": {},
                 "datasource": {
                     "type": "prometheus",
@@ -5716,7 +5795,6 @@
                 },
                 "definition": "label_values(node_uname_info{ins=\"$ins\"}, nodename)",
                 "description": "Node name of current postgres instance",
-                "error": null,
                 "hide": 2,
                 "includeAll": false,
                 "label": "Node",
@@ -5743,5 +5821,6 @@
     "timezone": "",
     "title": "PGSQL Session",
     "uid": "pgsql-session",
-    "version": 1
+    "version": 1,
+    "weekStart": ""
 }

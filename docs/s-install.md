@@ -24,7 +24,7 @@ When Pigsty is installed on one single node. It will init pigsty infra with a ba
 
 #### TL; DR
 
-[Prepare](#prepare) a **new** node : Linux x86_64 CentOS 7.8.2003, with **root** or **sudo** access, then [download](d-prepare.md#software-provisioning) pigsty
+[Prepare](d-prepare.md) a **new** node : Linux x86_64 CentOS 7.8.2003, with **root** or **sudo** access, then [download](d-prepare.md#software-provisioning) pigsty
 
 ```bash
 bash -c "$(curl -fsSL http://download.pigsty.cc/get)"  # Download Latest Pigsty Source
@@ -41,8 +41,8 @@ And a Nginx is serving & proxy all WebUI services @ port `80`.
 <details><summary>Download Directly via Curl</summary>
 
 ```bash
-curl https://github.com/Vonng/pigsty/releases/download/v1.4.1/pigsty.tgz -o /tmp/pigsty.tgz
-curl https://github.com/Vonng/pigsty/releases/download/v1.4.1/pkg.tgz    -o /tmp/pkg.tgz  
+curl https://github.com/Vonng/pigsty/releases/download/v1.5.0-beta/pigsty.tgz -o /tmp/pigsty.tgz
+curl https://github.com/Vonng/pigsty/releases/download/v1.5.0-beta/pkg.tgz    -o /tmp/pkg.tgz  
 ```
 
 </details>
@@ -60,7 +60,7 @@ Nginx port 80 is the default access endpoint for all Web GUI services. Although 
 
 ----------------
 
-## Cluster Mange
+## Cluster Manage
 
 Pigsty can also be used as a controller & monitoring infrastructure for production-grade large-scale nodes & databases.
 
@@ -72,7 +72,7 @@ You can deploy different types of High available [PostgreSQL](d-pgsql.md) Cluste
 ./nodes.yml  -l pg-test      # init 3 nodes of cluster pg-test
 ./pgsql.yml  -l pg-test      # init HA PGSQL Cluster pg-test
 ./redis.yml  -l redis-test   # init redis cluster redis-test
-./pigsty-matrix.yml -l mx-*  # init MatrixDB: mx-mdw,mx-sdw
+./pigsty-matrixdb.yml -l mx-*  # init MatrixDB: mx-mdw,mx-sdw
 ```
 
 
@@ -139,5 +139,5 @@ To deploy the open-source time-series data warehouse [MatrixDB](d-matrixdb.md) (
 ./download matrix     # Download the MatrixDB package and build the local source
 ./infra.yml -e no_cmdb=true # If meta node is part of it, add no_cmdb var to skip CMDB creation
 ./nodes.yml           # configure all nodes for MatrixDB installation
-./pigsty-matrix.yml   # Install MatrixDB on those nodes
+./pigsty-matrixdb.yml   # Install MatrixDB on those nodes
 ```

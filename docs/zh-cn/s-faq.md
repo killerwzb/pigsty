@@ -14,9 +14,6 @@
 * [NODES](#NODES)
 * [PGSQL](#PGSQL)
 
-[TOC]
-
-
 
 ---------------------------------
 
@@ -89,8 +86,8 @@ make start   # 使用Vagrant拉起单个meta节点  (start4则为4个节点)
 执行以上命令，可自动下载最新稳定版本 `pigsty.tgz` ，并解压至 `~/pigsty`目录。您也可以从下列位置手工下载特定版本的Pigsty[源码包](d-prepare.md#Pigsty源代码)，如果您需要在无互联网的环境中安装，可以提前下载并通过 scp/sftp 等方式上传至生产服务器。
 
 ```bash
-https://github.com/Vonng/pigsty/releases/download/v1.4.1/pigsty.tgz   # Github Release 
-http://download.pigsty.cc/v1.4.1/pigsty.tgz                           # 中国大陆用加速CDN
+https://github.com/Vonng/pigsty/releases/download/v1.5.0-beta/pigsty.tgz   # Github Release 
+http://download.pigsty.cc/v1.5.0-beta/pigsty.tgz                           # 中国大陆用加速CDN
 https://pan.baidu.com/s/1DZIa9X2jAxx69Zj-aRHoaw?pwd=8su9              # 百度云网盘下载
 ```
 
@@ -126,8 +123,8 @@ Pigsty的[离线软件包](d-prepare.md#Pigsty离线软件包) `pkg.tgz` 打包�
 在 [`./configure`](v-config.md#配置过程) 过程中，如果离线安装包`/tmp/pkg.tgz`不存在，向导会提示用户下载，回答“Y”即可自动从Github或CDN下载；回答“N”则会跳过下载。您也可以从下列位置手工下载离线软件包，并放置于 `/tmp/pkg.tgz`，则安装时会自动使用。
 
 ```bash
-curl https://github.com/Vonng/pigsty/releases/download/v1.4.1/pkg.tgz -o /tmp/pkg.tgz
-curl http://download.pigsty.cc/v1.4.1/pkg.tgz -o /tmp/pkg.tgz         # China CDN
+curl https://github.com/Vonng/pigsty/releases/download/v1.5.0-beta/pkg.tgz -o /tmp/pkg.tgz
+curl http://download.pigsty.cc/v1.5.0-beta/pkg.tgz -o /tmp/pkg.tgz         # China CDN
 https://pan.baidu.com/s/1DZIa9X2jAxx69Zj-aRHoaw?pwd=8su9              # Baidu Yun
 ```
 
@@ -157,7 +154,7 @@ Pigsty离线软件包基于CentOS 7.8操作系统制作，如果您使用的不�
 
 !> 检测环境，生成配置，启用离线软件包（可选），安装基本工具Ansible。
 
-当您下载完 Pigsty 源码包，解压并进入其中后，需要先执行 `./configure` 完成环境[配置过程](v-config#配置过程)。
+当您下载完 Pigsty 源码包，解压并进入其中后，需要先执行 `./configure` 完成环境[配置过程](v-config.md#配置过程)。
 
 Pigsty会检测当前环境是否满足安装要求，并根据当前机器环境生成推荐配置文件 `pigsty.yml`。在`files/conf/`目录中，有一系列名为`pigsty-*.yml`的配置文件，可以作为不同场景下的配置参考模板，通过`-m`指定。
 
@@ -187,7 +184,7 @@ Pigsty有且仅有一个[配置文件](v-config.md#配置文件)： [`pigsty.yml
 
 ### 用户需要修改什么配置吗？
 
-!> 单机部署通常啥配置也不用改，会自动调整，绝大多数参数都有合适都默认值。
+!> 单机部署通常啥配置也不用改，会自动调整，绝大多数参数都有合适的默认值。
 
 Pigsty提供了220+配置参数，您可以定制整个基础设施/平台/数据库的方方面面。通常在单机安装的情况下，不需要对配置文件进行任何调整即可直接使用。但仍然有个别参数，如果有需要，可以提前调整：
 
@@ -396,19 +393,17 @@ DCS Server与元节点并没有对应关系：在默认情况下，Pigsty会在�
 
 ### Abort because consul instance already exists
 
-!> Pigsty提供了DCS误删保护机制，配置`dcs_exists_action = clean` 可以硬干。
+!> Pigsty提供了DCS误删保护机制，配置`consul_clean = true` 可以硬干。
 
-Pigsty在执行数据库&基础设施初始化时，为了避免误删运行中的DCS实例(Consul Agent/Server)，提供了[保护机制](p-nodes.md#保护机制)。当Pigsty发现Consul已经在运行时，会根据参数 [`dcs_exists_action`](v-infra.md#dcs_exists_action) 来采取不同的行为： `abort` 意味着整个剧本的执行会立即中止。 `clean` 则会强制关停删除现有实例，请谨慎使用此配置。
+当目标节点的Consul服务已经存在时，[`nodes.yml`](p-nodes.md#nodes) 会根据 [`consul_clean`](v-nodes.md#consul_clean) 参数采取行动，如果为真，那么在初始化过程中现有的Consul会被抹除。
 
-此外若参数 [`dcs_disable_purge`](v-infra.md#dcs_disable_purge) 为真，则 `dcs_exists_action` 将会强制配置为 `abort`，提供了双重保险。
+Pigsty也提供了相应的[保护机制](p-nodes.md#保护机制) 参数： [`consul_safeguard`](v-nodes.md#consul_safeguard)
 
 您可以在配置文件 `pigsty.yml` 中修改这些参数，也可以直接在执行剧本时，通过额外参数机制指定：
 
 ```bash
-./nodes.yml -e dcs_exists_action=clean
+./nodes.yml -e consul_clean=true
 ```
-
-
 
 
 
@@ -419,16 +414,16 @@ Pigsty在执行数据库&基础设施初始化时，为了避免误删运行中�
 
 ### Abort because postgres instance already exists
 
-!> Pigsty提供了数据库误删保护机制，配置`pg_exists_action = clean` 可以硬干。
+!> Pigsty提供了数据库误删保护机制，配置`pg_clean = true` 可以硬干。
 
-在执行数据库&基础设施初始化时，为了避免误删Postgres实例，提供了[保护机制](p-pgsql.md#保护机制)。当Pigsty发现目标节点上已经有正在运行的Postgres实例，会根据参数 [`pg_exists_action`](v-pgsql.md#pg_exists_action) 来采取不同的行为： `abort` 意味着整个剧本的执行会立即中止。 `clean` 则会强制关停删除现有实例，请谨慎使用此参数。
+当目标节点的PostgreSQL服务已经存在时，[`pgsql.yml`](p-pgsql.md#pgsql) 会根据 [`pg_clean`](v-pgsql.md#pgsql_clean) 参数采取行动，如果为真，那么在初始化过程中现有的PostgreSQL实例会被抹除。
 
-此外，若参数 [`pg_disable_purge`](v-pgsql.md#pg_disable_purge) 为真，则 [`pg_exists_action`](v-pgsql.md#pg_exists_action) 将会强制配置为 `abort`，以免误删数据库实例。
+Pigsty也提供了相应的[保护机制](p-pgsql.md#保护机制) 参数： [`pg_safeguard`](v-pgsql.md#pgsql_safeguard)
 
 您可以在配置文件 `pigsty.yml` 中修改这些参数，也可以直接在执行剧本时，通过额外参数机制指定：
 
 ```bash
-./pgsql.yml -e pg_exists_action=clean
+./pgsql.yml -e pg_clean=true
 ```
 
 

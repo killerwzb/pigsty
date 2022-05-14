@@ -21,27 +21,12 @@
 
     # - launch - #
     - name: Launch meta dnsmasq service
+      when: nameserver_enabled|bool
       systemd: name=dnsmasq state=restarted enabled=yes daemon_reload=yes
 
     # - wait - #
     - name: Wait for meta dnsmasq online
+      when: nameserver_enabled|bool
       wait_for: host=localhost port=53 state=started
-
-
-#------------------------------------------------------------------------------
-# Register Dnsmasq Service
-#------------------------------------------------------------------------------
-- name: Register dnsmasq service
-  tags: nameserver
-  when: service_registry == 'consul'
-  ignore_errors: true
-  block:
-    # - register - #
-    - name: Register consul dnsmasq service
-      template: src=svc-dnsmasq.json.j2 dest=/etc/consul.d/svc-dnsmasq.json owner=consul mode=0660
-
-    # - reload - #
-    - name: Reload consul
-      systemd: name=consul state=reloaded enabled=yes daemon_reload=yes
 
 ...

@@ -15,9 +15,9 @@ How to prepare the resources required for Pigsty deployment.
 
 ## Node Provisioning
 
-Before deploying Pigsty, the user needs to prepare machine node resources with arbitrary [database nodes](c-arch.md#database-node), including at least one [meta node](c-arch.md#meta-node).
+Before deploying Pigsty, the user needs to prepare machine node resources with arbitrary [database nodes](c-nodes.md#node), including at least one [meta node](c-nodes.md#meta-node).
 
-The [nodes](c-arch.md#database-node) can use any nodes: bare metals, local VMs, cloud VMs, containers, etc...
+The [nodes](c-nodes.md#node) can use any nodes: bare metals, local VMs, cloud VMs, containers, etc...
 only if the following conditions are met:
 
 - [x] Processor architecture: x86_64
@@ -34,7 +34,7 @@ One node is sufficient if you are using Pigsty as a battery-included PostgreSQL 
 
 ## Meta Node Provisioning
 
-Pigsty requires [meta-nodes](c-nodes.md#meta-nodes) as the admin controller of the entire environment and provides [infra](c-infra.md#infrastructure) services.
+Pigsty requires [meta nodes](c-nodes.md#meta-node) as the admin controller of the entire environment and provides [infra](c-infra.md#infrastructure) services.
 
 The minimum number of **meta-nodes** is 1. Pigsty's infra is deployed as **replicas** on multiple meta nodes, except for DCS (Consul/Etcd), which exists as Quorum.
 
@@ -110,8 +110,8 @@ bash -c "$(curl -fsSL http://download.pigsty.cc/get)"  # get latest pigsty sourc
 You can also download the source tarball in other ways.
 
 ```bash
-# https://github.com/Vonng/pigsty/releases/download/v1.4.1/pigsty.tgz   # Github Release 
-# http://download.pigsty.cc/v1.4.1/pigsty.tgz                           # China CDN
+# https://github.com/Vonng/pigsty/releases/download/v1.5.0-beta/pigsty.tgz   # Github Release 
+# http://download.pigsty.cc/v1.5.0-beta/pigsty.tgz                           # China CDN
 # https://pan.baidu.com/s/1DZIa9X2jAxx69Zj-aRHoaw?pwd=8su9              # Baidu Cloud Download
 # git clone https://github.com/Vonng/pigsty                             # Get the latest code Master branch (not recommended)
 ```
@@ -134,8 +134,8 @@ The official offline package is made based on CentOS 7.8.2003 OS. Please refer t
 You can download the offline package in advance on the meta node where Pigsty is to be installed (just on a meta node to `/tmp/pkg.tgz`).
 
 ```bash
-curl https://github.com/Vonng/pigsty/releases/download/v1.4.1/pkg.tgz -o /tmp/pkg.tgz   # Github Release，Most authoritative  
-curl http://download.pigsty.cc/v1.4.1/pkg.tgz -o /tmp/pkg.tgz                      # Download with CDN in China
+curl https://github.com/Vonng/pigsty/releases/download/v1.5.0-beta/pkg.tgz -o /tmp/pkg.tgz   # Github Release，Most authoritative  
+curl http://download.pigsty.cc/v1.5.0-beta/pkg.tgz -o /tmp/pkg.tgz                      # Download with CDN in China
 ```
 
 Also, the [`download`](https://github.com/Vonng/pigsty/bl/master/download) script in the root of the pigsty project can be used to download offline packages.

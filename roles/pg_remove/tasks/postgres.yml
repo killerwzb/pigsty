@@ -35,20 +35,20 @@
     #---------------------------------------------
     - name: Remove follower postgres service from consul
       tags: consul_registry
-      when: service_registry == 'consul'
+      when: dcs_registry == 'consul'
       file:
         path: /etc/consul.d/svc-postgres.json
         state: absent
 
     - name: Remove follower patroni service from consul
       tags: consul_registry
-      when: service_registry == 'consul'
+      when: dcs_registry == 'consul'
       file:
         path: /etc/consul.d/svc-patroni.json
         state: absent
 
     - name: Reload follower consul to dereigster postgres & patroni
-      when: service_registry == 'consul'
+      when: dcs_registry == 'consul'
       systemd: name=consul state=reloaded
 
     #---------------------------------------------
@@ -63,8 +63,7 @@
     # in case of maintenance mode
     - name: Force follower postgres shutdown
       become_user: "{{ pg_dbsu }}"
-      shell: |
-        {{ pg_bin_dir }}/pg_ctl -D {{ pg_data }} stop -m immediate
+      shell: "{{ pg_bin_dir }}/pg_ctl -D {{ pg_data }} stop -m immediate; /bin/true"
 
 
 #------------------------------------------------------------------------------
@@ -81,20 +80,20 @@
     #---------------------------------------------
     - name: Remove leader postgres service from consul
       tags: consul_registry
-      when: service_registry == 'consul'
+      when: dcs_registry == 'consul'
       file:
         path: /etc/consul.d/svc-postgres.json
         state: absent
 
     - name: Remove leader patroni service from consul
       tags: consul_registry
-      when: service_registry == 'consul'
+      when: dcs_registry == 'consul'
       file:
         path: /etc/consul.d/svc-patroni.json
         state: absent
 
     - name: Reload leader consul to dereigster postgres & patroni
-      when: service_registry == 'consul'
+      when: dcs_registry == 'consul'
       systemd: name=consul state=reloaded
 
     #---------------------------------------------
@@ -109,11 +108,10 @@
     # in case of maintenance mode
     - name: Force leader postgres shutdown
       become_user: "{{ pg_dbsu }}"
-      shell: |
-        {{ pg_bin_dir }}/pg_ctl -D {{ pg_data }} stop -m immediate
+      shell: "{{ pg_bin_dir }}/pg_ctl -D {{ pg_data }} stop -m immediate; /bin/true"
 
     # when cleanup primary, remove pgsql cluster meta data
     - name: Remove consul metadata about pgsql cluster
-      shell: |
-        consul kv delete -recurse {{ pg_namespace }}/{{ pg_cluster }}
+      shell: "consul kv delete -recurse {{ pg_namespace }}/{{ pg_cluster }}; /bin/true"
+
 ...

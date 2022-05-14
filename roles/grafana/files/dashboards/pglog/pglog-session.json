@@ -3,7 +3,10 @@
         "list": [
             {
                 "builtIn": 1,
-                "datasource": "-- Grafana --",
+                "datasource": {
+                    "type": "datasource",
+                    "uid": "grafana"
+                },
                 "enable": true,
                 "hide": true,
                 "iconColor": "rgba(0, 211, 255, 1)",
@@ -18,7 +21,10 @@
                 "type": "dashboard"
             },
             {
-                "datasource": "Meta",
+                "datasource": {
+                    "type": "postgres",
+                    "uid": "ds-meta"
+                },
                 "enable": true,
                 "expr": "ALERTS",
                 "hide": false,
@@ -39,7 +45,7 @@
     "fiscalYearStartMonth": 0,
     "graphTooltip": 0,
     "id": null,
-    "iteration": 1648344441238,
+    "iteration": 1652398533537,
     "links": [
         {
             "asDropdown": false,
@@ -71,7 +77,6 @@
             "includeVars": true,
             "keepTime": true,
             "tags": [
-                "Pigsty",
                 "PGLOG"
             ],
             "targetBlank": false,
@@ -84,6 +89,7 @@
     "liveNow": false,
     "panels": [
         {
+            "collapsed": false,
             "datasource": {
                 "type": "prometheus",
                 "uid": "${ds}"
@@ -95,6 +101,7 @@
                 "y": 0
             },
             "id": 27,
+            "panels": [],
             "title": "Overview",
             "type": "row"
         },
@@ -265,7 +272,8 @@
                     },
                     "custom": {
                         "align": "center",
-                        "displayMode": "auto"
+                        "displayMode": "auto",
+                        "inspect": false
                     },
                     "mappings": [],
                     "thresholds": {
@@ -301,6 +309,17 @@
                             {
                                 "id": "unit",
                                 "value": "string"
+                            },
+                            {
+                                "id": "custom.displayMode",
+                                "value": "color-background"
+                            },
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "#e3e3e3e0",
+                                    "mode": "fixed"
+                                }
                             }
                         ]
                     },
@@ -324,11 +343,11 @@
                                             "value": null
                                         },
                                         {
-                                            "color": "green",
+                                            "color": "#55a64bbf",
                                             "value": 1
                                         },
                                         {
-                                            "color": "yellow",
+                                            "color": "#ff780abf",
                                             "value": 10
                                         }
                                     ]
@@ -352,23 +371,23 @@
                                     "mode": "absolute",
                                     "steps": [
                                         {
-                                            "color": "green",
+                                            "color": "#55a64bbf",
                                             "value": null
                                         },
                                         {
-                                            "color": "yellow",
+                                            "color": "#f2cc0cbd",
                                             "value": 1
                                         },
                                         {
-                                            "color": "orange",
+                                            "color": "#ff780abf",
                                             "value": 2
                                         },
                                         {
-                                            "color": "red",
+                                            "color": "#e02f44bf",
                                             "value": 4
                                         },
                                         {
-                                            "color": "purple",
+                                            "color": "#a352ccbf",
                                             "value": 8
                                         }
                                     ]
@@ -376,7 +395,7 @@
                             },
                             {
                                 "id": "custom.displayMode",
-                                "value": "color-background-solid"
+                                "value": "color-background"
                             },
                             {
                                 "id": "custom.width",
@@ -409,7 +428,7 @@
                     }
                 ]
             },
-            "pluginVersion": "8.4.4",
+            "pluginVersion": "8.5.2",
             "targets": [
                 {
                     "format": "table",
@@ -746,7 +765,7 @@
                 },
                 "textMode": "auto"
             },
-            "pluginVersion": "8.4.4",
+            "pluginVersion": "8.5.2",
             "targets": [
                 {
                     "format": "table",
@@ -874,7 +893,8 @@
                     "custom": {
                         "align": "center",
                         "displayMode": "auto",
-                        "filterable": false
+                        "filterable": false,
+                        "inspect": false
                     },
                     "mappings": [],
                     "thresholds": {
@@ -1305,7 +1325,7 @@
                     }
                 ]
             },
-            "pluginVersion": "8.4.4",
+            "pluginVersion": "8.5.2",
             "targets": [
                 {
                     "format": "table",
@@ -1408,7 +1428,7 @@
         }
     ],
     "refresh": false,
-    "schemaVersion": 35,
+    "schemaVersion": 36,
     "style": "dark",
     "tags": [
         "APP",
@@ -1448,7 +1468,7 @@
                 "name": "sid",
                 "options": [
                     {
-                        "selected": true,
+                        "selected": false,
                         "text": "60f01952.988",
                         "value": "60f01952.988"
                     }
@@ -1502,7 +1522,7 @@
         ]
     },
     "time": {
-        "from": "now-3h",
+        "from": "now-24h",
         "to": "now"
     },
     "timepicker": {},

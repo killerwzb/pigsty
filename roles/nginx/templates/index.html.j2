@@ -21,13 +21,9 @@
         </li>
         <li><p>Docs</p>
             <ul>
-{% if docs_enabled %}
                 <li><a href="/docs" title="Grafana">Local Document</a></li>
-{% endif %}
                 <li><a href="https://pigsty.cc/" title="Consul">Online Document</a></li>
-{% if docs_enabled %}
                 <li><a href="/docs/#/zh-cn/" title="Grafana">本地中文文档</a></li>
-{% endif %}
                 <li><a href="https://pigsty.cc/#/zh-cn/" title="Prometheus">在线中文文档</a></li>
             </ul>
         </li>
@@ -35,7 +31,7 @@
             <ul>
 
 
-{% for app in app_list %}
+{% for app in nginx_indexes %}
     {% set app_url = app.url %}
     {% if '${grafana}' in app_url %}
         {% set app_url = app_url|replace('${grafana}', grafana_domain) %}
@@ -52,12 +48,6 @@
                 <li><a href="{{ grafana_domain }}" title="Grafana">Grafana</a></li>
                 <li><a href="{{ prometheus_domain }}" title="Prometheus">Prometheus</a></li>
                 <li><a href="{{ alertmanager_domain }}" title="Alert Manager">Alert Manager</a></li>
-{% if pgweb_domain %}
-                <li><a href="{{ pgweb_domain }}" title="PGWeb Console">PGWeb Console</a></li>
-{% endif %}
-{% if jupyter_domain %}
-                <li><a href="{{ jupyter_domain }}" title="Jupyter Laboratory">Jupyter Laboratory</a></li>
-{% endif %}
             </ul>
         </li>
     </ul>
@@ -76,7 +66,7 @@
 <section class="cover show" style="background: linear-gradient(to left bottom, hsl(207, 100%, 85%) 0%,hsl(244, 100%, 85%) 100%)">
     <div class="mask"></div>
     <div class="cover-main"><a href="https://pigsty.cc"><p><img src="icon.svg" alt="logo"></p></a>
-        <h1 id="pigsty-101"><span>Pigsty <small>v1.4.1</small></span></h1>
+        <h1 id="pigsty-150"><span>Pigsty <small>v1.5.0</small></span></h1>
         <blockquote><p><b>Meta @ <code>{{ inventory_hostname }}</code></b></p></blockquote>
 
         <div align=center>
@@ -116,20 +106,6 @@
                     <td align="center"><a href="http://{{ alertmanager_endpoint }}"><code>{{ alertmanager_endpoint }}</code></a></td>
                     <td align="center"><a href="{{ alertmanager_domain }}"><code>{{ alertmanager_domain }}</code></a></td>
                 </tr>
-{% if pgweb_domain %}
-                <tr>
-                    <td align="center"><a href="{{ pgweb_domain }}"><code>PGWeb Console</code></a></td>
-                    <td align="center"><a href="http://{{ pgweb_endpoint }}"><code style="color: gray">{{ pgweb_endpoint }}</code></a></td>
-                    <td align="center"><a href="{{ pgweb_domain }}"><code>{{ pgweb_domain }}</code></a></td>
-                </tr>
-{% endif %}
-{% if jupyter_domain %}
-                <tr>
-                    <td align="center"><a href="{{ jupyter_domain }}"><code>Jupyter Laboratory</code></a></td>
-                    <td align="center"><a href="http://{{ jupyter_endpoint }}"><code style="color: gray">{{ jupyter_endpoint }}</code></a></td>
-                    <td align="center"><a href="{{ jupyter_domain }}"><code>{{ jupyter_domain }}</code></a></td>
-                </tr>
-{% endif %}
                 </tbody>
             </table>
         </div>

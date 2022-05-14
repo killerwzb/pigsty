@@ -18,7 +18,7 @@
 # Plugins Installation
 #------------------------------------------------------------------------------
 - import_tasks: plugins.yml
-  tags: grafana_plugins
+  tags: grafana_plugin_list
 
 #------------------------------------------------------------------------------
 # Config Grafana
@@ -30,20 +30,15 @@
 # Launch Grafana
 #------------------------------------------------------------------------------
 - import_tasks: launch.yml
+  when: grafana_enabled|bool
   tags: grafana_launch
 
 #------------------------------------------------------------------------------
-# Provision Pigsty
+# Provision Pigsty Dashboards
 #------------------------------------------------------------------------------
 - import_tasks: provision.yml
   ignore_errors: yes
+  when: grafana_enabled|bool
   tags: grafana_provision
-
-#------------------------------------------------------------------------------
-# Register Pigsty
-#------------------------------------------------------------------------------
-- import_tasks: register.yml
-  tags: grafana_register
-
 
 ...

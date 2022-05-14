@@ -1,10 +1,10 @@
 # Pigsty
 
-## Pigsty v1.4.1 Documentation
+## Pigsty v1.5.0 Documentation
 
 **Battery-Included Open-Source PostgreSQL Distribution**
 
-> Latest Version: [1.4.1](https://github.com/Vonng/pigsty/releases/tag/v1.4.1)  |  [Github Repo](https://github.com/Vonng/pigsty) | [Demo](http://demo.pigsty.cc)
+> Latest Version: [1.5.0-beta](https://github.com/Vonng/pigsty/releases/tag/v1.5.0-beta)  |  [Github Repo](https://github.com/Vonng/pigsty) | [Demo](http://demo.pigsty.cc)
 >
 > Documentation: [EN Docs](https://pigsty.cc/) | [中文文档](https://pigsty.cc/#/zh-cn/) | [Github Pages](https://vonng.github.io/pigsty/#/)
 
@@ -14,15 +14,64 @@
 
 [![](_media/WHAT_EN.svg)](s-feature.md)
 
-**Pigsty** is battery-included open-source database [distribution](s-feature.md#postgres-distribution), with the latest [PostgreSQL](https://www.postgresql.org/) kernel, [TimescaleDB](https://www.timescale.com), [PostGIS](https://postgis.net/), [Citus](https://www.citusdata.com/) & 100+ extensions, along with an entire [Infra](c-infra.md): Grafana, Prometheus, Loki, Ansible, [Docker](t-docker.md) to support your databases & [applications](s-feature.md#SaaS-Software). It also includes common tools for [data analysis](s-feature.md#data-analysis).
+**Pigsty** is battery-included open-source database [distribution](s-feature.md#postgresql-distribution), with the latest [PostgreSQL](https://www.postgresql.org/) kernel, [TimescaleDB](https://www.timescale.com), [PostGIS](https://postgis.net/), [Citus](https://www.citusdata.com/) & 100+ extensions, along with an entire [Infra](c-infra.md): Grafana, Prometheus, Loki, Ansible, [Docker](t-docker.md) to support your databases & [applications](s-feature.md#Versatile-Scenario). It also includes common tools for [data analysis](s-feature.md#data-analysis).
 
-Pigsty is a [monitoring](s-feature.md#ultimate-observability) & management [SRE Solution](s-feature.md#SRE-Solution). Which includes an unparalleled [monitoring](s-feature.md#Monitoring) system with ultimate observability, and [high-available](c-pgsql.md#High-Available) PostgreSQL with self-healing architecture. You can deploy various clusters & instances: [primary, replica](d-pgsql.md#m-s-replication), [standby](d-pgsql.md#Sync-Standby), [offline](d-pgsql.md#Offline-Replica), [delayed](d-pgsql.md#Delayed-Cluster), [cascade](d-pgsql.md#Cascade Instance), and even [Citus](d-pgsql.md#Citus-Deployment), [Redis](d-redis.md), and [Greenplum](d-matrixdb.md) clusters.
+Pigsty is a [monitoring](s-feature.md#ultimate-observability) & management [SRE Solution](s-feature.md#SRE-Solution). Which includes an unparalleled [monitoring](s-feature.md#Open-Source-RDS) system with ultimate observability, and [high-available](c-pgsql.md#High-Availability) PostgreSQL with self-healing architecture. You can deploy various clusters & instances: [primary, replica](d-pgsql.md#m-s-replication), [standby](d-pgsql.md#Sync-Standby), [offline](d-pgsql.md#Offline-Replica), [delayed](d-pgsql.md#Delayed-Cluster), [cascade](d-pgsql.md#Cascade-Instance), and even [Citus](d-pgsql.md#Citus-Deployment), [Redis](d-redis.md), and [Greenplum](d-matrixdb.md) clusters.
 
 Pigsty is a handy [toolbox](s-feature.md#developer-toolbox) for developers. It treats [**Database as Code**](s-feature.md#database-as-code), Infra as Data. You just [describe](v-config.md) what database you want, and pigsty will create it for you. You can download, install, deploy, scale, backup, migration with [one command](s-install.md).  It can be deployed [everywhere](s-feature.md#Ubiquitous-Deployment): a 10k+ core prod env or local 1C/2G VM, [cloud](d-sandbox.md#cloud-sandbox), or [on-premises](d-sandbox.md#local-sandbox).
 
-Pigsty is a [secure](s-feature.md#Safty) & [thrifty](s-feature.md#Thrifty) alternative to [Cloud RDS](s-feature.md#Open-Source-RDS)/PaaS. It can empower a single DEV/DBA to manage hundreds of databases clusters, with all data under your own control. It can [save](s-feature.md#thrifty) 50% - 80% cost compared to cloud RDS using ECS or on-premise deployment. And the software itself is completely [open-source](https://github.com/Vonng/Capslock/blob/master/LICENSE) & free!
+Pigsty is a [secure](s-feature.md#Safty-and-Thrifty) & [thrifty](s-feature.md#Safty-and-Thrifty) alternative to [Cloud RDS](s-feature.md#Open-Source-RDS)/PaaS. It can empower a single DEV/DBA to manage hundreds of databases clusters, with all data under your own control. It can [save](s-feature.md#Safty-and-Thrifty) 50% - 80% cost compared to cloud RDS using ECS or on-premise deployment. And the software itself is completely [open-source](https://github.com/Vonng/Capslock/blob/master/LICENSE) & free!
 
 Check [FEATURES](s-feature.md) for more detail.
+
+
+<details><summary>Distribution</summary>
+
+[![Distribution](docs/_media/DISTRIBUTION.gif)](docs/c-infra.md#Overview)
+
+</details>
+
+<details><summary>Observability</summary>
+
+[![Observability](docs/_media/overview-monitor.jpg)](http://demo.pigsty.cc)
+
+</details>
+
+<details><summary>High Availability</summary>
+
+[![High Availability](docs/_media/HA-PGSQL.svg)](docs/c-pgsql.md#High-Availability)
+
+</details>
+
+<details><summary>Architecture</summary>
+
+[![Architecture](docs/_media/ARCH.gif)](docs/c-arch.md)
+
+</details>
+
+<details><summary>Sandbox</summary>
+
+[![Sandbox](docs/_media/SANDBOX.gif)](docs/d-sandbox.md)
+
+</details>
+
+<details><summary>Provisioning</summary>
+
+[![Provisioning](docs/_media/PROVISION.gif)](docs/d-deploy.md)
+
+</details>
+
+<details><summary>User Interface</summary>
+
+[![User Interface](docs/_media/interface.jpg)](docs/s-install.md)
+
+</details>
+
+<details><summary>Application</summary>
+
+[![Application](docs/_media/overview-covid.jpg)](docs/t-application.md)
+
+</details>
 
 
 
@@ -49,8 +98,8 @@ Check [Installation](s-install.md) & [Demo](http://demo.pigsty.cc) for details.
 Pigsty source & software packages can be downloaded directly via `curl` in case of no Internet connection:
 
 ```bash
-curl -SL https://github.com/Vonng/pigsty/releases/download/v1.4.1/pkg.tgz -o /tmp/pkg.tgz
-curl -SL https://github.com/Vonng/pigsty/releases/download/v1.4.1/pigsty.tgz | gzip -d | tar -xC
+curl -SL https://github.com/Vonng/pigsty/releases/download/v1.5.0-beta/pkg.tgz -o /tmp/pkg.tgz
+curl -SL https://github.com/Vonng/pigsty/releases/download/v1.5.0-beta/pigsty.tgz | gzip -d | tar -xC ~
 ```
 
 </details>
@@ -91,12 +140,12 @@ You can deploy different types of databases & clusters with corresponding playbo
 
 * [`pgsql.yml`](p-pgsql.md#pgsql): Deploy HA PostgreSQL clusters.
 * [`redis.yml`](p-redis.md#redis): Deploy Redis clusters.
-* [`pgsql-matrix.yml`](p-pgsql.md#pgsql-matrix): Deploy matrixdb data warehouse (greenplum7).
+* [`pigsty-matrixdb.yml`](p-pgsql.md#pgsql-matrix): Deploy matrixdb data warehouse (greenplum7).
 
 ```bash
 ./pgsql.yml         -l pg-test      # init 1-primary & 2-replica pgsql cluster
 ./redis.yml         -l redis-test   # init redis cluster redis-test
-./pigsty-matrix.yml -l mx-*         # init MatrixDB cluster mx-mdw,mx-sdw .....
+./pigsty-matrixdb.yml -l mx-*         # init MatrixDB cluster mx-mdw,mx-sdw .....
 ```
 
 </details>

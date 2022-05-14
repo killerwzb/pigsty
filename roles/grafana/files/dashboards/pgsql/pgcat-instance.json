@@ -3,7 +3,10 @@
         "list": [
             {
                 "builtIn": 1,
-                "datasource": "-- Grafana --",
+                "datasource": {
+                    "type": "datasource",
+                    "uid": "grafana"
+                },
                 "enable": true,
                 "hide": true,
                 "iconColor": "rgba(0, 211, 255, 1)",
@@ -24,7 +27,7 @@
     "fiscalYearStartMonth": 0,
     "graphTooltip": 0,
     "id": null,
-    "iteration": 1646455745769,
+    "iteration": 1652178387579,
     "links": [
         {
             "asDropdown": true,
@@ -95,6 +98,10 @@
     "panels": [
         {
             "collapsed": false,
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${ds}"
+            },
             "gridPos": {
                 "h": 1,
                 "w": 24,
@@ -164,7 +171,7 @@
                 "text": {},
                 "textMode": "name"
             },
-            "pluginVersion": "8.4.2",
+            "pluginVersion": "8.5.2",
             "targets": [
                 {
                     "datasource": {
@@ -254,7 +261,7 @@
                 "text": {},
                 "textMode": "name"
             },
-            "pluginVersion": "8.4.2",
+            "pluginVersion": "8.5.2",
             "targets": [
                 {
                     "datasource": {
@@ -345,7 +352,7 @@
                 "text": {},
                 "textMode": "name"
             },
-            "pluginVersion": "8.4.2",
+            "pluginVersion": "8.5.2",
             "targets": [
                 {
                     "datasource": {
@@ -449,7 +456,7 @@
                 "text": {},
                 "textMode": "value"
             },
-            "pluginVersion": "8.4.2",
+            "pluginVersion": "8.5.2",
             "targets": [
                 {
                     "format": "table",
@@ -557,7 +564,7 @@
                 "text": {},
                 "textMode": "auto"
             },
-            "pluginVersion": "8.4.2",
+            "pluginVersion": "8.5.2",
             "targets": [
                 {
                     "format": "table",
@@ -591,6 +598,195 @@
         },
         {
             "datasource": {
+                "type": "postgres",
+                "uid": "${dsn}"
+            },
+            "description": "",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "links": [
+                        {
+                            "title": "PGSQL Cluster for ${cls}",
+                            "url": "/d/pgsql-cluster?var-cls=${cls}"
+                        }
+                    ],
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "text",
+                                "value": null
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 2,
+                "w": 4,
+                "x": 0,
+                "y": 3
+            },
+            "id": 156,
+            "links": [
+                {
+                    "title": "PGSQL Cluster : ${cls}",
+                    "url": "/d/pgsql-cluster?var-cls=${cls}"
+                }
+            ],
+            "options": {
+                "colorMode": "value",
+                "graphMode": "none",
+                "justifyMode": "center",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "/.*/",
+                    "values": false
+                },
+                "text": {},
+                "textMode": "value"
+            },
+            "pluginVersion": "8.5.2",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "postgres",
+                        "uid": "6os-dw_nk"
+                    },
+                    "format": "table",
+                    "group": [],
+                    "metricColumn": "none",
+                    "rawQuery": true,
+                    "rawSql": "select system_identifier FROM pg_control_system();",
+                    "refId": "A",
+                    "select": [
+                        [
+                            {
+                                "params": [
+                                    "value"
+                                ],
+                                "type": "column"
+                            }
+                        ]
+                    ],
+                    "timeColumn": "time",
+                    "where": [
+                        {
+                            "name": "$__timeFilter",
+                            "params": [],
+                            "type": "macro"
+                        }
+                    ]
+                }
+            ],
+            "title": "Cluster Identifier",
+            "transformations": [
+                {
+                    "id": "organize",
+                    "options": {
+                        "excludeByName": {
+                            "Time": true
+                        },
+                        "indexByName": {},
+                        "renameByName": {
+                            "Time": "",
+                            "Value": "${cls}"
+                        }
+                    }
+                }
+            ],
+            "type": "stat"
+        },
+        {
+            "datasource": {
+                "type": "postgres",
+                "uid": "${dsn}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "text",
+                                "value": null
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 2,
+                "w": 7,
+                "x": 4,
+                "y": 3
+            },
+            "id": 155,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "/.*/",
+                    "values": false
+                },
+                "textMode": "auto"
+            },
+            "pluginVersion": "8.5.2",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "postgres",
+                        "uid": "6os-dw_nk"
+                    },
+                    "format": "table",
+                    "group": [],
+                    "metricColumn": "none",
+                    "rawQuery": true,
+                    "rawSql": "select to_timestamp(((system_identifier>>32) & (2^32 -1)::bigint)) AS created FROM pg_control_system();",
+                    "refId": "A",
+                    "select": [
+                        [
+                            {
+                                "params": [
+                                    "value"
+                                ],
+                                "type": "column"
+                            }
+                        ]
+                    ],
+                    "timeColumn": "time",
+                    "where": [
+                        {
+                            "name": "$__timeFilter",
+                            "params": [],
+                            "type": "macro"
+                        }
+                    ]
+                }
+            ],
+            "title": "Cluster Created At",
+            "type": "stat"
+        },
+        {
+            "datasource": {
                 "uid": "${dsn}"
             },
             "fieldConfig": {
@@ -612,9 +808,9 @@
                 "overrides": []
             },
             "gridPos": {
-                "h": 7,
-                "w": 2,
-                "x": 0,
+                "h": 2,
+                "w": 13,
+                "x": 11,
                 "y": 3
             },
             "id": 53,
@@ -633,7 +829,7 @@
                 "text": {},
                 "textMode": "auto"
             },
-            "pluginVersion": "8.4.2",
+            "pluginVersion": "8.5.2",
             "targets": [
                 {
                     "format": "table",
@@ -705,7 +901,8 @@
                     },
                     "custom": {
                         "align": "center",
-                        "displayMode": "color-background"
+                        "displayMode": "color-background",
+                        "inspect": false
                     },
                     "mappings": [],
                     "thresholds": {
@@ -1297,9 +1494,9 @@
             },
             "gridPos": {
                 "h": 7,
-                "w": 22,
-                "x": 2,
-                "y": 3
+                "w": 24,
+                "x": 0,
+                "y": 5
             },
             "id": 57,
             "options": {
@@ -1318,7 +1515,7 @@
                     }
                 ]
             },
-            "pluginVersion": "8.4.2",
+            "pluginVersion": "8.5.2",
             "targets": [
                 {
                     "format": "table",
@@ -1435,482 +1632,492 @@
             "type": "table"
         },
         {
-            "collapsed": false,
+            "collapsed": true,
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${ds}"
+            },
             "gridPos": {
                 "h": 1,
                 "w": 24,
                 "x": 0,
-                "y": 10
+                "y": 12
             },
             "id": 94,
-            "panels": [],
+            "panels": [
+                {
+                    "datasource": {
+                        "uid": "${dsn}"
+                    },
+                    "description": "Roles of this database",
+                    "fieldConfig": {
+                        "defaults": {
+                            "color": {
+                                "fixedColor": "#e3e3e3e0",
+                                "mode": "fixed"
+                            },
+                            "custom": {
+                                "align": "center",
+                                "displayMode": "color-background",
+                                "inspect": false
+                            },
+                            "mappings": [],
+                            "thresholds": {
+                                "mode": "absolute",
+                                "steps": [
+                                    {
+                                        "color": "green",
+                                        "value": null
+                                    }
+                                ]
+                            }
+                        },
+                        "overrides": [
+                            {
+                                "matcher": {
+                                    "id": "byName",
+                                    "options": "ConnLimit"
+                                },
+                                "properties": [
+                                    {
+                                        "id": "custom.width",
+                                        "value": 85
+                                    },
+                                    {
+                                        "id": "custom.displayMode",
+                                        "value": "color-background"
+                                    },
+                                    {
+                                        "id": "color"
+                                    },
+                                    {
+                                        "id": "mappings",
+                                        "value": [
+                                            {
+                                                "options": {
+                                                    "-1": {
+                                                        "color": "blue",
+                                                        "index": 1,
+                                                        "text": "NO LIMIT"
+                                                    }
+                                                },
+                                                "type": "value"
+                                            },
+                                            {
+                                                "options": {
+                                                    "match": "null+nan",
+                                                    "result": {
+                                                        "color": "gray",
+                                                        "index": 0,
+                                                        "text": "N/A"
+                                                    }
+                                                },
+                                                "type": "special"
+                                            },
+                                            {
+                                                "options": {
+                                                    "from": 0,
+                                                    "result": {
+                                                        "color": "orange",
+                                                        "index": 2
+                                                    },
+                                                    "to": 99999999
+                                                },
+                                                "type": "range"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "matcher": {
+                                    "id": "byName",
+                                    "options": "Role"
+                                },
+                                "properties": [
+                                    {
+                                        "id": "custom.align",
+                                        "value": "center"
+                                    },
+                                    {
+                                        "id": "custom.displayMode",
+                                        "value": "color-background-solid"
+                                    },
+                                    {
+                                        "id": "color",
+                                        "value": {
+                                            "fixedColor": "text",
+                                            "mode": "palette-classic"
+                                        }
+                                    },
+                                    {
+                                        "id": "mappings",
+                                        "value": [
+                                            {
+                                                "options": {
+                                                    "dbuser_dba": {
+                                                        "color": "#E02F44",
+                                                        "index": 1
+                                                    },
+                                                    "dbuser_monitor": {
+                                                        "color": "super-light-orange",
+                                                        "index": 3
+                                                    },
+                                                    "postgres": {
+                                                        "color": "purple",
+                                                        "index": 0
+                                                    },
+                                                    "replicator": {
+                                                        "color": "orange",
+                                                        "index": 2
+                                                    }
+                                                },
+                                                "type": "value"
+                                            },
+                                            {
+                                                "options": {
+                                                    "pattern": "",
+                                                    "result": {
+                                                        "color": "blue",
+                                                        "index": 4,
+                                                        "text": "$1"
+                                                    }
+                                                },
+                                                "type": "regex"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "matcher": {
+                                    "id": "byName",
+                                    "options": "Login"
+                                },
+                                "properties": [
+                                    {
+                                        "id": "custom.width",
+                                        "value": 55
+                                    }
+                                ]
+                            },
+                            {
+                                "matcher": {
+                                    "id": "byName",
+                                    "options": "Inherit"
+                                },
+                                "properties": [
+                                    {
+                                        "id": "custom.width",
+                                        "value": 70
+                                    }
+                                ]
+                            },
+                            {
+                                "matcher": {
+                                    "id": "byName",
+                                    "options": "Superuser"
+                                },
+                                "properties": [
+                                    {
+                                        "id": "custom.width",
+                                        "value": 85
+                                    }
+                                ]
+                            },
+                            {
+                                "matcher": {
+                                    "id": "byName",
+                                    "options": "Replication"
+                                },
+                                "properties": [
+                                    {
+                                        "id": "custom.width",
+                                        "value": 88
+                                    }
+                                ]
+                            },
+                            {
+                                "matcher": {
+                                    "id": "byName",
+                                    "options": "BypassRLS"
+                                },
+                                "properties": [
+                                    {
+                                        "id": "custom.width",
+                                        "value": 88
+                                    }
+                                ]
+                            },
+                            {
+                                "matcher": {
+                                    "id": "byName",
+                                    "options": "CreateRole"
+                                },
+                                "properties": [
+                                    {
+                                        "id": "custom.width",
+                                        "value": 90
+                                    }
+                                ]
+                            },
+                            {
+                                "matcher": {
+                                    "id": "byName",
+                                    "options": "CreateDB"
+                                },
+                                "properties": [
+                                    {
+                                        "id": "custom.width",
+                                        "value": 80
+                                    }
+                                ]
+                            },
+                            {
+                                "matcher": {
+                                    "id": "byName",
+                                    "options": "ExpireAt"
+                                },
+                                "properties": [
+                                    {
+                                        "id": "custom.width",
+                                        "value": 86
+                                    }
+                                ]
+                            },
+                            {
+                                "matcher": {
+                                    "id": "byType",
+                                    "options": "boolean"
+                                },
+                                "properties": [
+                                    {
+                                        "id": "custom.displayMode",
+                                        "value": "color-background-solid"
+                                    },
+                                    {
+                                        "id": "mappings",
+                                        "value": [
+                                            {
+                                                "options": {
+                                                    "false": {
+                                                        "color": "blue",
+                                                        "index": 0,
+                                                        "text": "F"
+                                                    },
+                                                    "true": {
+                                                        "color": "orange",
+                                                        "index": 1,
+                                                        "text": "T"
+                                                    }
+                                                },
+                                                "type": "value"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "matcher": {
+                                    "id": "byName",
+                                    "options": "ExpireAt"
+                                },
+                                "properties": [
+                                    {
+                                        "id": "unit",
+                                        "value": "dateTimeFromNow"
+                                    },
+                                    {
+                                        "id": "custom.width",
+                                        "value": 90
+                                    }
+                                ]
+                            },
+                            {
+                                "matcher": {
+                                    "id": "byName",
+                                    "options": "OID"
+                                },
+                                "properties": [
+                                    {
+                                        "id": "custom.width",
+                                        "value": 80
+                                    },
+                                    {
+                                        "id": "custom.displayMode",
+                                        "value": "color-background-solid"
+                                    },
+                                    {
+                                        "id": "color",
+                                        "value": {
+                                            "fixedColor": "blue",
+                                            "mode": "fixed"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "gridPos": {
+                        "h": 8,
+                        "w": 24,
+                        "x": 0,
+                        "y": 13
+                    },
+                    "id": 84,
+                    "options": {
+                        "footer": {
+                            "fields": "",
+                            "reducer": [
+                                "sum"
+                            ],
+                            "show": false
+                        },
+                        "showHeader": true,
+                        "sortBy": [
+                            {
+                                "desc": true,
+                                "displayName": "ExpireAt"
+                            }
+                        ]
+                    },
+                    "pluginVersion": "8.5.2",
+                    "targets": [
+                        {
+                            "format": "table",
+                            "group": [],
+                            "metricColumn": "none",
+                            "rawQuery": true,
+                            "rawSql": "SELECT r.oid, r.rolname, r.rolsuper, r.rolinherit,\n       r.rolcreaterole, r.rolcreatedb, r.rolcanlogin,\n       r.rolconnlimit, r.rolvaliduntil,\n       ARRAY(SELECT b.rolname\n             FROM pg_catalog.pg_auth_members m\n                      JOIN pg_catalog.pg_roles b ON (m.roleid = b.oid)\n             WHERE m.member = r.oid) as memberof\n        , pg_catalog.shobj_description(r.oid, 'pg_authid') AS description\n        , r.rolreplication\n        , r.rolbypassrls\nFROM pg_catalog.pg_roles r\nWHERE r.rolname !~ '^pg_'\nORDER BY 1;",
+                            "refId": "A",
+                            "select": [
+                                [
+                                    {
+                                        "params": [
+                                            "value"
+                                        ],
+                                        "type": "column"
+                                    }
+                                ]
+                            ],
+                            "timeColumn": "time",
+                            "where": [
+                                {
+                                    "name": "$__timeFilter",
+                                    "params": [],
+                                    "type": "macro"
+                                }
+                            ]
+                        }
+                    ],
+                    "transformations": [
+                        {
+                            "id": "seriesToColumns",
+                            "options": {
+                                "byField": "datname"
+                            }
+                        },
+                        {
+                            "id": "organize",
+                            "options": {
+                                "excludeByName": {
+                                    "Time 1": true,
+                                    "Time 10": true,
+                                    "Time 2": true,
+                                    "Time 3": true,
+                                    "Time 4": true,
+                                    "Time 5": true,
+                                    "Time 6": true,
+                                    "Time 7": true,
+                                    "Time 8": true,
+                                    "Time 9": true,
+                                    "acl": true,
+                                    "datcollate": true,
+                                    "datctype": true,
+                                    "datfrozenxid": true,
+                                    "description": true,
+                                    "encoding": true,
+                                    "tablespace": true
+                                },
+                                "indexByName": {
+                                    "description": 12,
+                                    "memberof": 11,
+                                    "oid": 1,
+                                    "rolbypassrls": 6,
+                                    "rolcanlogin": 2,
+                                    "rolconnlimit": 9,
+                                    "rolcreatedb": 8,
+                                    "rolcreaterole": 7,
+                                    "rolinherit": 3,
+                                    "rolname": 0,
+                                    "rolreplication": 5,
+                                    "rolsuper": 4,
+                                    "rolvaliduntil": 10
+                                },
+                                "renameByName": {
+                                    "Time 1": "",
+                                    "Time 7": "",
+                                    "Value #A": "Size",
+                                    "Value #B": "Age",
+                                    "Value #C": "Status",
+                                    "Value #D": "Session",
+                                    "Value #E": "TPS",
+                                    "Value #F": "ConnLimit",
+                                    "Value #G": "Reserve",
+                                    "Value #H": "Current",
+                                    "Value #I": "Disable",
+                                    "Value #J": "Pause",
+                                    "acl": "Privileges",
+                                    "age": "Age",
+                                    "datallowconn": "Conn",
+                                    "datcollate": "Collate",
+                                    "datconnlimit": "ConnLimit",
+                                    "datctype": "Ctype",
+                                    "datfrozenxid": "FronzenXID",
+                                    "datistemplate": "Tmpl",
+                                    "datname": "Database",
+                                    "description": "Description",
+                                    "encoding": "Encoding",
+                                    "host": "Target",
+                                    "memberof": "Groups",
+                                    "oid": "OID",
+                                    "owner": "Owner",
+                                    "real_datname": "Datname",
+                                    "rolbypassrls": "BypassRLS",
+                                    "rolcanlogin": "Login",
+                                    "rolconnlimit": "ConnLimit",
+                                    "rolcreatedb": "CreateDB",
+                                    "rolcreaterole": "CreateRole",
+                                    "rolinherit": "Inherit",
+                                    "rolname": "Role",
+                                    "rolreplication": "Replication",
+                                    "rolsuper": "Superuser",
+                                    "rolvaliduntil": "ExpireAt",
+                                    "sessions": "Session",
+                                    "size": "Size",
+                                    "status": "Status",
+                                    "tablespace": "Tablespace"
+                                }
+                            }
+                        }
+                    ],
+                    "type": "table"
+                }
+            ],
             "title": "Role",
             "type": "row"
         },
         {
-            "datasource": {
-                "uid": "${dsn}"
-            },
-            "description": "Roles of this database",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "fixedColor": "#e3e3e3e0",
-                        "mode": "fixed"
-                    },
-                    "custom": {
-                        "align": "center",
-                        "displayMode": "color-background"
-                    },
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            }
-                        ]
-                    }
-                },
-                "overrides": [
-                    {
-                        "matcher": {
-                            "id": "byName",
-                            "options": "ConnLimit"
-                        },
-                        "properties": [
-                            {
-                                "id": "custom.width",
-                                "value": 85
-                            },
-                            {
-                                "id": "custom.displayMode",
-                                "value": "color-background"
-                            },
-                            {
-                                "id": "color"
-                            },
-                            {
-                                "id": "mappings",
-                                "value": [
-                                    {
-                                        "options": {
-                                            "-1": {
-                                                "color": "blue",
-                                                "index": 1,
-                                                "text": "NO LIMIT"
-                                            }
-                                        },
-                                        "type": "value"
-                                    },
-                                    {
-                                        "options": {
-                                            "match": "null+nan",
-                                            "result": {
-                                                "color": "gray",
-                                                "index": 0,
-                                                "text": "N/A"
-                                            }
-                                        },
-                                        "type": "special"
-                                    },
-                                    {
-                                        "options": {
-                                            "from": 0,
-                                            "result": {
-                                                "color": "orange",
-                                                "index": 2
-                                            },
-                                            "to": 99999999
-                                        },
-                                        "type": "range"
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        "matcher": {
-                            "id": "byName",
-                            "options": "Role"
-                        },
-                        "properties": [
-                            {
-                                "id": "custom.align",
-                                "value": "center"
-                            },
-                            {
-                                "id": "custom.displayMode",
-                                "value": "color-background-solid"
-                            },
-                            {
-                                "id": "color",
-                                "value": {
-                                    "fixedColor": "text",
-                                    "mode": "palette-classic"
-                                }
-                            },
-                            {
-                                "id": "mappings",
-                                "value": [
-                                    {
-                                        "options": {
-                                            "dbuser_dba": {
-                                                "color": "#E02F44",
-                                                "index": 1
-                                            },
-                                            "dbuser_monitor": {
-                                                "color": "super-light-orange",
-                                                "index": 3
-                                            },
-                                            "postgres": {
-                                                "color": "purple",
-                                                "index": 0
-                                            },
-                                            "replicator": {
-                                                "color": "orange",
-                                                "index": 2
-                                            }
-                                        },
-                                        "type": "value"
-                                    },
-                                    {
-                                        "options": {
-                                            "pattern": "",
-                                            "result": {
-                                                "color": "blue",
-                                                "index": 4,
-                                                "text": "$1"
-                                            }
-                                        },
-                                        "type": "regex"
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        "matcher": {
-                            "id": "byName",
-                            "options": "Login"
-                        },
-                        "properties": [
-                            {
-                                "id": "custom.width",
-                                "value": 55
-                            }
-                        ]
-                    },
-                    {
-                        "matcher": {
-                            "id": "byName",
-                            "options": "Inherit"
-                        },
-                        "properties": [
-                            {
-                                "id": "custom.width",
-                                "value": 70
-                            }
-                        ]
-                    },
-                    {
-                        "matcher": {
-                            "id": "byName",
-                            "options": "Superuser"
-                        },
-                        "properties": [
-                            {
-                                "id": "custom.width",
-                                "value": 85
-                            }
-                        ]
-                    },
-                    {
-                        "matcher": {
-                            "id": "byName",
-                            "options": "Replication"
-                        },
-                        "properties": [
-                            {
-                                "id": "custom.width",
-                                "value": 88
-                            }
-                        ]
-                    },
-                    {
-                        "matcher": {
-                            "id": "byName",
-                            "options": "BypassRLS"
-                        },
-                        "properties": [
-                            {
-                                "id": "custom.width",
-                                "value": 88
-                            }
-                        ]
-                    },
-                    {
-                        "matcher": {
-                            "id": "byName",
-                            "options": "CreateRole"
-                        },
-                        "properties": [
-                            {
-                                "id": "custom.width",
-                                "value": 90
-                            }
-                        ]
-                    },
-                    {
-                        "matcher": {
-                            "id": "byName",
-                            "options": "CreateDB"
-                        },
-                        "properties": [
-                            {
-                                "id": "custom.width",
-                                "value": 80
-                            }
-                        ]
-                    },
-                    {
-                        "matcher": {
-                            "id": "byName",
-                            "options": "ExpireAt"
-                        },
-                        "properties": [
-                            {
-                                "id": "custom.width",
-                                "value": 86
-                            }
-                        ]
-                    },
-                    {
-                        "matcher": {
-                            "id": "byType",
-                            "options": "boolean"
-                        },
-                        "properties": [
-                            {
-                                "id": "custom.displayMode",
-                                "value": "color-background-solid"
-                            },
-                            {
-                                "id": "mappings",
-                                "value": [
-                                    {
-                                        "options": {
-                                            "false": {
-                                                "color": "blue",
-                                                "index": 0,
-                                                "text": "F"
-                                            },
-                                            "true": {
-                                                "color": "orange",
-                                                "index": 1,
-                                                "text": "T"
-                                            }
-                                        },
-                                        "type": "value"
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        "matcher": {
-                            "id": "byName",
-                            "options": "ExpireAt"
-                        },
-                        "properties": [
-                            {
-                                "id": "unit",
-                                "value": "dateTimeFromNow"
-                            },
-                            {
-                                "id": "custom.width",
-                                "value": 90
-                            }
-                        ]
-                    },
-                    {
-                        "matcher": {
-                            "id": "byName",
-                            "options": "OID"
-                        },
-                        "properties": [
-                            {
-                                "id": "custom.width",
-                                "value": 80
-                            },
-                            {
-                                "id": "custom.displayMode",
-                                "value": "color-background-solid"
-                            },
-                            {
-                                "id": "color",
-                                "value": {
-                                    "fixedColor": "blue",
-                                    "mode": "fixed"
-                                }
-                            }
-                        ]
-                    }
-                ]
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 24,
-                "x": 0,
-                "y": 11
-            },
-            "id": 84,
-            "options": {
-                "footer": {
-                    "fields": "",
-                    "reducer": [
-                        "sum"
-                    ],
-                    "show": false
-                },
-                "showHeader": true,
-                "sortBy": [
-                    {
-                        "desc": true,
-                        "displayName": "ExpireAt"
-                    }
-                ]
-            },
-            "pluginVersion": "8.4.2",
-            "targets": [
-                {
-                    "format": "table",
-                    "group": [],
-                    "metricColumn": "none",
-                    "rawQuery": true,
-                    "rawSql": "SELECT r.oid, r.rolname, r.rolsuper, r.rolinherit,\n       r.rolcreaterole, r.rolcreatedb, r.rolcanlogin,\n       r.rolconnlimit, r.rolvaliduntil,\n       ARRAY(SELECT b.rolname\n             FROM pg_catalog.pg_auth_members m\n                      JOIN pg_catalog.pg_roles b ON (m.roleid = b.oid)\n             WHERE m.member = r.oid) as memberof\n        , pg_catalog.shobj_description(r.oid, 'pg_authid') AS description\n        , r.rolreplication\n        , r.rolbypassrls\nFROM pg_catalog.pg_roles r\nWHERE r.rolname !~ '^pg_'\nORDER BY 1;",
-                    "refId": "A",
-                    "select": [
-                        [
-                            {
-                                "params": [
-                                    "value"
-                                ],
-                                "type": "column"
-                            }
-                        ]
-                    ],
-                    "timeColumn": "time",
-                    "where": [
-                        {
-                            "name": "$__timeFilter",
-                            "params": [],
-                            "type": "macro"
-                        }
-                    ]
-                }
-            ],
-            "transformations": [
-                {
-                    "id": "seriesToColumns",
-                    "options": {
-                        "byField": "datname"
-                    }
-                },
-                {
-                    "id": "organize",
-                    "options": {
-                        "excludeByName": {
-                            "Time 1": true,
-                            "Time 10": true,
-                            "Time 2": true,
-                            "Time 3": true,
-                            "Time 4": true,
-                            "Time 5": true,
-                            "Time 6": true,
-                            "Time 7": true,
-                            "Time 8": true,
-                            "Time 9": true,
-                            "acl": true,
-                            "datcollate": true,
-                            "datctype": true,
-                            "datfrozenxid": true,
-                            "description": true,
-                            "encoding": true,
-                            "tablespace": true
-                        },
-                        "indexByName": {
-                            "description": 12,
-                            "memberof": 11,
-                            "oid": 1,
-                            "rolbypassrls": 6,
-                            "rolcanlogin": 2,
-                            "rolconnlimit": 9,
-                            "rolcreatedb": 8,
-                            "rolcreaterole": 7,
-                            "rolinherit": 3,
-                            "rolname": 0,
-                            "rolreplication": 5,
-                            "rolsuper": 4,
-                            "rolvaliduntil": 10
-                        },
-                        "renameByName": {
-                            "Time 1": "",
-                            "Time 7": "",
-                            "Value #A": "Size",
-                            "Value #B": "Age",
-                            "Value #C": "Status",
-                            "Value #D": "Session",
-                            "Value #E": "TPS",
-                            "Value #F": "ConnLimit",
-                            "Value #G": "Reserve",
-                            "Value #H": "Current",
-                            "Value #I": "Disable",
-                            "Value #J": "Pause",
-                            "acl": "Privileges",
-                            "age": "Age",
-                            "datallowconn": "Conn",
-                            "datcollate": "Collate",
-                            "datconnlimit": "ConnLimit",
-                            "datctype": "Ctype",
-                            "datfrozenxid": "FronzenXID",
-                            "datistemplate": "Tmpl",
-                            "datname": "Database",
-                            "description": "Description",
-                            "encoding": "Encoding",
-                            "host": "Target",
-                            "memberof": "Groups",
-                            "oid": "OID",
-                            "owner": "Owner",
-                            "real_datname": "Datname",
-                            "rolbypassrls": "BypassRLS",
-                            "rolcanlogin": "Login",
-                            "rolconnlimit": "ConnLimit",
-                            "rolcreatedb": "CreateDB",
-                            "rolcreaterole": "CreateRole",
-                            "rolinherit": "Inherit",
-                            "rolname": "Role",
-                            "rolreplication": "Replication",
-                            "rolsuper": "Superuser",
-                            "rolvaliduntil": "ExpireAt",
-                            "sessions": "Session",
-                            "size": "Size",
-                            "status": "Status",
-                            "tablespace": "Tablespace"
-                        }
-                    }
-                }
-            ],
-            "type": "table"
-        },
-        {
             "collapsed": true,
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${ds}"
+            },
             "gridPos": {
                 "h": 1,
                 "w": 24,
                 "x": 0,
-                "y": 19
+                "y": 13
             },
             "id": 96,
             "panels": [
@@ -1924,6 +2131,7 @@
                                 "align": "center",
                                 "displayMode": "auto",
                                 "filterable": false,
+                                "inspect": false,
                                 "width": 60
                             },
                             "mappings": [],
@@ -1931,7 +2139,8 @@
                                 "mode": "absolute",
                                 "steps": [
                                     {
-                                        "color": "green"
+                                        "color": "green",
+                                        "value": null
                                     },
                                     {
                                         "color": "super-light-green",
@@ -2029,7 +2238,8 @@
                                             "mode": "absolute",
                                             "steps": [
                                                 {
-                                                    "color": "#3275d9b8"
+                                                    "color": "#3275d9b8",
+                                                    "value": null
                                                 }
                                             ]
                                         }
@@ -2101,7 +2311,8 @@
                                             "mode": "absolute",
                                             "steps": [
                                                 {
-                                                    "color": "blue"
+                                                    "color": "blue",
+                                                    "value": null
                                                 }
                                             ]
                                         }
@@ -2174,7 +2385,8 @@
                                             "mode": "absolute",
                                             "steps": [
                                                 {
-                                                    "color": "light-blue"
+                                                    "color": "light-blue",
+                                                    "value": null
                                                 }
                                             ]
                                         }
@@ -2226,7 +2438,8 @@
                                             "mode": "absolute",
                                             "steps": [
                                                 {
-                                                    "color": "blue"
+                                                    "color": "blue",
+                                                    "value": null
                                                 }
                                             ]
                                         }
@@ -2278,7 +2491,8 @@
                                             "mode": "absolute",
                                             "steps": [
                                                 {
-                                                    "color": "#00000000"
+                                                    "color": "#00000000",
+                                                    "value": null
                                                 },
                                                 {
                                                     "color": "blue",
@@ -2380,7 +2594,8 @@
                                             "mode": "absolute",
                                             "steps": [
                                                 {
-                                                    "color": "#80808080"
+                                                    "color": "#80808080",
+                                                    "value": null
                                                 }
                                             ]
                                         }
@@ -2533,7 +2748,8 @@
                                             "mode": "absolute",
                                             "steps": [
                                                 {
-                                                    "color": "#e3e3e3e0"
+                                                    "color": "#e3e3e3e0",
+                                                    "value": null
                                                 }
                                             ]
                                         }
@@ -2575,7 +2791,8 @@
                                             "mode": "absolute",
                                             "steps": [
                                                 {
-                                                    "color": "#e3e3e3e0"
+                                                    "color": "#e3e3e3e0",
+                                                    "value": null
                                                 }
                                             ]
                                         }
@@ -2633,7 +2850,8 @@
                                             "mode": "absolute",
                                             "steps": [
                                                 {
-                                                    "color": "super-light-blue"
+                                                    "color": "super-light-blue",
+                                                    "value": null
                                                 },
                                                 {
                                                     "color": "light-blue",
@@ -2787,7 +3005,7 @@
                         "h": 13,
                         "w": 24,
                         "x": 0,
-                        "y": 20
+                        "y": 22
                     },
                     "id": 59,
                     "options": {
@@ -2806,7 +3024,7 @@
                             }
                         ]
                     },
-                    "pluginVersion": "8.4.2",
+                    "pluginVersion": "8.5.2",
                     "targets": [
                         {
                             "format": "table",
@@ -2920,11 +3138,15 @@
         },
         {
             "collapsed": true,
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${ds}"
+            },
             "gridPos": {
                 "h": 1,
                 "w": 24,
                 "x": 0,
-                "y": 20
+                "y": 14
             },
             "id": 153,
             "panels": [
@@ -3987,11 +4209,15 @@
         },
         {
             "collapsed": true,
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${ds}"
+            },
             "gridPos": {
                 "h": 1,
                 "w": 24,
                 "x": 0,
-                "y": 21
+                "y": 15
             },
             "id": 133,
             "panels": [
@@ -4613,11 +4839,15 @@
         },
         {
             "collapsed": true,
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${ds}"
+            },
             "gridPos": {
                 "h": 1,
                 "w": 24,
                 "x": 0,
-                "y": 22
+                "y": 16
             },
             "id": 90,
             "panels": [
@@ -4636,7 +4866,8 @@
                                 "mode": "absolute",
                                 "steps": [
                                     {
-                                        "color": "blue"
+                                        "color": "blue",
+                                        "value": null
                                     }
                                 ]
                             }
@@ -4647,7 +4878,7 @@
                         "h": 22,
                         "w": 6,
                         "x": 0,
-                        "y": 23
+                        "y": 38
                     },
                     "id": 130,
                     "links": [],
@@ -4666,7 +4897,7 @@
                         "text": {},
                         "textMode": "auto"
                     },
-                    "pluginVersion": "8.4.2",
+                    "pluginVersion": "8.5.2",
                     "targets": [
                         {
                             "format": "time_series",
@@ -4714,7 +4945,8 @@
                                 "mode": "absolute",
                                 "steps": [
                                     {
-                                        "color": "blue"
+                                        "color": "blue",
+                                        "value": null
                                     }
                                 ]
                             }
@@ -4725,7 +4957,7 @@
                         "h": 13,
                         "w": 6,
                         "x": 6,
-                        "y": 23
+                        "y": 38
                     },
                     "id": 131,
                     "links": [],
@@ -4744,7 +4976,7 @@
                         "text": {},
                         "textMode": "auto"
                     },
-                    "pluginVersion": "8.4.2",
+                    "pluginVersion": "8.5.2",
                     "targets": [
                         {
                             "format": "time_series",
@@ -4789,14 +5021,16 @@
                             },
                             "custom": {
                                 "align": "auto",
-                                "displayMode": "auto"
+                                "displayMode": "auto",
+                                "inspect": false
                             },
                             "mappings": [],
                             "thresholds": {
                                 "mode": "absolute",
                                 "steps": [
                                     {
-                                        "color": "orange"
+                                        "color": "orange",
+                                        "value": null
                                     }
                                 ]
                             }
@@ -4986,7 +5220,7 @@
                         "h": 22,
                         "w": 12,
                         "x": 12,
-                        "y": 23
+                        "y": 38
                     },
                     "id": 92,
                     "links": [],
@@ -5001,7 +5235,7 @@
                         "showHeader": true,
                         "sortBy": []
                     },
-                    "pluginVersion": "8.4.2",
+                    "pluginVersion": "8.5.2",
                     "targets": [
                         {
                             "format": "table",
@@ -5090,7 +5324,7 @@
                         "h": 9,
                         "w": 6,
                         "x": 6,
-                        "y": 36
+                        "y": 51
                     },
                     "id": 129,
                     "options": {
@@ -5165,7 +5399,7 @@
                         "h": 2,
                         "w": 24,
                         "x": 0,
-                        "y": 45
+                        "y": 60
                     },
                     "id": 134,
                     "links": [],
@@ -5222,11 +5456,15 @@
         },
         {
             "collapsed": true,
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${ds}"
+            },
             "gridPos": {
                 "h": 1,
                 "w": 24,
                 "x": 0,
-                "y": 23
+                "y": 17
             },
             "id": 98,
             "panels": [
@@ -6774,11 +7012,15 @@
         },
         {
             "collapsed": true,
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${ds}"
+            },
             "gridPos": {
                 "h": 1,
                 "w": 24,
                 "x": 0,
-                "y": 24
+                "y": 18
             },
             "id": 121,
             "panels": [
@@ -7326,11 +7568,15 @@
         },
         {
             "collapsed": true,
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${ds}"
+            },
             "gridPos": {
                 "h": 1,
                 "w": 24,
                 "x": 0,
-                "y": 25
+                "y": 19
             },
             "id": 115,
             "panels": [
@@ -7770,7 +8016,7 @@
         }
     ],
     "refresh": "",
-    "schemaVersion": 35,
+    "schemaVersion": 36,
     "style": "light",
     "tags": [
         "Pigsty",

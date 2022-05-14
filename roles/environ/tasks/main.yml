@@ -53,6 +53,7 @@
 - name: Setup postgres pass and service
   become: no
   tags: environ_pgpass
+  ignore_errors: true
   block:
     - name: Write default user credential to pgpass
       lineinfile: dest=~/.pgpass state=present create=yes mode=0600 line={{ item }}
@@ -68,6 +69,15 @@
         mode: '0600'
         src: pg_service.conf.j2
 
+    - name: Write servers.json to home dir
+      tags: pgserver
+      template:
+        dest: ~/.servers.json
+        mode: '0600'
+        src: servers.j2
+      vars:
+        servers_query: '[@.*][0][?pg_cluster && pg_cluster!=""].{pg_cluster: pg_cluster,pg_seq: pg_seq,pg_port: pg_port,pg_host: inventory_hostname,pg_admin_username:pg_admin_username,pg_admin_password: pg_admin_password}'
+
 
 #--------------------------------------------------------------#
 # Setup envrion_vars
@@ -75,6 +85,7 @@
 - name: Setup postgres pass and service
   become: no
   tags: environ_vars
+  ignore_errors: true
   block:
 
     # create ~/.pigsty bash file

@@ -3,7 +3,10 @@
         "list": [
             {
                 "builtIn": 1,
-                "datasource": "-- Grafana --",
+                "datasource": {
+                    "type": "datasource",
+                    "uid": "grafana"
+                },
                 "enable": true,
                 "hide": true,
                 "iconColor": "rgba(0, 211, 255, 1)",
@@ -18,13 +21,12 @@
             }
         ]
     },
-    "author": "Vonng (rh@vonng.com)",
     "description": "PostgreSQL Databases",
     "editable": true,
     "fiscalYearStartMonth": 0,
     "graphTooltip": 0,
     "id": null,
-    "iteration": 1647788705597,
+    "iteration": 1652412170194,
     "links": [
         {
             "asDropdown": true,
@@ -95,6 +97,10 @@
     "panels": [
         {
             "collapsed": false,
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${ds}"
+            },
             "gridPos": {
                 "h": 1,
                 "w": 24,
@@ -167,7 +173,7 @@
                 "text": {},
                 "textMode": "value_and_name"
             },
-            "pluginVersion": "8.4.4",
+            "pluginVersion": "8.5.2",
             "targets": [
                 {
                     "datasource": {
@@ -197,7 +203,8 @@
                     },
                     "custom": {
                         "align": "center",
-                        "displayMode": "color-background"
+                        "displayMode": "color-background",
+                        "inspect": false
                     },
                     "mappings": [],
                     "thresholds": {
@@ -1002,7 +1009,7 @@
                     }
                 ]
             },
-            "pluginVersion": "8.4.4",
+            "pluginVersion": "8.5.2",
             "targets": [
                 {
                     "datasource": {
@@ -1362,7 +1369,7 @@
                 },
                 "textMode": "value_and_name"
             },
-            "pluginVersion": "8.4.4",
+            "pluginVersion": "8.5.2",
             "targets": [
                 {
                     "datasource": {
@@ -1459,7 +1466,7 @@
                 },
                 "textMode": "value_and_name"
             },
-            "pluginVersion": "8.4.4",
+            "pluginVersion": "8.5.2",
             "targets": [
                 {
                     "datasource": {
@@ -1548,7 +1555,7 @@
                 },
                 "textMode": "value_and_name"
             },
-            "pluginVersion": "8.4.4",
+            "pluginVersion": "8.5.2",
             "targets": [
                 {
                     "datasource": {
@@ -1637,7 +1644,7 @@
                 },
                 "textMode": "value_and_name"
             },
-            "pluginVersion": "8.4.4",
+            "pluginVersion": "8.5.2",
             "targets": [
                 {
                     "datasource": {
@@ -1743,7 +1750,7 @@
                 },
                 "textMode": "value_and_name"
             },
-            "pluginVersion": "8.4.4",
+            "pluginVersion": "8.5.2",
             "targets": [
                 {
                     "datasource": {
@@ -1751,7 +1758,7 @@
                         "uid": "${ds}"
                     },
                     "exemplar": false,
-                    "expr": "sum(pgbouncer:db:query_time_rate1m{cls=\"$cls\",  datname=\"$datname\"}) \n/ sum(pgbouncer:db:query_rate1m{cls=\"$cls\",  datname=\"$datname\"})",
+                    "expr": "sum(pgbouncer:db:query_time_rate1m{cls=\"$cls\",  datname=\"$datname\"}) / sum(pgbouncer:db:query_rate1m{cls=\"$cls\",  datname=\"$datname\"})",
                     "interval": "",
                     "legendFormat": "Query RT",
                     "refId": "A"
@@ -1836,7 +1843,7 @@
                 },
                 "textMode": "value_and_name"
             },
-            "pluginVersion": "8.4.4",
+            "pluginVersion": "8.5.2",
             "targets": [
                 {
                     "datasource": {
@@ -1945,7 +1952,7 @@
                 },
                 "textMode": "value_and_name"
             },
-            "pluginVersion": "8.4.4",
+            "pluginVersion": "8.5.2",
             "targets": [
                 {
                     "datasource": {
@@ -2038,7 +2045,7 @@
                 },
                 "textMode": "value_and_name"
             },
-            "pluginVersion": "8.4.4",
+            "pluginVersion": "8.5.2",
             "targets": [
                 {
                     "datasource": {
@@ -2143,7 +2150,7 @@
                 },
                 "textMode": "value_and_name"
             },
-            "pluginVersion": "8.4.4",
+            "pluginVersion": "8.5.2",
             "targets": [
                 {
                     "datasource": {
@@ -2243,7 +2250,7 @@
                 },
                 "textMode": "value_and_name"
             },
-            "pluginVersion": "8.4.4",
+            "pluginVersion": "8.5.2",
             "targets": [
                 {
                     "datasource": {
@@ -2351,7 +2358,7 @@
                 },
                 "textMode": "value_and_name"
             },
-            "pluginVersion": "8.4.4",
+            "pluginVersion": "8.5.2",
             "targets": [
                 {
                     "datasource": {
@@ -2448,7 +2455,7 @@
                 },
                 "textMode": "value_and_name"
             },
-            "pluginVersion": "8.4.4",
+            "pluginVersion": "8.5.2",
             "targets": [
                 {
                     "datasource": {
@@ -2466,6 +2473,10 @@
         },
         {
             "collapsed": false,
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${ds}"
+            },
             "gridPos": {
                 "h": 1,
                 "w": 24,
@@ -3781,7 +3792,7 @@
                 },
                 "textMode": "auto"
             },
-            "pluginVersion": "8.4.4",
+            "pluginVersion": "8.5.2",
             "targets": [
                 {
                     "datasource": {
@@ -3799,6 +3810,10 @@
         },
         {
             "collapsed": false,
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${ds}"
+            },
             "gridPos": {
                 "h": 1,
                 "w": 24,
@@ -3822,7 +3837,8 @@
                     },
                     "custom": {
                         "align": "center",
-                        "displayMode": "auto"
+                        "displayMode": "auto",
+                        "inspect": false
                     },
                     "mappings": [],
                     "thresholds": {
@@ -4399,7 +4415,7 @@
                     }
                 ]
             },
-            "pluginVersion": "8.4.4",
+            "pluginVersion": "8.5.2",
             "targets": [
                 {
                     "datasource": {
@@ -4420,9 +4436,9 @@
                         "uid": "${ds}"
                     },
                     "exemplar": false,
-                    "expr": "max by (relname) (pg_class_relsize{cls=\"$cls\", datname=\"$datname\"})",
+                    "expr": "max by (relname) (pg_table_size_bytes{cls=\"$cls\", datname=\"$datname\"})",
                     "format": "table",
-                    "hide": true,
+                    "hide": false,
                     "instant": true,
                     "interval": "",
                     "legendFormat": "Table Size",
@@ -4563,7 +4579,7 @@
                             "Time 7": true,
                             "Time 8": true,
                             "Time 9": true,
-                            "Value #B": true,
+                            "Value #B": false,
                             "__name__": true,
                             "cls": true,
                             "datname": true,
@@ -4744,7 +4760,7 @@
                         "uid": "${ds}"
                     },
                     "exemplar": false,
-                    "expr": "max by (relname) (pg_class_relsize{cls=\"$cls\", datname=\"$datname\"})",
+                    "expr": "max by (relname) (pg_table_size_bytes{cls=\"$cls\", datname=\"$datname\"})",
                     "format": "table",
                     "instant": true,
                     "interval": "",
@@ -5001,6 +5017,10 @@
         },
         {
             "collapsed": false,
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${ds}"
+            },
             "gridPos": {
                 "h": 1,
                 "w": 24,
@@ -5022,7 +5042,8 @@
                     "custom": {
                         "align": "center",
                         "displayMode": "auto",
-                        "filterable": false
+                        "filterable": false,
+                        "inspect": false
                     },
                     "mappings": [],
                     "thresholds": {
@@ -5511,7 +5532,7 @@
                     }
                 ]
             },
-            "pluginVersion": "8.4.4",
+            "pluginVersion": "8.5.2",
             "targets": [
                 {
                     "datasource": {
@@ -5799,7 +5820,7 @@
                         "uid": "${ds}"
                     },
                     "exemplar": false,
-                    "expr": "increase(pg_query_exec_time{cls=\"$cls\", datname=\"$datname\"}[1h]) / 1000",
+                    "expr": "increase(pg_query_exec_time{cls=\"$cls\", datname=\"$datname\"}[1h])",
                     "format": "table",
                     "group": [],
                     "interval": "",
@@ -5835,7 +5856,7 @@
                         "uid": "${ds}"
                     },
                     "exemplar": false,
-                    "expr": "max by (query) (pg:query:rt_1m{cls=\"$cls\", datname=\"$datname\"}) / 1000",
+                    "expr": "max by (query) (pg:query:rt_1m{cls=\"$cls\", datname=\"$datname\"})",
                     "format": "table",
                     "group": [],
                     "hide": false,
@@ -6104,7 +6125,7 @@
         }
     ],
     "refresh": "",
-    "schemaVersion": 35,
+    "schemaVersion": 36,
     "style": "light",
     "tags": [
         "Pigsty",
@@ -6236,5 +6257,6 @@
     "title": "PGSQL Databases",
     "uid": "pgsql-databases",
     "version": 1,
-    "weekStart": ""
+    "weekStart": "",
+    "author": "Vonng (rh@vonng.com)"
 }

@@ -1,6 +1,6 @@
 # Migration Tutorial
 
-There's an auxiliary playbook [`pgsql-migration.yml`](p-pgsql.md#pgsql-migration) which provides a battery-included migration method based on logical replication. 
+An auxiliary playbook, [`pgsql-migration.yml`](p-pgsql.md#pgsql-migration), provides a battery-included migration method based on logical replication. 
 
 By filling in the information about the source and host clusters, the playbook will automatically create the scripts needed for the migration and simply execute them in sequence during the database migration.
 
@@ -23,16 +23,16 @@ remove-sub         # remove subscription from dst cluster
 
 ## Prepare
 
-### SRC & DST Clusters
+### SRC and DST Clusters
 
-Now suppose we want to migrate the `pg-meta` cluster in the sandbox (containing the Pigsty meta-database with the pgbench test tables) to the `pg-test` cluster.
+Suppose you want to migrate the `pg-meta` cluster in the sandbox (containing the Pigsty meta DB with the pgbench test tables) to the `pg-test` cluster.
 
 
 ```bash
 pg-meta-1	10.10.10.10  --> pg-test-1	10.10.10.11 (10.10.10.12,10.10.10.13)
 ```
 
-First, create a new empty target cluster `pg-test`, then edit the variables list in `pgsql-migration.yml` and fill in the relevant information (connection information for the host cluster's master library).
+First, create a new empty target cluster `pg-test`, then edit the variables list in `pgsql-migration.yml` and fill in the relevant information (connection information for the host cluster's primary).
 
 ```yaml
 #--------------------------------------------------------------#
@@ -73,43 +73,43 @@ Execute `pgsql-migration.yml`, which by default creates the `~/migration/pg-meta
 
 ## Manual Template
 
-[**Announcement**](#Announcement)
+**Announcement**
 
-* [Operation Notice](#Operation-Notice)
-* [Business Party Notification](#Business-Party-Notification)
+* Operation Notice
+* Business Party Notification
 
-[**Preparations**](#Preparations)
+**Preparations**
 
-* [ ] [Prepare source and host clusters](#Prepare-source-and-host-clusters)
-* [ ] [Repair Source HBA](#Repair-Source-HBA)
-* [ ] [Create Source Replication User](#Create-Source-Replication-User)
-* [ ] [External Resource Request](#External-Resource-Request)
-* [ ] [Create Cluster Profile](#Create-Cluster-Profile)
-* [ ] [Configure business users](#Configure-business-users)
-* [ ] [Configure business database](#-Configure-business-database)
-* [ ] [Configure business whitelist](#Configure-business-whitelist)
-* [ ] [Create business cluster](#Create-business-cluster)
-* [ ] [Fix Replication Identity](#Fix-Replication-Identity)
-* [ ] [Identify migration target](#Identify-migration-target)
-* [ ] [Generate schema synchronization command](#Generate-schema-synchronization-command)
-* [ ] [Generate serial number synchronization command](#Generate-serial-number-synchronization-command)
-* [ ] [Generate create publish command](#generate-create-publish-command)
-* [ ] [Generate create subscription command](#Generate-create-subscription-command)
-* [ ] [Generate progress check command](#generate-progress-check-command)
-* [ ] [Generate check command](#Generate-check-command)
+* [ ] Prepare source and host clusters
+* [ ] Repair Source HBA
+* [ ] Create Source Replication User
+* [ ] External Resource Request
+* [ ] Create Cluster Profile
+* [ ] Configure business users
+* [ ] Configure business database
+* [ ] Configure business whitelist
+* [ ] Create business cluster
+* [ ] Fix Replication Identity
+* [ ] Identify migration target
+* [ ] Generate schema synchronization command
+* [ ] Generate serial number synchronization command
+* [ ] Generate create publish command
+* [ ] Generate create subscription command
+* [ ] Generate progress check command
+* [ ] Generate check command
 
-[**Stock Migration**](#Stock-Migration)
+**Stock Migration**
 
-- [ ] [Synchronize database schema](#Synchronize-database-schema)
-- [ ] [Create publish at the source](#Create-publish-at-source)
-- [ ] [Create a subscription to host](#Create-subscription-on-host)
-- [ ] [Wait for logical replication synchronization](#Wait-for-logical-replication-synchronization)
+- [ ] Synchronize database schema
+- [ ] Create publish at the source
+- [ ] Create a subscription to host
+- [ ] Wait for logical replication sync
 
-[ **Switch moment**](#Switch-moment)
+**Switch moment**
 
-- [ ] [Ready to work](#Ready-to-work)
-- [ ] [Stop source write traffic](#Stop-source-write-traffic)
-- [ ] [Synchronize sequence numbers with other objects](#Synchronize-sequence-number-with-other-objects)
-- [ ] [Verify data consistency](#Synchronize-sequence-number-with-other-objects)
-- [ ] [Flow Switching](#Flow-Switching)
-- [ ] [Aftercare](#Aftercare)
+- [ ] Prepare
+- [ ] Stop source write traffic
+- [ ] Synchronize sequence numbers with other objects
+- [ ] Verify data consistency
+- [ ] Flow Switching
+- [ ] Aftercare

@@ -1,14 +1,14 @@
 #==============================================================#
 # File      :   Makefile
 # Ctime     :   2019-04-13
-# Mtime     :   2022-04-19
+# Mtime     :   2022-04-28
 # Desc      :   Makefile shortcuts
 # Path      :   Makefile
 # Copyright (C) 2018-2022 Ruohang Feng (rh@vonng.com)
 #==============================================================#
 
 # pigsty version
-VERSION?=v1.4.1
+VERSION?=v1.5.0-beta
 
 # target cluster (meta by default)
 CLS?=meta
@@ -121,7 +121,7 @@ infra:
 
 # reinit pgsql cmdb
 pgsql:
-	./infra.yml --tags=cmdb -e pg_exists_action=clean
+	./infra.yml --tags=cmdb -e pg_clean=clean
 
 # rebuild repo
 repo:
@@ -366,23 +366,26 @@ copy-src:
 	scp "dist/${VERSION}/pigsty.tgz" meta:~/pigsty.tgz
 copy-pkg:
 	scp dist/${VERSION}/pkg.tgz meta:/tmp/pkg.tgz
-copy-pkg2:
+copy-matrix:
 	scp dist/${VERSION}/matrix.tgz meta:/tmp/matrix.tgz
 copy-app:
 	scp dist/${VERSION}/app.tgz meta:~/app.tgz
 	ssh -t meta 'rm -rf ~/app; tar -xf app.tgz; rm -rf app.tgz'
+copy-docker:
+	scp dist/${VERSION}/docker.tgz meta:/tmp/docker.tgz
+load-docker:
+	ssh meta 'cat /tmp/docker.tgz | gzip -d -c - | docker load'
 copy-all: copy-src copy-pkg
 
 use-src:
 	ssh -t meta 'rm -rf ~/pigsty; tar -xf pigsty.tgz; rm -rf pigsty.tgz'
 use-pkg:
 	ssh meta '/home/vagrant/pigsty/configure --ip 10.10.10.10 --non-interactive --download -m demo'
-use-pkg2:
+use-matrix:
 	ssh meta 'sudo tar -xf /tmp/matrix.tgz -C /www'
 	scp files/matrix.repo meta:/tmp/matrix.repo
 	ssh meta sudo mv -f /tmp/matrix.repo /www/matrix.repo
 use-all: use-src use-pkg
-use-matrix: copy-pkg2 use-pkg2
 
 ###############################################################
 
@@ -402,11 +405,16 @@ release-pkg: cache
 	scp meta:/tmp/pkg.tgz dist/${VERSION}/pkg.tgz
 
 # release
-rp2: release-matrix-pkg
-release-matrix-pkg:
+rp2: release-matrix
+release-matrix:
 	#ssh meta 'sudo cp -r /www/matrix /tmp/matrix; sudo chmod -R a+r /www/matrix'
 	ssh meta sudo tar zcvf /tmp/matrix.tgz -C /www matrix
 	scp meta:/tmp/matrix.tgz dist/${VERSION}/matrix.tgz
+
+rp3: release-docker
+release-docker:
+	ssh meta 'docker save kong alpine registry dpage/pgadmin4 sosedoff/pgweb postgrest/postgrest swaggerapi/swagger-ui minio/minio bytebase/bytebase:1.0.5 vonng/pg_exporter | gzip -9 -c > /tmp/docker.tgz'
+	scp meta:/tmp/docker.tgz dist/${VERSION}/docker.tgz
 
 # publish will publish pigsty packages
 p: release publish
@@ -415,6 +423,9 @@ publish:
 
 # create pkg.tgz on initialized meta node
 cache:
+	tar -cf files/docs.tgz docs
+	scp files/docs.tgz meta:/tmp/docs.tgz
+	ssh meta 'sudo mv /tmp/docs.tgz /www/pigsty/docs.tgz'
 	scp bin/cache meta:/tmp/cache
 	ssh meta "sudo bash /tmp/cache"
 
@@ -434,6 +445,10 @@ d: doc
 doc:
 	bin/doc
 
+# make docs tarball
+docs:
+	tar -cf files/docs.tgz docs
+
 ###############################################################
 
 
@@ -451,7 +466,7 @@ doc:
         st status suspend resume s sync s4 sync4 ss \
         ri rc rw ro test-ri test-rw test-ro test-rw2 test-ro2 test-rc test-st test-rb1 test-rb2 test-rb3 \
         di dd dc dashboard-init dashboard-dump dashboard-clean \
-        copy copy2 copy-src copy-pkg copy-pkg2 copy-app copy-all use-src use-pkg use-pkg2 use-all  \
-        r releast rp release-pkg rp2 release-matrix-pkg p publish cache \
-        svg doc d
+        copy copy-src copy-pkg copy-matrix copy-app copy-docker load-docker copy-all use-src use-pkg use-matrix use-all \
+        r releast rp release-pkg rp2 release-matrix-rp3 release-docker pkg p publish cache \
+        svg doc d docs
 ###############################################################

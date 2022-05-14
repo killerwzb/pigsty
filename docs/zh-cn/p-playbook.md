@@ -26,7 +26,7 @@ Pigsty在底层通过 [Ansible Playbook](#Ansible快速上手) 实现核心管�
 |  [`pgsql-monly`](p-pgsql.md#pgsql-monly)            |        仅监控模式，接入现存PostgreSQL实例或RDS                       |        [`src`](https://github.com/vonng/pigsty/blob/master/pgsql-monly.yml)      |
 |  [`pgsql-migration`](p-pgsql.md#pgsql-migration)    |        生成PostgreSQL半自动数据库迁移方案（Beta）                     |        [`src`](https://github.com/vonng/pigsty/blob/master/pgsql-migration.yml)  |
 |  [`pgsql-audit`](p-pgsql.md#pgsql-audit)            |        生成PostgreSQL审计合规报告（Beta）                         |        [`src`](https://github.com/vonng/pigsty/blob/master/pgsql-audit.yml)      |
-|  [`pgsql-matrix`](p-pgsql.md#pgsql-matrix)          |        复用PG角色部署一套MatrixDB数据仓库集群（Beta）                   |        [`src`](https://github.com/vonng/pigsty/blob/master/pgsql-matrix.yml)     |
+|  [`pgsql-matrix`](p-pgsql.md#pgsql-matrix)          |        复用PG角色部署一套MatrixDB数据仓库集群（Beta）                   |        [`src`](https://github.com/vonng/pigsty/blob/master/pigsty-matrixdb.yml)     |
 |  [**redis**](p-redis.md#redis)                        |        **部署集群/主从/Sentinel模式的Redis数据库**              |        [`src`](https://github.com/vonng/pigsty/blob/master/redis.yml)            |
 |  [`redis-remove`](p-redis.md#redis-remove)          |        Redis集群/节点下线                                     |        [`src`](https://github.com/vonng/pigsty/blob/master/redis-remove.yml)     |
 
@@ -125,7 +125,7 @@ yum install ansible
 
 ```bash
 ./nodes.yml -e ansible_user=admin -k -K      # 在配置节点时，使用另一个管理员用户 admin，并输入ssh与sudo密码
-./pgsql.yml -e pg_exists_action=clean        # 在安装PG时，强制抹除已有运行中数据库实例（危险）
+./pgsql.yml -e pg_clean=clean        # 在安装PG时，强制抹除已有运行中数据库实例（危险）
 ./infra-remove.yml -e rm_metadata=true       # 在卸载Pigsty时，一并移除数据
 ./infra-remove.yml -e rm_metadpkgs=true      # 在卸载Pigsty时，一并卸载软件
 ./nodes-remove.yml -e rm_dcs_server=true     # 在移除节点时，即使上面有DCS Server也强制移除

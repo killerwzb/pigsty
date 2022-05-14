@@ -1,8 +1,8 @@
 # MatrixDB部署与监控
 
-> Pigsty可用于部署与监控MatrixDB（等效于Greenplum 7+时序数据库功能)
+> Pigsty可用于部署与监控MatrixDB（等于Greenplum 7+时序数据库)
 
-因为目前MatrixDB使用的是PostgreSQL 12的内核，而原生Greenplum仍然使用9.6内核，因此优先使用MatrixDB作为Greenplum实现，后续将添加原生的Greenplum支持。
+因为目前MatrixDB使用的是PostgreSQL 12的内核，而原生Greenplum仍然使用9.6内核，因此优先使用MatrixDB替代Greenplum实现，后续将添加原生的Greenplum支持。
 
 
 
@@ -26,12 +26,12 @@ MatrixDB在逻辑上由两部分组成，Master与Segments，两者均由Postgre
 ## 下载软件
 
 MatrixDB & Greenplum 的RPM包并不是标准Pigsty部署的一部分，因此不会放入默认的`pkg.tgz`中。
-MatrixDB & Greenplum 的RPM包及其完整依赖将打包为一个单独的离线软件包 [`matrix.tgz`](https://github.com/Vonng/pigsty/releases/download/v1.4.1/matrix.tgz)。
+MatrixDB & Greenplum 的RPM包及其完整依赖将打包为一个单独的离线软件包 [`matrix.tgz`](https://github.com/Vonng/pigsty/releases/download/v1.5.0-beta/matrix.tgz)。
 您可以向Pigsty元节点上添加新的`matrix`源。
 
 ```bash
-# 下载地址（Github）：https://github.com/Vonng/pigsty/releases/download/v1.4.1/matrix.tgz
-# 下载地址（China CDN）：http://download.pigsty.cc/v1.4.1/matrix.tgz
+# 下载地址（Github）：https://github.com/Vonng/pigsty/releases/download/v1.5.0-beta/matrix.tgz
+# 下载地址（China CDN）：http://download.pigsty.cc/v1.5.0-beta/matrix.tgz
 # 下载脚本，在元节点上，pigsty目录下，直接使用 download matrix 下载并解压
 ./download matrix
 ```
@@ -53,7 +53,7 @@ MatrixDB / Greenplum 的安装将复用 PGSQL 任务与配置，专属配置参�
 ./configure -m mxdb
 ```
 
-此配置文件中 [`node_local_repo_url`](v-nodes.md#node_local_repo_url)添加了新Yum源地址，`http://pigsty/matrix.repo` 确保所有节点都可以访问Matrix Repo。
+此配置文件中 [`node_repo_local_urls`](v-nodes.md#node_repo_local_urls)添加了新Yum源地址，`http://pigsty/matrix.repo` 确保所有节点都可以访问Matrix Repo。
 
 
 
@@ -70,10 +70,10 @@ MatrixDB / Greenplum 的安装将复用 PGSQL 任务与配置，专属配置参�
 ./nodes.yml
 
 # 在上述节点上安装MatrixDB
-./pigsty-matrix.yml
+./pigsty-matrixdb.yml
 ```
 
-安装完成后，您需要通过MatrixDB 提供的WEB UI完成接下来的安装。打开 [http://matrix.pigsty](http://matrix.pigsty) 或访问 http://10.10.10.10:8240，填入 `pgsql-matrix.yml` 最后输出的初始用户密码进入安装向导。 
+安装完成后，您需要通过MatrixDB 提供的WEB UI完成接下来的安装。打开 [http://mx.pigsty](http://mx.pigsty) 或访问 http://10.10.10.10:8240 ，填入 [`pigsty-matrixdb.yml`](p-pgsql.md#pgsql-matrix) 最后输出的初始用户密码进入安装向导。 
 
 按照提示依次添加MatrixDB的节点：10.10.10.11, 10.10.10.12, 10.10.10.13，点击确认安装并等待完成后，进行下一步。
 

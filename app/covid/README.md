@@ -5,23 +5,29 @@ This is an example of store, load, visualize WHO COVID-19 dataset.
 Usage: **Run this on meta node with admin user**
 
 
-```bash
-make ui          # install covid dashboards to grafana
-make sql         # install covid database schema to metadb 
-make download    # download history & latest csv data from WHO
-make load        # load history & latest covid csv data into database 
-```
-
-Or just use `make all` to setup all stuff for you.
+## Install
 
 ```bash
-make all   # setup everything
+make            # if local-data available
+make all        # if local-data not available, download from internet
 ```
 
-If data already download (e.g get applications via downloading app.tgz), run `make all2` instead to skip download.
+Subtasks:
+
+```bash
+make reload     # download latest data and pour it again
+make ui         # install grafana dashboards
+make sql        # install database schemas
+make download   # download latest data
+make load       # load downloaded data into database
+make reload     # download latest data and pour it into database
+```
 
 
-Demo: http://g.pigsty.cc/d/covid-overview
+## Dashboards
 
+* [Covid Overview](http://demo.pigsty.cc/d/covid-overview)
+* [Covid Country](http://demo.pigsty.cc/d/covid-country)
+* [Covid Timeline](http://demo.pigsty.cc/d/covid-timeline-map?var-data_type=new_cases)
 
 
