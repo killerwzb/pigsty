@@ -2,161 +2,94 @@
 ---
 #==============================================================#
 # File      :   infra.yml
+# Desc      :   init pigsty infrastructure on infra nodes
 # Ctime     :   2021-01-19
-# Mtime     :   2022-04-28
-# Desc      :   init infrastructure on pigsty meta nodes
+# Mtime     :   2023-02-20
 # Path      :   infra.yml
-# Copyright (C) 2018-2022 Ruohang Feng (rh@vonng.com)
+# Author    :   Ruohang Feng (rh@vonng.com)
+# License   :   AGPLv3
 #==============================================================#
 
-#---------------------------------------------------------------
-# setup meta node identity
-#---------------------------------------------------------------
-- name: Node Identity
+
+#--------------------------------------------------------------#
+# create CA on files/pki/ca @ localhost                     [ca]
+#--------------------------------------------------------------#
+- name: CA
   become: yes
-  hosts: meta
+  hosts: localhost
   gather_facts: no
-  tags: [ always, node-id ]
-  connection: local
-  tasks:
+  tags: ca
+  roles: [{ role: ca }]
 
-    # overwrite nodes identity with pgsql identity if pg_hostname is true
-    - name: Overwrite node_cluster
-      when: (pg_hostname is defined and pg_hostname|bool) and (node_cluster is not defined or node_cluster == 'nodes' or node_cluster == '') and (pg_cluster is defined and pg_cluster != '')
-      set_fact: { node_cluster: "{{ pg_cluster }}" }  # use pg_cluster as non-trivial node_cluster name
 
-    - name: Overwrite nodename
-      when: (pg_hostname is defined and pg_hostname|bool) and (nodename is not defined or nodename == '') and (pg_cluster is defined and pg_cluster != '' and pg_seq is defined)
-      set_fact: { nodename: "{{ pg_cluster }}-{{ pg_seq }}" }
-
-    - debug: { msg: "ins={{ nodename|default('NULL') }} cls={{ node_cluster|default('NULL') }}" }
-
-#---------------------------------------------------------------
-# bootstrap meta node with local yum repo
-#---------------------------------------------------------------
-- name: Infra Bootstrap
+#--------------------------------------------------------------#
+# install module `INFRA` and `NODE` on infra nodes
+#--------------------------------------------------------------#
+- name: INFRA
   become: yes
-  hosts: meta
+  hosts: infra
   gather_facts: no
-  tags: infra-boot
   roles:
-
-    - role: environ             # setup environment on meta nodes
-      tags: environ
-
-    - role: repo                # setup local yum repo on meta nodes
-      tags: repo                # you can disable repo on extra meta nodes with nginx_enabled: false
-      when: nginx_enabled|bool
-
-#---------------------------------------------------------------
-# pigsty meta nodes setup
-#---------------------------------------------------------------
-- name: Meta Node Init
-  become: yes
-  hosts: meta
-  gather_facts: no
-  tags: [ infra-node , node-init ]
-  roles:
-
-    - role: node            # init meta node itself
-      tags: [ node , node-init ]
-
-    - role: docker          # init docker if enabled
-      tags: docker
-      when: docker_enabled|bool
-
-    - role: consul          # init dcs:consul (servers)
-      tags: [ consul , dcs-init ]
+    # id
+    - { role: node_id        ,tags: id         }  # generate node & pgsql identity
+    # repo
+    - { role: repo           ,tags: repo       }  # create local yum repo
+    # node-init
+    - { role: node           ,tags: node       }  # prepare node for pigsty
+    - { role: haproxy        ,tags: haproxy    }  # init haproxy if enabled
+    # infra
+    - { role: infra          ,tags: infra      }  # setup infra components
+    # node-monitor
+    - { role: node_monitor   ,tags: monitor    }  # init node exporter & promtail
 
 
-#---------------------------------------------------------------
-# init infrastructure on meta nodes
-#---------------------------------------------------------------
-- name: Setup Infrastructure on meta nodes
-  become: yes
-  hosts: meta
-  gather_facts: no
-  tags: infra-svcs
-  roles:
-
-    - role: ca              # init ca-infrastructure
-      tags: ca
-
-    - role: nameserver    # init dns nameserver
-      tags: nameserver
-      # when: nameserver_enabled|bool
-
-    - role: nginx           # init nginx
-      tags: nginx
-      # when: nginx_enabled|bool
-
-    - role: prometheus      # init prometheus
-      tags: prometheus
-      # when: prometheus_enabled|bool
-
-    - role: grafana         # init grafana
-      tags: grafana
-      # when: grafana_enabled|bool
-
-    - role: loki            # init loki
-      tags: loki
-      # when: loki_enabled|bool
-
-    - role: infra_register
-      tags: infra_register
-
-
-#---------------------------------------------------------------
-# Meta Node Monitor
-#---------------------------------------------------------------
-- name: Meta Node Monitor
-  become: yes
-  hosts: meta
-  gather_facts: no
-  tags: node-monitor
-  roles:
-
-    # init & register node exporter
-    - role: node_exporter
-      tags: node-exporter
-      when: node_exporter_enabled|bool
-
-    # init & register promtail log agent
-    - role: promtail
-      tags: promtail
-      when: promtail_enabled|bool
-
-    # register node-exporter & docker to prometheus
-    - role: node_register
-      tags: node-register
-
-#---------------------------------------------------------------
-# init cmdb(s) on meta nodes
-#---------------------------------------------------------------
-- name: Meta PGSQL Init     # init pgsql cmdb on meta nodes
-  become: yes
-  hosts: meta
-  gather_facts: no
-  tags: [ infra-cmdb, pgsql-init ]
-  vars:
-    no_cmdb: false          # command line args (-e no_cmdb=true)
-  roles:
-
-    - role: postgres        # init postgres pgbouncer patroni
-      when: not no_cmdb|bool
-      tags: postgres
-
-    - role: service         # init service , haproxy , vip
-      when: not no_cmdb|bool
-      tags: service
-
-    - role: pg_exporter     # init monitor exporters
-      when: not no_cmdb|bool
-      tags: pg-exporter
-
-    - role: pg_register     # register cluster/instance to infra
-      when: not no_cmdb|bool
-      tags: pg-register
-
-#---------------------------------------------------------------
+#--------------------------------------------------------------#
+# Tasks
+#--------------------------------------------------------------#
+# ca            : create self-signed CA on localhost files/pki
+#   - ca_dir        : create CA directory
+#   - ca_private    : generate ca private key: files/pki/ca/ca.key
+#   - ca_cert       : signing ca cert: files/pki/ca/ca.crt
+#
+# id            : generate node identity
+#
+# repo          : bootstrap a local yum repo from internet or offline packages
+#   - repo_dir      : create repo directory
+#   - repo_check    : check repo exists
+#   - repo_prepare  : use existing repo if exists
+#   - repo_build    : build repo from upstream if not exists
+#     - repo_upstream    : handle upstream repo files in /etc/yum.repos.d
+#       - repo_remove    : remove existing repo file if repo_remove == true
+#       - repo_add       : add upstream repo files to /etc/yum.repos.d
+#     - repo_url_pkg     : download packages from internet defined by repo_url_packages
+#     - repo_cache       : make upstream yum cache with yum makecache
+#     - repo_boot_pkg    : install bootstrap pkg such as createrepo_c,yum-utils,...
+#     - repo_pkg         : download packages & dependencies from upstream repo
+#     - repo_create      : create a local yum repo with createrepo_c & modifyrepo_c
+#     - repo_use         : add newly built repo into /etc/yum.repos.d
+#   - repo_nginx    : launch a nginx for repo if no nginx is serving
+#
+# node/haproxy/docker/monitor : setup infra node as a common node (check node.yml)
+#   - node_name, node_hosts, node_resolv, node_firewall, node_ca, node_repo, node_pkg
+#   - node_feature, node_kernel, node_tune, node_sysctl, node_profile, node_ulimit
+#   - node_data, node_admin, node_timezone, node_ntp, node_crontab, node_vip
+#   - haproxy_install, haproxy_config, haproxy_launch, haproxy_reload
+#   - docker_install, docker_admin, docker_config, docker_launch, docker_image
+#   - haproxy_register, node_exporter, node_register, promtail
+#
+# infra         : setup infra components
+#   - infra_env      : env_dir, env_pg, env_var
+#   - infra_pkg      : infra_pkg_yum, infra_pkg_pip
+#   - infra_user     : setup infra os user group
+#   - infra_cert     : issue cert for infra components
+#   - dns            : dns_config, dns_record, dns_launch
+#   - nginx          : nginx_config, nginx_cert, nginx_static, nginx_launch, nginx_exporter
+#   - prometheus     : prometheus_clean, prometheus_dir, prometheus_config, prometheus_launch, prometheus_reload
+#   - alertmanager   : alertmanager_config, alertmanager_launch
+#   - pushgateway    : pushgateway_config, pushgateway_launch
+#   - blackbox       : blackbox_config, blackbox_launch
+#   - grafana        : grafana_clean, grafana_config, grafana_plugin, grafana_launch, grafana_provision
+#   - loki           : loki clean, loki_dir, loki_config, loki_launch
+#   - infra_register : register infra components to prometheus
+#--------------------------------------------------------------#
 ...

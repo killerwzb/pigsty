@@ -1,0 +1,98 @@
+---
+#--------------------------------------------------------------#
+# Config etcd                                        [etcd_conf]
+#--------------------------------------------------------------#
+- name: setup etcd server
+  tags: etcd_conf
+  block:
+    - name: print etcd configuration info
+      debug:
+        msg: "ETCDCTL_ENDPOINTS={% for ip in groups['etcd']|sort %}{% if not loop.first %},{% endif %}https://{{ ip }}:{{ etcd_port }}{% endfor %}"
+
+    - name: copy /etc/etcd/etcd.conf
+      template: src=etcd.conf.j2 dest=/etc/etcd/etcd.conf owner=etcd mode=0644
+
+    - name: copy etcd server service unit
+      template: src=etcd.service.j2 dest={{ systemd_dir }}/etcd.service
+      vars: { systemd_dir: "{% if os_package is defined and os_package == 'deb' %}/lib/systemd/system/{% else %}/usr/lib/systemd/system{% endif %}" }
+
+    # since infra node will access etcd with infra.crt, we don't need to write this profile on infra nodes
+    - name: write etcd environment profile
+      tags: etcd_env
+      copy:
+        dest: /etc/profile.d/etcdctl.sh
+        mode: 0644
+        content: |
+          #!/bin/bash
+          alias e="etcdctl"
+          alias em="etcdctl member"
+          export ETCDCTL_API=3
+          export ETCDCTL_ENDPOINTS="{% for ip in groups['etcd']|sort %}{% if not loop.first %},{% endif %}https://{{ ip }}:{{ etcd_port }}{% endfor %}"
+          export ETCDCTL_CACERT=/etc/pki/ca.crt
+          {% if inventory_hostname in groups['infra'] %}
+          export ETCDCTL_CERT=/etc/pki/infra.crt
+          export ETCDCTL_KEY=/etc/pki/infra.key
+          {% else %}
+          export ETCDCTL_CERT=/etc/etcd/server.crt
+          export ETCDCTL_KEY=/etc/etcd/server.key
+          {% endif %}
+
+
+#--------------------------------------------------------------#
+# Issue etcd certs                             [etcd_cert_issue]
+#--------------------------------------------------------------#
+- name: generate etcd server certs
+  tags: [ etcd_cert, etcd_cert_issue ]
+  become: no
+  delegate_to: localhost
+  block:
+
+    - name: generate etcd private key
+      connection: local
+      openssl_privatekey:
+        path: files/pki/etcd/{{ etcd_instance }}.key
+        mode: 0600
+
+    - name: generate etcd signing request
+      connection: local
+      openssl_csr:
+        path: "files/pki/csr/{{ etcd_instance }}.csr"
+        privatekey_path: "files/pki/etcd/{{ etcd_instance }}.key"
+        common_name: "{{ etcd_instance }}"
+        organization_name: pigsty
+        organizational_unit_name: etcd
+        force: true
+        subject_alt_name:
+          - IP:127.0.0.1
+          - DNS:localhost
+          - "IP:{{ inventory_hostname }}"
+          - "DNS:{{ etcd_instance }}"
+
+    - name: issue etcd server certificate
+      connection: local
+      openssl_certificate:
+        path: "files/pki/etcd/{{ etcd_instance }}.crt"
+        csr_path: "files/pki/csr/{{ etcd_instance }}.csr"
+        ownca_path: files/pki/ca/ca.crt
+        ownca_privatekey_path: files/pki/ca/ca.key
+        provider: ownca
+        selfsigned_not_after: "+{{ cert_validity }}"
+        mode: 0644
+
+
+#--------------------------------------------------------------#
+# Copy etcd certs                               [etcd_cert_copy]
+#--------------------------------------------------------------#
+- name: copy etcd certs
+  tags: [ etcd_cert, etcd_cert_copy ]
+  become: yes
+  block:
+    - name: copy ca file
+      copy: src="files/pki/ca/ca.crt" dest="/etc/etcd/ca.crt" owner=etcd mode=0644
+    - name: copy etcd ssl cert
+      copy: src="files/pki/etcd/{{ etcd_instance }}.crt" dest="/etc/etcd/server.crt" owner=etcd mode=0644
+    - name: copy etcd ssl key
+      copy: src="files/pki/etcd/{{ etcd_instance }}.key" dest="/etc/etcd/server.key" owner=etcd mode=0600
+
+
+...

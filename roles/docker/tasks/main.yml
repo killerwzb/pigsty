@@ -1,64 +1,75 @@
 ---
-#------------------------------------------------------------------------------
-# install docker
-#------------------------------------------------------------------------------
-- name: Install docker and docker-compose
+#--------------------------------------------------------------#
+# Install docker                                [docker_install]
+#--------------------------------------------------------------#
+- name: install docker and docker-compose
   tags: docker_install
+  #when: docker_enabled|bool
+  ignore_errors: true  # HOTFIX for EL8 Docker installation
   package: name={{ item }} state=present
   with_items:
     - docker-ce
-    - docker-compose
+    - docker-compose-plugin
 
-#------------------------------------------------------------------------------
-# docker admin user
-#------------------------------------------------------------------------------
-- name: Add admin user to docker group
+
+#--------------------------------------------------------------#
+# Add admin user to Docker group                  [docker_admin]
+#--------------------------------------------------------------#
+- name: add admin user to docker group
   ignore_errors: true
   tags: docker_admin
+  #when: docker_enabled|bool
+  user: name={{ item }} append=true groups=docker
+  with_items:
+    - "{% if node_user == 'root' %}{{ node_admin_username }}{% else %}{{ node_user }}{% endif %}"
+    - "{{ node_admin_username }}"
+
+
+#--------------------------------------------------------------#
+# config docker                                  [docker_config]
+#--------------------------------------------------------------#
+- name: config docker
+  tags: docker_config
+  #when: docker_enabled|bool
   block:
-    - name: Get current admin user
-      become: no  # get current user
-      command: whoami
-      register: whoami_result
+    - name: create /etc/docker config dir
+      file: path=/etc/docker state=directory mode=0755
 
-    - name: Add admin user to docker group
-      user: name={{ item }} group=docker
-      with_items:
-        - "{{ whoami_result.stdout }}"
-        - "{{ node_admin_username|default('dba') }}"
-
-#------------------------------------------------------------------------------
-# config docker
-#------------------------------------------------------------------------------
-- name: Make sure /etc/docker exists
-  tags: docker_config
-  file: path=/etc/docker state=directory mode=0755
-
-- name: Overwrite /etc/docker/daemon.json
-  tags: docker_config
-  template: src=daemon.json.j2 dest=/etc/docker/daemon.json
+    - name: render /etc/docker/daemon.json
+      tags: docker_config
+      template: src=daemon.json.j2 dest=/etc/docker/daemon.json
 
 
-#------------------------------------------------------------------------------
-# launch docker
-#------------------------------------------------------------------------------
-- name: Launch docker service unit
+#--------------------------------------------------------------#
+# launch docker                                  [docker_launch]
+#--------------------------------------------------------------#
+# only launch docker when enabled
+- name: launch docker systemd service
   tags: docker_launch
+  #when: docker_enabled|bool
   systemd: name=docker state=restarted enabled=yes daemon_reload=yes
 
 
-#------------------------------------------------------------------------------
-# load docker images cache if exists
-#------------------------------------------------------------------------------
-- name: Check docker image cache exists
+#--------------------------------------------------------------#
+# load docker images cache if exists              [docker_image]
+#--------------------------------------------------------------#
+# only load docker images docker when enabled
+- name: load docker images
   tags: docker_image
+  #when: docker_enabled|bool
   ignore_errors: true
-  stat: path={{ docker_image_cache }}
-  register: docker_cache
+  block:
 
-- name: Load docker image cache if exists
-  tags: docker_image
-  ignore_errors: true
-  when: docker_cache.stat.exists
-  shell: cat {{ docker_image_cache }} | gzip -d -c - | docker load
+    - name: check docker image cache exists
+      stat: path={{ docker_image_cache }}
+      register: docker_cache
+
+    - name: load docker image cache if exists
+      when: docker_cache.stat.exists
+      shell: |
+        cat {{ item }} | gzip -d -c - | docker load
+      args: { executable: /bin/bash }
+      with_fileglob:
+        - "/tmp/docker/*.tgz"
+
 ...

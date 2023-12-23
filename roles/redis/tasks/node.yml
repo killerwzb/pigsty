@@ -1,0 +1,31 @@
+---
+#--------------------------------------------------------------#
+# Install Redis Packages                         [redis_install]
+#--------------------------------------------------------------#
+- name: install redis binaries
+  tags: redis_install
+  package: name={{ item }} state=present
+  with_items:
+    - redis
+    - "{% if os_package|default('rpm') == 'deb' %}redis-exporter{% else %}redis_exporter{% endif %}"
+
+#--------------------------------------------------------------#
+# Redis User                                        [redis_user]
+#--------------------------------------------------------------#
+- name: create os user redis
+  tags: redis_user
+  ignore_errors: yes
+  user: name=redis home=/home/redis generate_ssh_key=yes
+
+#--------------------------------------------------------------#
+# Redis Directory                                    [redis_dir]
+#--------------------------------------------------------------#
+- name: create redis directories
+  tags: redis_dir
+  file: path={{ item }} state=directory owner=redis mode=0700
+  with_items:
+    - /etc/redis
+    - /var/log/redis/
+    - /var/run/redis/
+    - "{{ redis_fs_main }}/redis"
+...

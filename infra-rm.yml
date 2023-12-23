@@ -1,0 +1,135 @@
+#!/usr/bin/env ansible-playbook
+---
+#==============================================================#
+# File      :   infra-rm.yml
+# Desc      :   uninstall pigsty infra module
+# Ctime     :   2022-02-22
+# Mtime     :   2022-12-08
+# Path      :   infra-rm.yml
+# Author    :   Ruohang Feng (rh@vonng.com)
+# License   :   AGPLv3
+#==============================================================#
+
+
+#---------------------------------------------------------------
+# Usage
+#---------------------------------------------------------------
+# ./infra-rm.yml               # remove everything about infra
+# ./infra-rm.yml -t service    # stop infra services
+# ./infra-rm.yml -t data       # remove infra data
+# ./infra-rm.yml -t package    # uninstall infra packages
+#---------------------------------------------------------------
+
+
+#--------------------------------------------------------------#
+# Remove Infrastructure
+#--------------------------------------------------------------#
+- name: INFRA REMOVE
+  become: yes
+  hosts: infra
+  gather_facts: no
+  ignore_errors: yes
+  tasks:
+
+    #---------------------------------------------
+    # Stop Service
+    #---------------------------------------------
+    - name: stop infra service
+      systemd: name={{ item }} state=stopped enabled=no daemon_reload=yes
+      tags: service
+      with_items:
+        - alertmanager
+        - pushgateway
+        - blackbox_exporter
+        - prometheus
+        - loki
+        - grafana-server
+        - nginx_exporter
+        - nginx
+        - dnsmasq
+
+
+    #---------------------------------------------
+    # Remove conf
+    #---------------------------------------------
+    - name: remove infra conf
+      file: state=absent path="{{ item }}"
+      tags: config
+      vars: { systemd_dir: "{% if os_package is defined and os_package == 'deb' %}/lib/systemd/system/{% else %}/usr/lib/systemd/system{% endif %}" }
+      with_items:
+        - /etc/pigsty
+        - /etc/pki/infra.crt
+        - /etc/pki/infra.key
+        - /etc/alertmanager.yml
+        - /etc/default/alertmanager
+        - "{{ systemd_dir }}/alertmanager.service"
+        - /etc/blackbox.conf
+        - /etc/default/blackbox_exporter
+        - "{{ systemd_dir }}/blackbox_exporter.service"
+        - /etc/default/pushgateway
+        - "{{ systemd_dir }}/pushgateway.service"
+        - /etc/prometheus
+        - /etc/default/prometheus
+        - "{{ systemd_dir }}/prometheus.service"
+        - /etc/loki.yml
+        - "{{ systemd_dir }}/loki.service"
+        - /etc/grafana
+        - "{{ systemd_dir }}/grafana.service"
+        - /etc/nginx/
+        - /etc/default/nginx_exporter
+        - "{{ systemd_dir }}/nginx.service"
+        - "{{ systemd_dir }}/nginx_exporter.service"
+        - /etc/dnsmasq.conf
+        - "{{ systemd_dir }}/dnsmasq.service"
+
+
+    #---------------------------------------------
+    # Remove Env
+    #---------------------------------------------
+    - name: remove infra env
+      become: no
+      file: state=absent path="{{ item }}"
+      tags: env
+      with_items:
+        - '~/.pg_service.conf'
+        - '~/.servers.json'
+        - '~/.pgpass'
+        - '~/.pigsty'
+        - '~/.pgpass'
+
+
+    #---------------------------------------------
+    # Remove Infra Data
+    #---------------------------------------------
+    - name: remove infra data
+      file: state=absent path="{{ item }}"
+      tags: data
+      with_items:
+        - "{{ prometheus_data|default('/data/prometheus') }}"
+        - "{{ loki_data|default('/data/loki') }}"
+        - "{{ nginx_home|default('/www') }}"
+        - /var/lib/grafana
+        - /etc/hosts.d
+
+
+    #---------------------------------------------
+    # Uninstall Packages
+    #---------------------------------------------
+    - name: uninstall infra packages
+      yum: name={{ item }} state=removed
+      tags: package
+      with_items:
+        - alertmanager
+        - pushgateway
+        - blackbox_exporter
+        - prometheus2
+        - loki
+        - grafana
+        - nginx_exporter
+        - nginx
+        - dnsmasq
+        - mcli
+        - logcli
+
+
+...

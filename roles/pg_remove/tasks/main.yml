@@ -1,58 +1,118 @@
 ---
 #--------------------------------------------------------------#
-# remove exporter targets from prometheus
+# HONOR PG_SAFEGUARD                              [pg_safeguard]
+#--------------------------------------------------------------#
+- name: ABORT due to pg_safeguard enabled
+  connection: local
+  when: pg_safeguard|bool
+  tags: [ always , pg_safeguard ]
+  any_errors_fatal: true
+  ignore_errors: false
+  fail: msg="Abort due to pg_safeguard for {{ pg_cluster }}-{{ pg_seq }} @ {{ inventory_hostname }} is enabled, override with -e pg_safeguard=false"
+
+
+#--------------------------------------------------------------#
+# remove exporter targets from prometheus           [prometheus]
 #--------------------------------------------------------------#
 - import_tasks: prometheus.yml
   tags: [ prometheus , register ]
 
+
 #--------------------------------------------------------------#
-# remove pgsql datasource from grafana
+# remove pgsql datasource from grafana                 [grafana]
 #--------------------------------------------------------------#
 - import_tasks: grafana.yml
   tags: [ grafana , register ]
 
-#--------------------------------------------------------------#
-# remove haproxy index from nginx
-#--------------------------------------------------------------#
-- import_tasks: nginx.yml
-  tags: [ nginx , register ]
 
 #--------------------------------------------------------------#
-# remove service (haproxy, vip)
+# remove pg dns records                                    [dns]
 #--------------------------------------------------------------#
-- import_tasks: service.yml
-  tags: [ service ]
+- import_tasks: dns.yml
+  tags: dns
+
 
 #--------------------------------------------------------------#
-# remove monitor
+# remove pg vip manager                                    [vip]
 #--------------------------------------------------------------#
-- import_tasks: monitor.yml
-  tags: [ monitor ]
+- import_tasks: vip.yml
+  tags: vip
+
 
 #--------------------------------------------------------------#
-# remove pgbouncer
+# remove service                                    [pg_service]
+#--------------------------------------------------------------#
+- import_tasks: pg_service.yml
+  tags: [ haproxy, pg_service ]
+
+
+#--------------------------------------------------------------#
+# remove monitor                                   [pg_exporter]
+#--------------------------------------------------------------#
+# pg_exporter, pgbouncer_exporter
+- import_tasks: pg_exporter.yml
+  tags: pg_exporter
+
+
+#--------------------------------------------------------------#
+# remove pgbouncer                                   [pgbouncer]
 #--------------------------------------------------------------#
 - import_tasks: pgbouncer.yml
-  tags: [ pgbouncer ]
+  tags: pgbouncer
+
 
 #--------------------------------------------------------------#
-# remove postgres
+# remove postgres                                     [postgres]
 #--------------------------------------------------------------#
+# pg_replica, pg_primary, pg_meta
 - import_tasks: postgres.yml
-  tags: [ postgres ]
+  tags: postgres
+
 
 #--------------------------------------------------------------#
-# remove data
+# remove backup                                     [pgbackrest]
 #--------------------------------------------------------------#
-- import_tasks: pgdata.yml
-  when: rm_pgdata|bool
-  tags: [ pgdata ]
+- import_tasks: pgbackrest.yml
+  tags: pgbackrest
+
 
 #--------------------------------------------------------------#
-# remove packages
+# remove data                                          [pg_data]
 #--------------------------------------------------------------#
-- import_tasks: pgpkgs.yml
-  when: rm_pgpkgs|bool
-  tags: [ pgpkgs ]
+- name: remove postgres data
+  tags: pg_data
+  when: pg_clean|bool
+  ignore_errors: yes
+  file: path={{ item }} state=absent
+  with_items:
+    - /pg/data
+    - "{{ pg_fs_main }}/postgres"
+
+
+#--------------------------------------------------------------#
+# remove packages                                       [pg_pkg]
+#--------------------------------------------------------------#
+- name: remove postgres packages
+  tags: pg_pkg
+  when: pg_uninstall|bool
+  ignore_errors: yes
+  block:
+
+    # remove pg path & alias
+    - name: remove postgres environ
+      file: path={{ item }} state=absent
+      with_items:
+        - /etc/profile.d/pgsql.sh
+        - /etc/profile.d/pg-alias.sh
+
+    # uninstall postgres extensions
+    - name: uninstall pg extensions
+      package: state=absent name={{ item|replace('${pg_version}', pg_version|string)|replace(' ',',') }}
+      with_items: "{{ pg_extensions }}"
+
+    # uninstall postgres basic packages
+    - name: uninstall pg packages
+      package: state=absent name={{ item|replace('${pg_version}', pg_version|string)|replace(' ',',') }}
+      with_items: "{{ pg_packages }}"
 
 ...

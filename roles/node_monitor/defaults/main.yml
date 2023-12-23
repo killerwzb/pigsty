@@ -1,0 +1,47 @@
+---
+#--------------------------------------------------------------#
+# NODE EXPORTER
+#--------------------------------------------------------------#
+node_exporter_enabled: true       # setup node_exporter on this node?
+node_exporter_port: 9100          # node exporter listen port, 9100 by default
+node_exporter_options: '--no-collector.softnet --no-collector.nvme --collector.tcpstat --collector.processes'
+#--------------------------------------------------------------#
+# PROMTAIL
+#--------------------------------------------------------------#
+promtail_enabled: true            # enable promtail logging collector?
+promtail_clean: false             # purge existing promtail status file during init?
+promtail_port: 9080               # promtail listen port, 9080 by default
+promtail_positions: /var/log/positions.yaml # promtail position status file path
+#-----------------------------------------------------------------
+# NODE_VIP
+#-----------------------------------------------------------------
+vip_enabled: false                # enable vip on this node cluster?
+# vip_address:         [IDENTITY] # node vip address in ipv4 format, required if vip is enabled
+vip_dns_suffix: ''                # node vip dns name suffix, empty string by default
+vip_exporter_port: 9650           # keepalived exporter listen port, 9650 by default
+#-----------------------------------------------------------------
+# EXPORTER (Reference)
+#-----------------------------------------------------------------
+exporter_install: none            # how to install exporter? none|yum|binary
+exporter_repo_url: ''             # exporter repo file url if install exporter via yum
+exporter_metrics_path: /metrics   # exporter metric path
+#-----------------------------------------------------------------
+# HAPROXY (Reference)
+#-----------------------------------------------------------------
+haproxy_enabled: true             # enable haproxy on this node?
+haproxy_exporter_port: 9101       # haproxy admin/exporter port, 9101 by default
+#-----------------------------------------------------------------
+# PGSQL (Reference)
+#-----------------------------------------------------------------
+patroni_enabled: true             # if disabled, no postgres cluster will be created during init
+pgbouncer_enabled: true           # if disabled, pgbouncer will not be launched on pgsql host
+pgbackrest_enabled: true          # enable pgbackrest on pgsql host?
+pg_log_dir: /pg/log/postgres      # postgres log dir, `/pg/log/postgres` by default
+patroni_log_dir: /pg/log/patroni  # patroni log dir, `/pg/log/patroni` by default
+pgbouncer_log_dir: /pg/log/pgbouncer  # pgbouncer log dir, `/pg/log/pgbouncer` by default
+pgbackrest_log_dir: /pg/log/pgbackrest # pgbackrest log dir, `/pg/log/pgbackrest` by default
+#-----------------------------------------------------------------
+# INFRA (Reference)
+#-----------------------------------------------------------------
+infra_portal: {loki : {endpoint: "${admin_ip}:3100"}}
+...

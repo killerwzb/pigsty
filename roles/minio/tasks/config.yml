@@ -1,0 +1,119 @@
+---
+#--------------------------------------------------------------#
+# Config Minio                                    [minio_config]
+#--------------------------------------------------------------#
+- name: render minio config
+  tags: minio_conf
+  block:
+
+    - name: render minio config
+      template:
+        src: minio.default.j2
+        dest: /etc/default/minio
+        owner: root
+        group: minio
+        mode: 0644
+
+    - name: create minio systemd service
+      template: src=minio.service.j2 dest={{ systemd_dir }}/minio.service owner=root group=root
+      vars: { systemd_dir: "{% if os_package is defined and os_package == 'deb' %}/lib/systemd/system/{% else %}/usr/lib/systemd/system{% endif %}" }
+
+
+#--------------------------------------------------------------#
+# Issue minio certs                           [minio_cert_issue]
+#--------------------------------------------------------------#
+- name: generate certs for minio
+  tags: [ minio_cert , minio_cert_issue ]
+  become: no
+  delegate_to: localhost
+  block:
+
+    # reuse existing private key if already exists
+    - name: generate minio private key
+      openssl_privatekey:
+        path: files/pki/minio/{{ minio_instance }}.key
+        mode: 0600
+
+    - name: generate minio server signing request
+      openssl_csr:
+        path: "files/pki/csr/{{ minio_instance }}.csr"
+        privatekey_path: "files/pki/minio/{{ minio_instance }}.key"
+        common_name: "{{ minio_nodename }}"
+        organization_name: pigsty
+        organizational_unit_name: minio
+        force: true
+        subject_alt_name:
+          - "DNS:localhost"
+          - "DNS:{{ minio_nodename }}"
+          - "DNS:{{ minio_cluster }}"
+          - "DNS:{{ minio_cluster }}-{{ minio_seq }}"
+          - "DNS:{{ minio_domain }}"
+          - IP:127.0.0.1
+          - "IP:{{ inventory_hostname }}"
+
+    - name: issue minio server certificate
+      openssl_certificate:
+        path: "files/pki/minio/{{ minio_instance }}.crt"
+        csr_path: "files/pki/csr/{{ minio_instance }}.csr"
+        ownca_path: files/pki/ca/ca.crt
+        ownca_privatekey_path: files/pki/ca/ca.key
+        provider: ownca
+        selfsigned_not_after: "+{{ cert_validity }}"
+        mode: 0644
+
+
+#--------------------------------------------------------------#
+# Copy minio certs                             [minio_cert_copy]
+#--------------------------------------------------------------#
+- name: copy minio certs
+  tags: [ minio_cert, minio_cert_copy ]
+  become: yes
+  block:
+    - name: copy minio ca file
+      copy: src="files/pki/ca/ca.crt" dest="/etc/minio/ca.crt" owner=minio mode=0644
+    - name: copy minio server cert
+      copy: src="files/pki/minio/{{ minio_instance }}.crt" dest="/etc/minio/public.crt" owner={{ minio_user }} group=minio mode=0644
+    - name: copy minio server key
+      copy: src="files/pki/minio/{{ minio_instance }}.key" dest="/etc/minio/private.key" owner={{ minio_user }} group=minio mode=0600
+
+
+#--------------------------------------------------------------#
+# Copy minio certs                                   [minio_dns]
+#--------------------------------------------------------------#
+- name: write minio instance dns to local dns records
+  tags: [ minio_dns , minio_dns_local ]
+  block:
+
+    - name: wipe minio dns entries
+      lineinfile: path=/etc/hosts regexp='# minio dns$' state=absent
+
+    # NOTE: dns records write by pigsty will be suffixed with "# minio dns" mark
+    - name: write static etc hosts entry
+      lineinfile:
+        path: /etc/hosts
+        line: "{{ item.strip() }} # minio dns"
+      with_items: "{{ minio_member.split(',') }}"
+
+- name: write minio instance dns to infra nameserver
+  tags: [ minio_dns , register_dns ]
+  delegate_to: '{{ item }}'
+  with_items: "{{ groups['infra'] }}"
+  copy:
+    dest: /etc/hosts.d/{{ minio_instance }}
+    mode: 0644
+    owner: root
+    group: root
+    content: |
+      {{ inventory_hostname }} {{ minio_nodename }}
+      {{ inventory_hostname }} {{ minio_cluster }}-{{ minio_seq }}
+
+# reload meta node nginx (maybe not appropriate here)
+- name: reload dnsmasq on infra node
+  tags: [ minio_dns, register_dns ]
+  delegate_to: '{{ item }}'
+  run_once: true
+  ignore_errors: true
+  with_items: '{{ groups["infra"] }}'
+  systemd: name=dnsmasq state=reloaded enabled=yes daemon_reload=yes
+
+...

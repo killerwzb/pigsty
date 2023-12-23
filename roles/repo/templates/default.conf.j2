@@ -1,6 +1,5 @@
 server {
-    listen       {{ nginx_port | default('80') }} default_server;
-    server_name  {{ repo_address }} localhost;
+    listen       {{ nginx_port }} default_server;
     location / {
         root        {{ nginx_home }};
         index       index.html;
@@ -11,7 +10,6 @@ server {
     }
 
     location /nginx {
-        stub_status on;
         access_log off;
     }
 }

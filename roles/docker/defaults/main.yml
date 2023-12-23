@@ -2,8 +2,12 @@
 #-----------------------------------------------------------------
 # DOCKER
 #-----------------------------------------------------------------
-docker_enabled: false             # enable docker on all nodes? (you can enable them on meta nodes only)
-docker_cgroups_driver: systemd    # docker cgroup fs driver
-docker_registry_mirrors: []       # docker registry mirror
-docker_image_cache: /tmp/docker.tgz # docker images tarball to be loaded if exists
+docker_enabled: false             # enable docker on this node?
+docker_cgroups_driver: systemd    # docker cgroup fs driver: cgroupfs,systemd
+docker_registry_mirrors: []       # docker registry mirror list
+docker_image_cache: /tmp/docker   # docker image cache dir, `/tmp/docker` by default
+#-----------------------------------------------------------------
+# NODE_ADMIN (Reference)
+#-----------------------------------------------------------------
+node_admin_username: dba          # name of this admin user, dba by default
 ...

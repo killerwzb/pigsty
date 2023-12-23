@@ -1,0 +1,28 @@
+---
+#-----------------------------------------------------------------
+# etcd
+#-----------------------------------------------------------------
+#etcd_seq: 1                      # etcd instance identifier, explicitly required
+etcd_cluster: etcd                # etcd cluster & group name, etcd by default
+etcd_safeguard: false             # prevent purging running etcd instance?
+etcd_clean: true                  # purging existing etcd during initialization?
+etcd_data: /data/etcd             # etcd data directory, /data/etcd by default
+etcd_port: 2379                   # etcd client port, 2379 by default
+etcd_peer_port: 2380              # etcd peer port, 2380 by default
+etcd_init: new                    # etcd initial cluster state, new or existing
+etcd_election_timeout: 1000       # etcd election timeout, 1000ms by default
+etcd_heartbeat_interval: 100      # etcd heartbeat interval, 100ms by default
+
+#-----------------------------------------------------------------
+# INTERNAL
+#-----------------------------------------------------------------
+etcd_exists: false                # internal flag that indicate etcd existence
+#-----------------------------------------------------------------
+# CA (Reference)
+#-----------------------------------------------------------------
+cert_validity: 7300d              # cert validity, 20 years by default
+#-----------------------------------------------------------------
+# NODE (Reference)
+#-----------------------------------------------------------------
+node_data: /data                  # node main data directory, /data by default
+...

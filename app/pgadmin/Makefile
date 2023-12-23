@@ -1,6 +1,7 @@
 default: up view
-up:
-	docker-compose up -d
+
+up: view
+	docker compose up -d
 
 run:
 	docker run --init --name pgadmin --restart always --detach --publish 8885:80 \
@@ -41,9 +42,10 @@ rmi:
 	docker rmi dpage/pgadmin4
 
 save:
-	docker save dpage/pgadmin4 | lz4 -c > /tmp/pgadmin.tlz
+	mkdir -p /tmp/docker
+	docker save dpage/pgadmin4 | gzip -9 -c > /tmp/docker/pgadmin4.tgz
 
 load:
-	cat /tmp/pgadmin.tlz | lz4 -d -c - | docker load
+	cat /tmp/docker/pgadmin4.tgz | gzip -d -c - | docker load
 
 .PHONY: default up run view log info stop clean conf dump pull rmi save load

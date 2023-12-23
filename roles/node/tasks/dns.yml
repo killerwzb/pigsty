@@ -1,56 +1,68 @@
 ---
-#------------------------------------------------------------------------------
-# Setup DNS
-#------------------------------------------------------------------------------
-- name: Setup node dns records
-  tags: node_dns
+#--------------------------------------------------------------#
+# Setup Node Static DNS Records                     [node_hosts]
+#--------------------------------------------------------------#
+- name: setup node dns
+  tags: node_hosts
   block:
-    # - name: Write local nodename to /etc/hosts
-    #   when: nodename is defined and nodename != ''
-    #   lineinfile: path=/etc/hosts line="127.0.0.1 {{ nodename }}"
 
-    - name: Write static dns records to /etc/hosts
-      when: node_etc_hosts_default is defined and node_etc_hosts_default|length > 0
-      lineinfile: path=/etc/hosts line="{{ item }}"
-      with_items: "{{ node_etc_hosts_default }}"
+    # NOTE: dns records suffixed with "# pigsty meta" will be treated as meta node dns record and been wiped
+    - name: wipe pigsty dns entries
+      lineinfile: path=/etc/hosts regexp='# pigsty dns$' state=absent
 
-    - name: Write extra static dns records to /etc/hosts
-      when: node_etc_hosts is defined and node_etc_hosts|length > 0
-      lineinfile: path=/etc/hosts line="{{ item }}"
-      with_items: "{{ node_etc_hosts }}"
+    # NOTE: dns records write by pigsty will be suffixed with "# pigsty meta" mark
+    - name: write static etc hosts entry
+      lineinfile:
+        path: /etc/hosts
+        line: "{{ item | replace('${admin_ip}', admin_ip) }} # pigsty dns"
+      with_items: "{{ node_default_etc_hosts|default([]) + node_etc_hosts|default([]) }}"
+
+    - name: exchange nodename between nodes
+      when: nodename_exchange|bool
+      ignore_errors: true
+      lineinfile:
+        path: /etc/hosts
+        line: "{{ inventory_hostname }} {{ item[0] }} # pigsty meta"
+      delegate_to: "{{ item[1] }}"
+      with_nested:
+        - "{{ nodename }}"
+        - "{{ play_hosts }}"
 
 
-#------------------------------------------------------------------------------
-# Setup Resolver
-#------------------------------------------------------------------------------
+#--------------------------------------------------------------#
+# Setup Node DNS Resolver                             [node_dns]
+#--------------------------------------------------------------#
 # add static nameserver to resolv (if node_dns_method != 'none')
-- name: Setup node dns resolver
+- name: setup node dns resolver
   tags: node_resolv
   when: node_dns_method is defined and node_dns_method != 'none'
   block:
+
     # add new nameservers to existing nameservers
-    - name: Get old nameservers
+    - name: get existing etc resolv
       when: node_dns_method == 'add'
       shell: grep -E '^nameserver' /etc/resolv.conf  | grep -Eo '[0-9\.]+' | head -n3
+      args: { executable: /bin/bash }
       register: old_nameservers
 
-    - name: Write tmp resolv file
-      shell: echo -n "" > /etc/resolv.conf.tmp
-
-    - name: Write resolv options
-      shell: echo {{ item }} >> /etc/resolv.conf.tmp
-      with_items: "{{ node_dns_options }}"
-
-    - name: Write additional nameservers
-      shell: echo "nameserver {{ item }}" >> /etc/resolv.conf.tmp
-      with_items: "{{ node_dns_servers }}"
-
-    - name: Append existing nameservers
-      shell: echo "nameserver {{ item }}" >> /etc/resolv.conf.tmp
-      with_items: "{{ old_nameservers.stdout_lines }}"
-      when: node_dns_method == 'add' and item not in node_dns_servers
-
-    - name: Swap resolv.conf
-      shell: mv -f /etc/resolv.conf /etc/resolv.conf.backup; mv /etc/resolv.conf.tmp /etc/resolv.conf
-
+    - name: generate etc resolv conf
+      copy:
+        dest: /etc/resolv.conf
+        mode: 0644
+        owner: root
+        content: |
+          {% for item in node_dns_options %}
+          {{ item }}
+          {% endfor %}
+          {% for item in node_dns_servers %}
+          nameserver {{ item | replace('${admin_ip}', admin_ip ) }}
+          {% endfor %}
+          {% if node_dns_method == 'add' %}
+          {% for item in old_nameservers.stdout_lines %}
+          {% if item not in node_dns_servers and item != admin_ip %}
+          nameserver {{ item | replace('${admin_ip}', admin_ip ) }}
+          {% endif %}
+          {% endfor %}
+          {% endif %}
+...
 ...

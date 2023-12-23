@@ -1,17 +1,27 @@
 #==============================================================#
 # File      :   Makefile
+# Desc      :   pigsty shortcuts
 # Ctime     :   2019-04-13
-# Mtime     :   2022-04-28
-# Desc      :   Makefile shortcuts
+# Mtime     :   2023-11-29
 # Path      :   Makefile
-# Copyright (C) 2018-2022 Ruohang Feng (rh@vonng.com)
+# Author    :   Ruohang Feng (rh@vonng.com)
+# License   :   AGPLv3
 #==============================================================#
+# pigsty version string
+VERSION?=v2.5.1
 
-# pigsty version
-VERSION?=v1.5.0-beta
+# variables
+SRC_PKG=pigsty-$(VERSION).tgz
+APP_PKG=pigsty-app-$(VERSION).tgz
+DOCKER_PKG=pigsty-docker-$(VERSION).tgz
+EL7_PKG=pigsty-pkg-$(VERSION).el7.x86_64.tgz
+EL8_PKG=pigsty-pkg-$(VERSION).el8.x86_64.tgz
+EL9_PKG=pigsty-pkg-$(VERSION).el9.x86_64.tgz
+D11_PKG=pigsty-pkg-$(VERSION).debian11.x86_64.tgz
+D12_PKG=pigsty-pkg-$(VERSION).debian12.x86_64.tgz
+U20_PKG=pigsty-pkg-$(VERSION).ubuntu20.x86_64.tgz
+U22_PKG=pigsty-pkg-$(VERSION).ubuntu22.x86_64.tgz
 
-# target cluster (meta by default)
-CLS?=meta
 
 ###############################################################
 #                      1. Quick Start                         #
@@ -19,33 +29,32 @@ CLS?=meta
 # run with nopass SUDO user (or root) on CentOS 7.x node
 default: tip
 tip:
-	@echo "# Run on Linux x86_64 CentOS 7.8 node with sudo & ssh access"
-	@echo 'bash -c "$$(curl -fsSL http://download.pigsty.cc/get)"'
-	@echo "./download pkg  # download pigsty offline pkgs (optional)"
+	@echo "# Run on Linux x86_64 EL7-9 node with sudo & ssh access"
+	@echo 'bash -c "$$(curl -fsSL https://get.pigsty.cc/latest)"'
+	@echo "./bootstrap     # prepare local repo & ansible"
 	@echo "./configure     # pre-check and templating config"
-	@echo "./infra.yml     # install pigsty on current node"
+	@echo "./install.yml   # install pigsty on current node"
 
 # print pkg download links
 link:
-	@echo 'bash -c "$$(curl -fsSL http://download.pigsty.cc/get)"'
+	@echo 'bash -c "$$(curl -fsSL https://get.pigsty.cc/latest)"'
 	@echo "[Github Download]"
-	@echo "curl -SL https://github.com/Vonng/pigsty/releases/download/${VERSION}/pigsty.tgz | gzip -d | tar -xC ~ ; cd ~/pigsty"
-	@echo "curl -SL https://github.com/Vonng/pigsty/releases/download/${VERSION}/pkg.tgz -o /tmp/pkg.tgz           # [optional]"
+	@echo "curl -SL https://github.com/Vonng/pigsty/releases/download/${VERSION}/${SRC_PKG} | gzip -d | tar -xC ~ ; cd ~/pigsty"
 	@echo "[CDN Download]"
-	@echo "curl -SL http://download.pigsty.cc/${VERSION}/pigsty.tgz | gzip -d | tar -xC ~ ; cd ~/pigsty"
-	@echo "curl -SL http://download.pigsty.cc/${VERSION}/pkg.tgz -o /tmp/pkg.tgz           # [optional]"
+	@echo "curl -SL https://get.pigsty.cc/${VERSION}/${SRC_PKG} | gzip -d | tar -xC ~ ; cd ~/pigsty"
 
-# get pigsty source from CDN
-get:
-	bash -c "$(curl -fsSL http://download.pigsty.cc/get)"
+
+# serve a local docs with docsify or python http
+doc:
+	docs/serve
 
 #-------------------------------------------------------------#
 # there are 3 steps launching pigsty:
-all: download configure install
+all: bootstrap configure install
 
-# (1). DOWNLOAD   pigsty source code to ~/pigsty, pkg to /tmp/pkg.tgz
-download:
-	./download pigsty pkg
+# (1). BOOTSTRAP  pigsty pkg & util preparedness
+bootstrap:
+	./boostrap
 
 # (2). CONFIGURE  pigsty in interactive mode
 config:
@@ -53,7 +62,7 @@ config:
 
 # (3). INSTALL    pigsty on current node
 install:
-	./infra.yml
+	./install.yml
 ###############################################################
 
 
@@ -79,15 +88,11 @@ install:
 ###############################################################
 # There are two things needs to be downloaded:
 #    pigsty.tgz    :   source code
-#    pkg.tgz       :   offline rpm packages (build under 7.8)
+#    pkg.tgz       :   offline rpm packages (build under 7.9)
 #
 # get latest stable version to ~/pigsty
 src:
-	curl -SL https://github.com/Vonng/pigsty/releases/download/${VERSION}/pigsty.tgz -o ~/pigsty.tgz
-
-# download pkg.tgz to /tmp/pkg.tgz
-pkg:
-	curl -SL https://github.com/Vonng/pigsty/releases/download/${VERSION}/pkg.tgz -o /tmp/pkg.tgz
+	curl -SL https://github.com/Vonng/pigsty/releases/download/${VERSION}/${SRC_PKG} -o ~/pigsty.tgz
 ###############################################################
 
 
@@ -101,11 +106,6 @@ pkg:
 
 # common interactive configuration procedure
 c: config
-
-# config with parameters
-# IP=10.10.10.10 MODE=oltp make conf
-conf:
-	./configure --ip ${IP} --mode ${MODE} --download
 ###############################################################
 
 
@@ -119,10 +119,6 @@ conf:
 infra:
 	./infra.yml
 
-# reinit pgsql cmdb
-pgsql:
-	./infra.yml --tags=cmdb -e pg_clean=clean
-
 # rebuild repo
 repo:
 	./infra.yml --tags=repo
@@ -131,10 +127,13 @@ repo:
 repo-upstream:
 	./infra.yml --tags=repo_upstream
 
+repo-check:
+	./install.yml -t node_repo,node_pkg,infra_pkg,pg_install
+
 # download repo packages
-repo-download:
-	sudo rm -rf /www/pigsty/repo_complete
-	./infra.yml --tags=repo_upstream,repo_download
+repo-build:
+	ansible infra -b -a 'rm -rf /www/pigsty/repo_complete'
+	./infra.yml --tags=repo_upstream,repo_build
 
 # init prometheus
 prometheus:
@@ -148,6 +147,9 @@ grafana:
 loki:
 	./infra.yml --tags=loki -e loki_clean=true
 
+# init docker
+docker:
+	./docker.yml
 
 ###############################################################
 
@@ -172,7 +174,7 @@ loki:
 #=============================================================#
 
 #------------------------------#
-# 1. deps
+# 1. deps (macos)
 #------------------------------#
 # install macos sandbox software dependencies
 deps:
@@ -184,7 +186,7 @@ deps:
 #------------------------------#
 # write static dns records (sudo password required) (only run on first time)
 dns:
-	sudo bin/dns
+	sudo vagrant/dns
 
 #------------------------------#
 # 3. start
@@ -192,47 +194,35 @@ dns:
 # start will pull-up node and write ssh-config
 # it may take a while to download centos/7 box for the first time
 start: up ssh      # 1-node version
-start4: up4 ssh    # 4-node version
-ssh:               # add node ssh config to your ~/.ssh/config
-	bin/ssh
+ssh:               # add current ssh config to your ~/.ssh/pigsty_config
+	vagrant/ssh
+sshb:              # add build ssh config to your ~/.ssh/build_config
+	vagrant/ssh build
 
 #------------------------------#
 # 4. demo
 #------------------------------#
 # launch one-node demo
 demo: demo-prepare
-	ssh meta 'cd ~/pigsty; ./infra.yml'
-
-# launch four-node demo
-demo4: demo-prepare
-	ssh meta 'cd ~/pigsty; ./infra-demo.yml'
-
-# prepare demo resource by download|upload
-demo-prepare: demo-upload
-
-# download demo pkg.tgz from github
-demo-download:
-	ssh meta "cd ~ && curl -fsSLO https://github.com/Vonng/pigsty/releases/download/${VERSION}/pigsty.tgz && tar -xf pigsty.tgz && cd pigsty"
-	ssh meta '/home/vagrant/pigsty/configure --ip 10.10.10.10 --non-interactive --download -m demo'
-
-# upload demo pkg.tgz from local dist dir
-demo-upload:
-	scp "dist/${VERSION}/pigsty.tgz" meta:~/pigsty.tgz
-	ssh -t meta 'rm -rf ~/pigsty; tar -xf pigsty.tgz; rm -rf pigsty.tgz'
-	scp "dist/${VERSION}/pkg.tgz" meta:/tmp/pkg.tgz
-	ssh meta '/home/vagrant/pigsty/configure --ip 10.10.10.10 --non-interactive -m demo'
+	ssh meta "cd ~ && curl -fsSLO https://github.com/Vonng/pigsty/releases/download/${VERSION}/${SRC_PKG} -o ~/pigsty.tgz && tar -xf pigsty.tgz"
+	ssh meta 'cd ~/pigsty; ./bootstrap -y'
+	ssh meta 'cd ~/pigsty; ./configure --ip 10.10.10.10 --non-interactive -m demo'
+	ssh meta 'cd ~/pigsty; ./install.yml'
 
 #------------------------------#
 # vagrant vm management
 #------------------------------#
 # default node (meta)
 up:
-	cd vagrant && vagrant up meta
+	cd vagrant && vagrant up
 dw:
-	cd vagrant && vagrant halt meta
+	cd vagrant && vagrant halt
 del:
-	cd vagrant && vagrant destroy -f meta
+	cd vagrant && vagrant destroy -f
+nuke:
+	cd vagrant && ./nuke
 new: del up
+clean: del
 #------------------------------#
 # extra nodes: node-{1,2,3}
 up-test:
@@ -243,16 +233,6 @@ del-test:
 	cd vagrant && vagrant destroy -f node-1 node-2 node-3
 new-test: del-test up-test
 #------------------------------#
-# all nodes (meta, node-1, node-2, node-3)
-up4:
-	cd vagrant && vagrant up
-dw4:
-	cd vagrant && vagrant halt
-del4:
-	cd vagrant && vagrant destroy -f
-new4: del4 up4
-clean: del4
-#------------------------------#
 # status
 st: status
 status:
@@ -261,21 +241,45 @@ suspend:
 	cd vagrant && vagrant suspend
 resume:
 	cd vagrant && vagrant resume
-
 #------------------------------#
-# time sync
-#------------------------------#
-# sync meta node time
-s:sync
-sync:  # sync time
-	ssh meta 'sudo ntpdate -u pool.ntp.org'; true
+# vagrant templates:
+v1:
+	cd vagrant && make v1
+v4:
+	cd vagrant && make v4
+v7:
+	cd vagrant && make v7
+v8:
+	cd vagrant && make v8
+v9:
+	cd vagrant && make v9
+vb:
+	cd vagrant && make vb
+vc:
+	cd vagrant && make vc
+vm:
+	cd vagrant && make vm
+vo:
+	cd vagrant && make vo
+vu:
+	cd vagrant && make vu
+vp: vp8  # use rocky 8 as default
+vp7:
+	cd vagrant && make vp7
+vp8:
+	cd vagrant && make vp8
+vp9:
+	cd vagrant && make vp9
+vp11:
+	cd vagrant && make vp11
+vp12:
+	cd vagrant && make vp12
+vp20:
+	cd vagrant && make vp20
+vp22:
+	cd vagrant && make vp22
+vnew: new ssh
 
-# sync 4 node time
-s4: sync4
-sync4:  # sync time
-	echo meta node-1 node-2 node-3 | xargs -n1 -P4 -I{} ssh {} 'sudo ntpdate -u pool.ntp.org'; true
-ss:     # sync time with aliyun ntp service
-	echo meta node-1 node-2 node-3 | xargs -n1 -P4 -I{} ssh {} 'sudo ntpdate -u ntp.aliyun.com'; true
 ###############################################################
 
 
@@ -299,24 +303,26 @@ rc:
 rw:
 	while true; do pgbench -nv -P1 -c4 --rate=64 -T10 postgres://dbuser_meta:DBUser.Meta@meta:5433/meta; done
 ro:
-	while true; do pgbench -nv -P1 -c8 --rate=256 --select-only -T10 postgres://dbuser_meta:DBUser.Meta@meta:5434/meta; done
-
+	while true; do pgbench -nv -P1 -c8 --rate=256 -S -T10 postgres://dbuser_meta:DBUser.Meta@meta:5434/meta; done
+rh:
+	ssh meta 'sudo -iu postgres /pg/bin/pg-heartbeat'
 # pg-test cluster benchmark
-
 test-ri:
 	pgbench -is10  postgres://test:test@pg-test:5436/test
 test-rc:
 	psql -AXtw postgres://test:test@pg-test:5433/test -c 'DROP TABLE IF EXISTS pgbench_accounts, pgbench_branches, pgbench_history, pgbench_tellers;'
 # pgbench small read-write / read-only traffic (rw=64TPS, ro=512QPS)
 test-rw:
-	while true; do pgbench -nv -P1 -c4 --rate=64 -T10 postgres://test:test@pg-test:5433/test; done
+	while true; do pgbench -nv -P1 -c4 --rate=32 -T10 postgres://test:test@pg-test:5433/test; done
 test-ro:
-	while true; do pgbench -nv -P1 -c8 --select-only --rate=512 -T10 postgres://test:test@pg-test:5434/test; done
+	while true; do pgbench -nv -P1 -c8 -S --rate=256 -T10 postgres://test:test@pg-test:5434/test; done
 # pgbench read-write / read-only traffic (maximum speed)
 test-rw2:
 	while true; do pgbench -nv -P1 -c16 -T10 postgres://test:test@pg-test:5433/test; done
 test-ro2:
-	while true; do pgbench -nv -P1 -c64 -T10 --select-only postgres://test:test@pg-test:5434/test; done
+	while true; do pgbench -nv -P1 -c64 -T10 -S postgres://test:test@pg-test:5434/test; done
+test-rh:
+	ssh node-1 'sudo -iu postgres /pg/bin/pg-heartbeat'
 #------------------------------#
 # show patroni status for pg-test cluster
 test-st:
@@ -332,6 +338,7 @@ test-rb3:
 
 
 
+
 ###############################################################
 #                       7. Develop                            #
 ###############################################################
@@ -343,15 +350,15 @@ test-rb3:
 #------------------------------#
 di: dashboard-init                    # init grafana dashboards
 dashboard-init:
-	cd roles/grafana/files/dashboards/ && ./grafana.py init
+	cd files/grafana/ && ./grafana.py init
 
 dd: dashboard-dump                    # dump grafana dashboards
 dashboard-dump:
-	cd roles/grafana/files/dashboards/ && ./grafana.py dump
+	cd files/grafana/ && ./grafana.py dump
 
 dc: dashboard-clean                   # cleanup grafana dashboards
 dashboard-clean:
-	cd files/ui && ./grafana.py clean
+	cd files/grafana/ && ./grafana.py clean
 
 du: dashboard-clean dashboard-init    # update grafana dashboards
 
@@ -359,33 +366,54 @@ du: dashboard-clean dashboard-init    # update grafana dashboards
 # copy source & packages
 #------------------------------#
 # copy latest pro source code
-copy: release copy-src copy-pkg use-src use-pkg
+copy: copy-src copy-pkg use-src use-pkg
+cc: release copy-src copy-pkg use-src use-pkg
 
 # copy pigsty source code
 copy-src:
-	scp "dist/${VERSION}/pigsty.tgz" meta:~/pigsty.tgz
-copy-pkg:
-	scp dist/${VERSION}/pkg.tgz meta:/tmp/pkg.tgz
-copy-matrix:
-	scp dist/${VERSION}/matrix.tgz meta:/tmp/matrix.tgz
+	scp "dist/${VERSION}/${SRC_PKG}" meta:~/pigsty.tgz
+copy-el7:
+	scp dist/${VERSION}/${EL7_PKG} meta:/tmp/pkg.tgz
+copy-el8:
+	scp dist/${VERSION}/${EL8_PKG} meta:/tmp/pkg.tgz
+copy-el9:
+	scp dist/${VERSION}/${EL9_PKG} meta:/tmp/pkg.tgz
+copy-d11:
+	scp dist/${VERSION}/${D11_PKG} meta:/tmp/pkg.tgz
+copy-d12:
+	scp dist/${VERSION}/${D12_PKG} meta:/tmp/pkg.tgz
+copy-u20:
+	scp dist/${VERSION}/${U20_PKG} meta:/tmp/pkg.tgz
+copy-u22:
+	scp dist/${VERSION}/${U22_PKG} meta:/tmp/pkg.tgz
 copy-app:
-	scp dist/${VERSION}/app.tgz meta:~/app.tgz
+	scp dist/${VERSION}/${APP_PKG} meta:~/app.tgz
 	ssh -t meta 'rm -rf ~/app; tar -xf app.tgz; rm -rf app.tgz'
 copy-docker:
-	scp dist/${VERSION}/docker.tgz meta:/tmp/docker.tgz
+	scp -r dist/docker meta:/tmp/
 load-docker:
 	ssh meta 'cat /tmp/docker.tgz | gzip -d -c - | docker load'
 copy-all: copy-src copy-pkg
 
+# extract packages
 use-src:
 	ssh -t meta 'rm -rf ~/pigsty; tar -xf pigsty.tgz; rm -rf pigsty.tgz'
 use-pkg:
-	ssh meta '/home/vagrant/pigsty/configure --ip 10.10.10.10 --non-interactive --download -m demo'
-use-matrix:
-	ssh meta 'sudo tar -xf /tmp/matrix.tgz -C /www'
-	scp files/matrix.repo meta:/tmp/matrix.repo
-	ssh meta sudo mv -f /tmp/matrix.repo /www/matrix.repo
+	ssh meta "sudo mkdir -p /www; sudo tar -xf /tmp/pkg.tgz -C /www"
 use-all: use-src use-pkg
+
+# load config into cmdb
+cmdb:
+	bin/inventory_load
+	bin/inventory_cmdb
+
+#------------------------------#
+# push / pull
+#------------------------------#
+push:
+	rsync -avz ./ sv:~/pigsty/ --delete --exclude-from 'vagrant/Vagrantfile'
+pull:
+	rsync -avz sv:~/pigsty/ ./ --exclude-from 'vagrant/Vagrantfile' --exclude-from 'vagrant/.vagrant'
 
 ###############################################################
 
@@ -394,79 +422,120 @@ use-all: use-src use-pkg
 ###############################################################
 #                       8. Release                            #
 ###############################################################
-# make release
+# make pigsty release (source code tarball)
 r: release
 release:
 	bin/release ${VERSION}
 
-# release-pkg will make cache and copy to dist dir
-rp: release-pkg
-release-pkg: cache
-	scp meta:/tmp/pkg.tgz dist/${VERSION}/pkg.tgz
+rr: remote-release
+remote-release: release copy-src use-src
+	ssh meta "cd pigsty; make release"
+	scp meta:~/pigsty/dist/${VERSION}/${SRC_PKG} dist/${VERSION}/${SRC_PKG}
 
-# release
-rp2: release-matrix
-release-matrix:
-	#ssh meta 'sudo cp -r /www/matrix /tmp/matrix; sudo chmod -R a+r /www/matrix'
-	ssh meta sudo tar zcvf /tmp/matrix.tgz -C /www matrix
-	scp meta:/tmp/matrix.tgz dist/${VERSION}/matrix.tgz
+# release offline packages with build environment
+rp: release-package
+release-package:
+	bin/release-pkg ${VERSION}
 
-rp3: release-docker
-release-docker:
-	ssh meta 'docker save kong alpine registry dpage/pgadmin4 sosedoff/pgweb postgrest/postgrest swaggerapi/swagger-ui minio/minio bytebase/bytebase:1.0.5 vonng/pg_exporter | gzip -9 -c > /tmp/docker.tgz'
-	scp meta:/tmp/docker.tgz dist/${VERSION}/docker.tgz
-
-# publish will publish pigsty packages
-p: release publish
+# publish pigsty packages to https://get.pigsty.cc
+pb: publish
 publish:
 	bin/publish ${VERSION}
 
-# create pkg.tgz on initialized meta node
-cache:
-	tar -cf files/docs.tgz docs
-	scp files/docs.tgz meta:/tmp/docs.tgz
-	ssh meta 'sudo mv /tmp/docs.tgz /www/pigsty/docs.tgz'
-	scp bin/cache meta:/tmp/cache
-	ssh meta "sudo bash /tmp/cache"
+
+###############################################################
+#                     9. Environment                          #
+###############################################################
+# validate offline packages with build environment
+check-all: check-src check-repo check-boot
+check-src:
+	scp dist/${VERSION}/${SRC_PKG} build-el7:~/pigsty.tgz ; ssh build-el7 "tar -xf pigsty.tgz";
+	scp dist/${VERSION}/${SRC_PKG} build-el8:~/pigsty.tgz ; ssh build-el8 "tar -xf pigsty.tgz";
+	scp dist/${VERSION}/${SRC_PKG} build-el9:~/pigsty.tgz ; ssh build-el9 "tar -xf pigsty.tgz";
+	#scp dist/${VERSION}/${SRC_PKG} debian11:~/pigsty.tgz ; ssh debian11  "tar -xf pigsty.tgz";
+	#scp dist/${VERSION}/${SRC_PKG} debian12:~/pigsty.tgz ; ssh debian12  "tar -xf pigsty.tgz";
+	#scp dist/${VERSION}/${SRC_PKG} ubuntu20:~/pigsty.tgz ; ssh ubuntu20  "tar -xf pigsty.tgz";
+	#scp dist/${VERSION}/${SRC_PKG} ubuntu22:~/pigsty.tgz ; ssh ubuntu22  "tar -xf pigsty.tgz";
+check-repo:
+	scp dist/${VERSION}/pigsty-pkg-${VERSION}.el7.x86_64.tgz build-el7:/tmp/pkg.tgz ; ssh build-el7 'sudo mkdir -p /www; sudo tar -xf /tmp/pkg.tgz -C /www'
+	scp dist/${VERSION}/pigsty-pkg-${VERSION}.el8.x86_64.tgz build-el8:/tmp/pkg.tgz ; ssh build-el8 'sudo mkdir -p /www; sudo tar -xf /tmp/pkg.tgz -C /www'
+	scp dist/${VERSION}/pigsty-pkg-${VERSION}.el9.x86_64.tgz build-el9:/tmp/pkg.tgz ; ssh build-el9 'sudo mkdir -p /www; sudo tar -xf /tmp/pkg.tgz -C /www'
+	#scp dist/${VERSION}/pigsty-pkg-${VERSION}.debian11.x86_64.tgz debian11:/tmp/pkg.tgz ; ssh debian11 'sudo mkdir -p /www; sudo tar -xf /tmp/pkg.tgz -C /www'
+	#scp dist/${VERSION}/pigsty-pkg-${VERSION}.debian12.x86_64.tgz debian12:/tmp/pkg.tgz ; ssh debian12 'sudo mkdir -p /www; sudo tar -xf /tmp/pkg.tgz -C /www'
+	#scp dist/${VERSION}/pigsty-pkg-${VERSION}.ubuntu20.x86_64.tgz ubuntu22:/tmp/pkg.tgz ; ssh ubuntu20 'sudo mkdir -p /www; sudo tar -xf /tmp/pkg.tgz -C /www'
+	#scp dist/${VERSION}/pigsty-pkg-${VERSION}.ubuntu22.x86_64.tgz ubuntu22:/tmp/pkg.tgz ; ssh ubuntu22 'sudo mkdir -p /www; sudo tar -xf /tmp/pkg.tgz -C /www'
+check-boot:
+	ssh build-el7 "cd pigsty; ./bootstrap -n ; ./configure -m el7  -i 10.10.10.7 -n";
+	ssh build-el8 "cd pigsty; ./bootstrap -n ; ./configure -m el   -i 10.10.10.8 -n";
+	ssh build-el9 "cd pigsty; ./bootstrap -n ; ./configure -m el   -i 10.10.10.9 -n";
+	#ssh debian11 "cd pigsty; ./bootstrap -n ; ./configure -m el   -i 10.10.10.11 -n";
+	#ssh debian12 "cd pigsty; ./bootstrap -n ; ./configure -m el   -i 10.10.10.12 -n";
+	#ssh ubuntu20 "cd pigsty; ./bootstrap -n ; ./configure -m el   -i 10.10.10.20 -n";
+	#ssh ubuntu22 "cd pigsty; ./bootstrap -n ; ./configure -m el   -i 10.10.10.22 -n";
+
+meta:  del v1 new ssh copy-el9 use-pkg
+	cp files/pigsty/demo.yml pigsty.yml
+full: del v4 new ssh copy-el9 use-pkg
+	cp files/pigsty/demo.yml pigsty.yml
+el7: del v7 new ssh copy-el7 use-pkg
+	cp files/pigsty/test.yml pigsty.yml
+el8: del v8 new ssh copy-el8 use-pkg
+	cp files/pigsty/test.yml pigsty.yml
+el9: del v9 new ssh copy-el9 use-pkg
+	cp files/pigsty/test.yml pigsty.yml
+minio: del vm new ssh copy-el9 use-pkg
+	cp files/pigsty/citus.yml pigsty.yml
+os: del vo new ssh
+	cp files/pigsty/os.yml pigsty.yml
+ubuntu: del vu new ssh copy-u22 use-pkg
+	cp files/pigsty/ubuntu.yml pigsty.yml
+build: del vb new ssh
+	cp files/pigsty/build.yml pigsty.yml
+build-boot:
+	bin/build-boot
+check: del vc new ssh
+	cp files/pigsty/check.yml pigsty.yml
+checkb: del vc new ssh check-all
+	cp files/pigsty/check.yml pigsty.yml
+
+prod7: del vp7 new ssh
+	cp files/pigsty/prod.yml pigsty.yml
+	scp dist/${VERSION}/pigsty-pkg-${VERSION}.el7.x86_64.tgz meta-1:/tmp/pkg.tgz ; ssh meta-1 'sudo mkdir -p /www; sudo tar -xf /tmp/pkg.tgz -C /www'
+	scp dist/${VERSION}/pigsty-pkg-${VERSION}.el7.x86_64.tgz meta-2:/tmp/pkg.tgz ; ssh meta-2 'sudo mkdir -p /www; sudo tar -xf /tmp/pkg.tgz -C /www'
+prod8: del vp8 new ssh
+	cp files/pigsty/prod.yml pigsty.yml
+	scp dist/${VERSION}/pigsty-pkg-${VERSION}.el8.x86_64.tgz meta-1:/tmp/pkg.tgz ; ssh meta-1 'sudo mkdir -p /www; sudo tar -xf /tmp/pkg.tgz -C /www'
+	scp dist/${VERSION}/pigsty-pkg-${VERSION}.el8.x86_64.tgz meta-2:/tmp/pkg.tgz ; ssh meta-2 'sudo mkdir -p /www; sudo tar -xf /tmp/pkg.tgz -C /www'
+prod9: del vp9 new ssh
+	cp files/pigsty/prod.yml pigsty.yml
+	scp dist/${VERSION}/pigsty-pkg-${VERSION}.el9.x86_64.tgz meta-1:/tmp/pkg.tgz ; ssh meta-1 'sudo mkdir -p /www; sudo tar -xf /tmp/pkg.tgz -C /www'
+	scp dist/${VERSION}/pigsty-pkg-${VERSION}.el9.x86_64.tgz meta-2:/tmp/pkg.tgz ; ssh meta-2 'sudo mkdir -p /www; sudo tar -xf /tmp/pkg.tgz -C /www'
+prod12: del vp12 new ssh
+	cp files/pigsty/prod-d12.yml pigsty.yml
+	scp dist/${VERSION}/pigsty-pkg-${VERSION}.debian12.x86_64.tgz meta-1:/tmp/pkg.tgz ; ssh meta-1 'sudo mkdir -p /www; sudo tar -xf /tmp/pkg.tgz -C /www'
+	scp dist/${VERSION}/pigsty-pkg-${VERSION}.debian12.x86_64.tgz meta-2:/tmp/pkg.tgz ; ssh meta-2 'sudo mkdir -p /www; sudo tar -xf /tmp/pkg.tgz -C /www'
+prod22: del vp22 new ssh
+	cp files/pigsty/prod-u22.yml pigsty.yml
+	scp dist/${VERSION}/pigsty-pkg-${VERSION}.ubuntu22.x86_64.tgz meta-1:/tmp/pkg.tgz ; ssh meta-1 'sudo mkdir -p /www; sudo tar -xf /tmp/pkg.tgz -C /www'
+	scp dist/${VERSION}/pigsty-pkg-${VERSION}.ubuntu22.x86_64.tgz meta-2:/tmp/pkg.tgz ; ssh meta-2 'sudo mkdir -p /www; sudo tar -xf /tmp/pkg.tgz -C /www'
 
 ###############################################################
 
 
 
 ###############################################################
-#                         9. Misc                             #
+#                        Inventory                            #
 ###############################################################
-# generate playbook svg graph
-svg:
-	bin/svg
-
-# serve pigsty doc with docsify or python http server
-d: doc
-doc:
-	bin/doc
-
-# make docs tarball
-docs:
-	tar -cf files/docs.tgz docs
-
-###############################################################
-
-
-
-###############################################################
-#                         Appendix                            #
-###############################################################
-.PHONY: default tip link all download config install \
+.PHONY: default tip link doc all bootstrap config install \
         src pkg \
-        c conf \
-        infra pgsql repo repo-upstream repo-download prometheus grafana loki \
-        repo repo-upstream repo prometheus grafana loki \
-        deps dns start start4 ssh demo demo4 demo-prepare demo-download demo-upload \
-        up dw del new up-test dw-test del-test new-test up4 dw4 del4 new4 clean \
-        st status suspend resume s sync s4 sync4 ss \
-        ri rc rw ro test-ri test-rw test-ro test-rw2 test-ro2 test-rc test-st test-rb1 test-rb2 test-rb3 \
-        di dd dc dashboard-init dashboard-dump dashboard-clean \
-        copy copy-src copy-pkg copy-matrix copy-app copy-docker load-docker copy-all use-src use-pkg use-matrix use-all \
-        r releast rp release-pkg rp2 release-matrix-rp3 release-docker pkg p publish cache \
-        svg doc d docs
+        c \
+        infra pgsql repo repo-upstream repo-build prometheus grafana loki docker \
+        deps dns start ssh sshb demo \
+        up dw del new clean up-test dw-test del-test new-test clean \
+        st status suspend resume v1 v4 v7 v8 v9 vb vm vo vc vu vp vp7 vp9 vnew \
+        ri rc rw ro rh rhc test-ri test-rw test-ro test-rw2 test-ro2 test-rc test-st test-rb1 test-rb2 test-rb3 \
+        di dd dc du dashboard-init dashboard-dump dashboard-clean \
+        copy copy-src copy-pkg copy-el7 copy-el8 copy-el9 copy-u22 copy-app copy-docker load-docker copy-all use-src use-pkg use-all cmdb \
+        r release rr remote-release rp release-pkg release-el7 release-el8 release-el9 check-all check-src check-repo check-boot pp package pb publish \
+        meta full el7 el8 el9 build check minio os ubuntu prod7 prod8 prod9 prod12 prod22
 ###############################################################

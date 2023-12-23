@@ -1,24 +1,21 @@
 #!/bin/bash
 set -euo pipefail
-
 #==============================================================#
 # File      :   release
-# Ctime     :   2021-04-20
-# Mtime     :   2022-04-29
 # Desc      :   make pigsty release
+# Ctime     :   2021-04-20
+# Mtime     :   2023-07-29
 # Path      :   bin/release
-# Copyright (C) 2018-2022 Ruohang Feng (rh@vonng.com)
-#==============================================================#
-
-#==============================================================#
-# environment
+# Author    :   Ruohang Feng (rh@vonng.com)
+# License   :   AGPLv3
 #==============================================================#
 PROG_NAME="$(basename $0)"
 PROG_DIR="$(cd $(dirname $0) && pwd)"
 
-#==============================================================#
-# parameters
-#==============================================================#
+
+#--------------------------------------------------------------#
+# Param
+#--------------------------------------------------------------#
 # complete version string start with 'v'. e.g: v1.0.0
 # if default 'latest' is used, released source code will be generated @ dist/latest
 PIGSTY_VERSION=${1-'latest'}
@@ -29,36 +26,49 @@ PIGSTY_HOME="$(cd $(dirname ${PROG_DIR}) && pwd)"
 RELEASE_DIR=${PIGSTY_HOME}/dist/
 DIR="${RELEASE_DIR}/${PIGSTY_VERSION}"
 
-#==============================================================#
+
+#--------------------------------------------------------------#
 # source code dir
-#==============================================================#
+#--------------------------------------------------------------#
 cd ${PIGSTY_HOME}
 mkdir -p "${DIR}"
 rm -rf "${DIR}/pigsty"
-mkdir -p "${DIR}/pigsty" "${DIR}/pigsty/files/bin" "${DIR}/pigsty/vagrant" "${DIR}/pigsty/docs" "${DIR}/pigsty/terraform"
+mkdir -p "${DIR}/pigsty" "${DIR}/pigsty/files/bin" "${DIR}/pigsty/vagrant" "${DIR}/pigsty/terraform"
 
-#==============================================================#
+
+#--------------------------------------------------------------#
 # copy resources
-#==============================================================#
-cp -r ${PIGSTY_HOME}/{README.md,KEYS,LICENSE,CHANGELOG.md,Makefile} "${DIR}/pigsty/"      # copy text files
-cp -r ${PIGSTY_HOME}/vagrant/{Vagrantfile,ssh,provision.sh} "${DIR}/pigsty/vagrant/"      # copy vagrant resources
-cp -r ${PIGSTY_HOME}/terraform/alicloud.tf                  "${DIR}/pigsty/terraform/"    # copy terraform resources
-cp -R ${PIGSTY_HOME}/files/{conf,ui,cmdb.sql,rule,pg_exporter.yml} "${DIR}/pigsty/files/" # copy pigsty example config
-cp -r ${PIGSTY_HOME}/app         "${DIR}/pigsty/" # copy app
+#--------------------------------------------------------------#
+cp -r ${PIGSTY_HOME}/{README.md,KEYS,LICENSE,Makefile} "${DIR}/pigsty/"
+cp -r ${PIGSTY_HOME}/vagrant/{ssh,dns,spec,nuke,switch,Vagrantfile.libvirt,Vagrantfile.virtualbox,README.md} "${DIR}/pigsty/vagrant/"
+cp -r ${PIGSTY_HOME}/terraform/{README.md,terraform.tf,spec} "${DIR}/pigsty/terraform/"
+cp -R ${PIGSTY_HOME}/files/{pigsty,grafana,prometheus,postgres,cmdb.sql} "${DIR}/pigsty/files/"
+cp -r ${PIGSTY_HOME}/app         "${DIR}/pigsty/" # copy pigsty app
+cp -r ${PIGSTY_HOME}/docs        "${DIR}/pigsty/" # copy pigsty docs
 cp -r ${PIGSTY_HOME}/{bin,roles} "${DIR}/pigsty/" # copy scripts, playbooks
 cp -r ${PIGSTY_HOME}/ansible.cfg "${DIR}/pigsty/" # copy ansible config
 cp -R ${PIGSTY_HOME}/templates   "${DIR}/pigsty/" # copy scripts, playbooks
+cp -r ${PIGSTY_HOME}/install.yml "${DIR}/pigsty/" # copy install playbook
+cp -r ${PIGSTY_HOME}/node*.yml   "${DIR}/pigsty/" # copy node playbooks
 cp -r ${PIGSTY_HOME}/infra*.yml  "${DIR}/pigsty/" # copy infra playbooks
-cp -r ${PIGSTY_HOME}/nodes*.yml  "${DIR}/pigsty/" # copy nodes playbooks
 cp -r ${PIGSTY_HOME}/pgsql*.yml  "${DIR}/pigsty/" # copy pgsql playbooks
 cp -r ${PIGSTY_HOME}/redis*.yml  "${DIR}/pigsty/" # copy redis playbooks
+cp -r ${PIGSTY_HOME}/etcd*.yml   "${DIR}/pigsty/" # copy etcd playbooks
+cp -r ${PIGSTY_HOME}/minio*.yml  "${DIR}/pigsty/" # copy minio playbooks
+cp -r ${PIGSTY_HOME}/mongo*.yml  "${DIR}/pigsty/" # copy mongo playbooks
+cp -r ${PIGSTY_HOME}/cert*.yml   "${DIR}/pigsty/" # copy cert playbook
+cp -r ${PIGSTY_HOME}/docker*.yml "${DIR}/pigsty/" # copy docker playbook
 cp -r ${PIGSTY_HOME}/pigsty.yml  "${DIR}/pigsty/" # copy pigsty config
-cp -r ${PIGSTY_HOME}/configure   "${DIR}/pigsty/" # copy configure script
-cp -r ${PIGSTY_HOME}/download    "${DIR}/pigsty/" # copy download script
-rm -rf "${DIR}/pigsty/bin/__pycache__"            # and other cache files
+cp -r ${PIGSTY_HOME}/{bootstrap,configure} "${DIR}/pigsty/"   # basic scripts
+rm -rf "${DIR}/pigsty/bin/__pycache__"            # remove py cache files
+rm -rf "${DIR}/pigsty/bin/publish"                # remove publish script
+rm -rf "${DIR}/pigsty/files/grafana/__pycache__"  # remove py cache files
+mkdir -p ${DIR}/pigsty/files/pki
+mkdir ${DIR}/pigsty/files/pki/{ca,etcd,misc,infra,pgsql,redis,nginx,minio,mongo,mysql,csr}
 
-#==============================================================#
+
+#--------------------------------------------------------------#
 # make tarball
-#==============================================================#
-cd ${DIR} && tar cf - pigsty | gzip -9 > pigsty.tgz
+#--------------------------------------------------------------#
+cd ${DIR} && tar cf - pigsty | gzip -9 > pigsty-${PIGSTY_VERSION}.tgz
 rm -rf ${DIR}/pigsty

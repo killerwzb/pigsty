@@ -1,12 +1,11 @@
 default: up view
-up:
-	docker-compose up -d
-
-ui:
-	docker run --init --name pgweb --name swagger -p 8882:8080 -e API_URL=http://10.10.10.10:8884 swaggerapi/swagger-ui
+	docker compose up -d
 
 view:
-	@echo "visit http://10.10.10.10:8884"
+	@echo "admin url: http://10.10.10.10:8001"
+
+ui:
+	docker run --init --name pgweb --name swagger -p 8882:8080 -e API_URL=http://10.10.10.10:8001 swaggerapi/swagger-ui
 
 log:
 	docker logs -f kong
@@ -28,9 +27,10 @@ rmi:
 	docker rmi kong
 
 save:
-	docker save kong | lz4 -c > /tmp/kong.tlz
+	mkdir -p /tmp/docker
+	docker save kong | gzip -9 -c > /tmp/docker/kong.tgz
 
 load:
-	cat /tmp/kong.tlz | lz4 -d -c - | docker load
+	cat /tmp/docker/kong.tgz | gzip -d -c - | docker load
 
 .PHONY: default up run view log info stop clean pull rmi save load

@@ -1,70 +1,72 @@
 ---
-#==============================================================#
-# Stage 1: Add /etc/profile
-#==============================================================#
-- name: Copy default user bash profile
+#--------------------------------------------------------------#
+# Stage 1: Add /etc/profile                       [node_profile]
+#--------------------------------------------------------------#
+- name: write node etc profile
   tags: node_profile
-  copy: src=profile.sh dest=/etc/profile.d/profile.sh mode=755
+  copy: src=node.sh dest=/etc/profile.d/node.sh mode=0644
 
-#==============================================================#
-# Stage 2: Setup pam ulimit for node users
-#==============================================================#
-- name: Setup node default pam ulimits
+
+#--------------------------------------------------------------#
+# Stage 2: Setup pam ulimit for node users         [node_ulimit]
+#--------------------------------------------------------------#
+- name: set pam ulimit
   tags: node_ulimit
   copy: src=limits.conf dest=/etc/security/limits.d/limits.conf mode=0644
 
-#==============================================================#
-# Stage 3: Create data dir if not exists
-#==============================================================#
-- name: Create node data dir if exists
-  tags: node_data_dir
-  shell: |
-    [[ -d {{ node_data_dir }} ]] || mkdir -p {{ node_data_dir }} -m 777
 
-#==============================================================#
-# Stage 4: Create default users/groups
-#==============================================================#
-- name: Create node users and groups
+#--------------------------------------------------------------#
+# Stage 3: Create data dir if not exists             [node_data]
+#--------------------------------------------------------------#
+- name: assure node data dir exists
+  tags: node_data
+  when: node_data is defined and node_data != '' and node_data != '/'
+  file:
+    path: "{{ node_data }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0777'
+
+
+#--------------------------------------------------------------#
+# Stage 5: Create default users/groups              [node_admin]
+#--------------------------------------------------------------#
+- name: create os node users and groups
   tags: node_admin
   when: node_admin_enabled
   block:
 
-    #------------------------------------------------------------------------------
     # admin user , group, privileges
-    #------------------------------------------------------------------------------
-    # create user and group
-    - name: Create os user group admin
+    - name: create os user group admin
       group: name=admin gid={{ node_admin_uid }}
-    - name: Create os user admin
+    - name: create os user admin
       user: name={{ node_admin_username }} uid={{ node_admin_uid }} home=/home/{{ node_admin_username }} group=admin generate_ssh_key=yes
 
-    - name: Grant admin group nopass sudo
+    - name: grant admin group nopass sudo
       copy:
         content: "%admin ALL=(ALL) NOPASSWD: ALL"
         dest: /etc/sudoers.d/{{ node_admin_username }}
         mode: 0440
 
-    # ssh config for admin user
-    - name: Add no host checking to ssh config
+    - name: touch admin user ssh config
       copy: src=ssh.config dest=/home/{{ node_admin_username }}/.ssh/config mode=0600 owner={{ node_admin_username }} group=admin
 
-    - name: Add admin ssh no host checking
+    - name: set ssh config no host checking
       lineinfile:
         path: /home/{{ node_admin_username }}/.ssh/config
         regexp: '^StrictHostKeyChecking='
         line: StrictHostKeyChecking=no
 
-    #------------------------------------------------------------------------------
     # admin ssh exchange among cluster
-    #------------------------------------------------------------------------------
-    # admin ssh-key exchange
-    - name: Fetch all admin public keys
+    - name: fetch admin public keys
       shell: cat /home/{{ node_admin_username }}/.ssh/id_rsa.pub
+      args: { executable: /bin/bash }
       register: admin_ssh_keys
 
     # for all hosts, copy their admin ssh public key to each other
-    - name: Exchange all admin ssh keys
-      when: node_admin_ssh_exchange
+    - name: exchange all admin ssh keys
+      when: node_admin_ssh_exchange|bool
       authorized_key: user={{ node_admin_username }} key="{{ item[0] }}"
       ignore_errors: true
       delegate_to: "{{ item[1] }}"
@@ -72,22 +74,22 @@
         - "{{ admin_ssh_keys.stdout }}"
         - "{{ play_hosts }}"
 
-
-    #------------------------------------------------------------------------------
     # add additional public keys
-    #------------------------------------------------------------------------------
-    - name: Install public keys
+    - name: add admin public keys
       tags: node_admin_pk_list
+      when: node_admin_pk_list is defined and node_admin_pk_list|length > 0
       authorized_key: user={{ node_admin_username }} key="{{ item }}"
       ignore_errors: true
       with_items:
         - "{{ node_admin_pk_list }}"
 
-    - name: Install current public key
+    # add current user public keys in ~/.ssh/id*.pub
+    - name: add current user public keys
       tags: node_admin_pk_current
-      when: node_admin_pk_current
+      when: node_admin_pk_current|bool
       authorized_key:
         user: "{{ node_admin_username }}"
-        key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
-
+        key: "{{ lookup('file', item) }}"
+      with_fileglob:
+        - "~/.ssh/id*.pub"
 ...

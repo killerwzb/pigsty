@@ -1,6 +1,7 @@
 default: up view
-up:
-	docker-compose up -d
+
+up: view
+	docker compose up -d
 
 run:
 	docker run --init --name pgweb --restart always --detach --publish 8886:8081 sosedoff/pgweb
@@ -28,9 +29,10 @@ rmi:
 	docker rmi sosedoff/pgweb
 
 save:
-	docker save sosedoff/pgweb | lz4 -c > /tmp/pgweb.tlz
+	mkdir -p /tmp/docker
+	docker save sosedoff/pgweb | gzip -9 -c > /tmp/docker/pgweb.tgz
 
 load:
-	cat /tmp/pgweb.tlz | lz4 -d -c - | docker load
+	cat /tmp/docker/pgweb.tgz | gzip -d -c - | docker load
 
 .PHONY: default up run view log info stop clean pull rmi save load

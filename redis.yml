@@ -2,16 +2,18 @@
 ---
 #==============================================================#
 # File      :   redis.yml
-# Mtime     :   2020-11-22
-# Mtime     :   2022-05-01
-# Desc      :   init redis instance on pigsty nodes
+# Desc      :   init redis cluster / node / instance
+# Ctime     :   2020-11-22
+# Mtime     :   2023-09-15
 # Path      :   redis.yml
-# Copyright (C) 2018-2022 Ruohang Feng (rh@vonng.com)
+# Author    :   Ruohang Feng (rh@vonng.com)
+# License   :   AGPLv3
 #==============================================================#
 
-################################################################
-# Tutorial
-################################################################
+
+#---------------------------------------------------------------
+# usage
+#---------------------------------------------------------------
 # How to create redis clusters ?
 #
 #  init all redis instances on group <cluster>
@@ -23,156 +25,126 @@
 #  init all redis instances specific node
 #   ./redis.yml -l 10.10.10.10    # create redis cluster
 #
-#  init one specific instance 10.10.10.11:6501
-#   ./redis.yml -l 10.10.10.11 -e redis_port=6501 -t redis
+#  init one specific instance 10.10.10.10:6379
+#   ./redis.yml -l 10.10.10.11 -e redis_port=6379 -t redis
 #
-################################################################
+#--------------------------------------------------------------#
+# Utils
+#--------------------------------------------------------------#
+#
+#  bin/redis-add redis-ms          # create redis cluster 'redis-ms'
+#  bin/redis-add 10.10.10.10       # create redis node '10.10.10.10'
+#  bin/redis-add 10.10.10.10 6379  # create redis instance '10.10.10.10:6379'
+#
+#--------------------------------------------------------------#
+# Tasks
+#--------------------------------------------------------------#
+# redis_node        : init redis node
+#   - redis_install : install redis & redis_exporter
+#   - redis_user    : create os user redis
+#   - redis_dir     # redis redis fhs
+# redis_exporter    : config and launch redis_exporter
+#   - redis_exporter_config  : generate redis_exporter config
+#   - redis_exporter_launch  : launch redis_exporter
+# redis_instance    : config and launch redis cluster/node/instance
+#   - redis_check   : check redis instance existence
+#   - redis_clean   : purge existing redis instance
+#   - redis_config  : generate redis instance config
+#   - redis_launch  : launch redis instance
+# redis_register    : register redis to prometheus
+# redis_ha          : setup redis sentinel
+# redis_join        : join redis cluster
+#--------------------------------------------------------------#
 
 
-#---------------------------------------------------------------
-# Init Redis Node
-#---------------------------------------------------------------
-# install software, create user & dir, launch exporter
-- name: Redis Node
-  hosts: all
-  become: true
-  gather_facts: no
-  tags: redis-node
-  tasks:
-
-    #------------------------------------------------------------------------------
-    # Redis Packages
-    #------------------------------------------------------------------------------
-    - name: Install redis and exporter
-      when: not redis_port is defined
-      package: name={{ item }} state=present
-      with_items: [ redis , redis_exporter ]
-
-    #------------------------------------------------------------------------------
-    # Redis User & Directory
-    #------------------------------------------------------------------------------
-    - name: Create user redis
-      tags: [ redis_install_method , redis_user ]
-      when: not redis_port is defined
-      user: name=redis home=/home/redis generate_ssh_key=yes
-
-    - name: Make sure redis data dir exists
-      when: not redis_port is defined
-      file: path={{ item }} state=directory owner=redis mode=0700
-      with_items:
-        - /etc/redis
-        - /var/log/redis/
-        - /var/run/redis/
-        - "{{ redis_fs_main }}/redis"
-
-    #------------------------------------------------------------------------------
-    # Setup Redis Exporter
-    #------------------------------------------------------------------------------
-    - name: Config /etc/default/redis_exporter
-      tags: [ redis_exporter, redis_exporter_config ]
-      when: not redis_port is defined
-      copy:
-        dest: /etc/default/redis_exporter
-        content: |
-          REDIS_EXPORTER_OPTS={{ redis_exporter_options }}
-          REDIS_EXPORTER_CONNECTION_TIMEOUT=10s
-          REDIS_EXPORTER_WEB_LISTEN_ADDRESS="0.0.0.0:{{ redis_exporter_port }}"
-          REDIS_EXPORTER_WEB_TELEMETRY_PATH="{{ exporter_metrics_path }}"
-          REDIS_EXPORTER_INCL_SYSTEM_METRICS=true
-
-    - name: Config redis_exporter service unit
-      tags: [ redis_exporter, redis_exporter_config ]
-      when: not redis_port is defined
-      copy:
-        dest: /usr/lib/systemd/system/redis_exporter.service
-        content: |
-          [Unit]
-          Description=Prometheus exporter for Redis server metrics.
-          Documentation=https://github.com/oliver006/redis_exporter
-          After=network.target
-          [Service]
-          EnvironmentFile=-/etc/default/redis_exporter
-          User=prometheus
-          ExecStart=/bin/redis_exporter $REDIS_EXPORTER_OPTS
-          ExecReload=/bin/kill -HUP $MAINPID
-          Restart=on-failure
-          RestartSec=5s
-          CPUQuota=10%
-          MemoryLimit=200M          
-          [Install]
-          WantedBy=multi-user.target
-
-    - name: Launch redis_exporter systemd service
-      when: redis_exporter_enabled|bool and not redis_port is defined
-      tags: redis_exporter
-      systemd: name=redis_exporter state=restarted enabled=yes daemon_reload=yes
-    - name: Wait for redis_exporter online
-      when: redis_exporter_enabled|bool and not redis_port is defined
-      tags: redis_exporter
-      wait_for: host=127.0.0.1 port={{ redis_exporter_port }} state=started  timeout=10
-
-
-#---------------------------------------------------------------
-# launch redis instance on nodes
-#---------------------------------------------------------------
-- name: Setup Redis Instances
+#--------------------------------------------------------------#
+# Init Redis Cluster / Node / Instance                   [redis]
+#--------------------------------------------------------------#
+- name: REDIS
   hosts: all
   become: true
   gather_facts: no
   tags: redis
+  roles: [{ role: node_id },  { role: redis }]
+
+
+#--------------------------------------------------------------#
+# setup redis sentinel targets                        [redis_ha]
+#--------------------------------------------------------------#
+- name: REDIS HA
+  hosts: all
+  become: true
+  gather_facts: no
+  tags: redis-ha
   tasks:
 
-    - name: Assert redis configured properly
-      tags: [ always, redis-id ]
-      assert:
-        that:
-          - redis_cluster is defined and redis_cluster != ''
-          - redis_node is defined
-          - redis_instances is defined and redis_instances | type_debug == "dict"
-        fail_msg: variable `redis_cluster|redis_instances` are required for redis deployment
+    - name: skip if not a redis sentinel cluster
+      when: redis_port is defined or redis_mode|default('standalone') != 'sentinel' or redis_sentinel_monitor is not defined or redis_sentinel_monitor|length == 0
+      meta: end_host
 
-    - name: Setup redis instance
-      tags: redis_ins
-      when: redis_port is not defined or (redis_port is defined and item.key|int == redis_port|int)
-      include_role:
-        name: redis
-      vars:
-        port: "{{ item.key }}"
-        conf: "{{ item.value|default({}) }}"
-      with_dict: "{{ redis_instances }}"
+    - name: setup redis ha with sentinel
+      ignore_errors: true
+      when: redis_port is not defined
+      run_once: true
+      block:
 
-    - name: Register redis exporter as prometheus target
-      tags: [ redis_register, register_prometheus ]
-      delegate_to: '{{ item }}'
-      with_items: '{{ groups["meta"] }}'
-      become: yes
-      copy:
-        dest: /etc/prometheus/targets/redis/{{ redis_cluster }}-{{ redis_node }}.yml
-        content: |
-          # {{ redis_cluster }}-{{ redis_node }} @ {{ inventory_hostname }}
-    
-          {% for port in redis_instances %}
-          - labels: { cls: {{ redis_cluster }}, ins: {{ redis_cluster }}-{{ redis_node }}-{{ port }}, instance: {{ inventory_hostname }}:{{ port }} }
-            targets: [ redis://{{ inventory_hostname }}:{{ port }} ]
-    
-          {% endfor %}
+        - name: render redis sentinel monitor commands
+          copy:
+            dest: /tmp/{{ redis_cluster }}.monitor
+            mode: 0700
+            content: |
+              {% macro abort(error) %}{{ None['[ERROR] ' ~ error][0] }}{% endmacro %}
+              {% for master in redis_sentinel_monitor %}
+              {% if 'name' not in master or 'host' not in master %}
+              {{ abort("redis_sentinel_monitor require master name and host") }}
+              {% endif %}
+              SENTINEL REMOVE {{ master.name }}
+              {% if not master.remove|default(false) %}
+              SENTINEL MONITOR {{ master.name }} {{ master.host }} {{ master.port|default(6379) }} {{ master.quorum|default(1) }}
+              {% endif %}
+              {% if 'password' in master and master.password != '' %}
+              SENTINEL SET {{ master.name }} auth-pass {{ master.password }}
+              {% endif %}
+              {% endfor %}
+
+        - name: render redis sentinel monitor scripts
+          copy:
+            dest: /tmp/{{ redis_cluster }}-ha.sh
+            mode: 0700
+            content: |
+              {% set redis_meta = hostvars|json_query(cluster_query) %}
+              #!/bin/bash
+              {% for i in redis_meta %}
+              {% for port, _ in i.redis_instances.items() %}
+              cat /tmp/{{ redis_cluster }}.monitor | redis-cli -h {{ i.inventory_hostname }} -p {{ port }} -a {{ i.redis_password|default('') }}
+              {% endfor %}
+              {% endfor %}
+          vars: { cluster_query: "[@.*][0][?redis_cluster=='{{ redis_cluster }}']" }
+
+        - name: execute redis cluster sentinel monitor script
+          shell: "/tmp/{{ redis_cluster }}-ha.sh"
+          args: { executable: /bin/bash }
 
 
-#---------------------------------------------------------------
-# join redis instances for cluster (works on -l <clsname> )
-#---------------------------------------------------------------
-- name: Join redis cluster
+#--------------------------------------------------------------#
+# join redis instances for cluster                  [redis_join]
+#--------------------------------------------------------------#
+- name: REDIS JOIN
   hosts: all
   become: true
   gather_facts: no
   tags: redis-join
   tasks:
 
-    - name: Join redis cluster
-      when: redis_mode == 'cluster'
+    - name: skip if not a redis native cluster
+      when: redis_port is defined or redis_mode|default('standalone') != 'cluster'
+      meta: end_host
+
+    - name: perform redis cluster join
+      run_once: true
       block:
 
-        - name: Fetch redis cluster memberships
+        - name: fetch redis cluster membership
           when: redis_port is not defined
           connection: local
           set_fact:
@@ -180,7 +152,7 @@
           vars:
             redis_cluster_members_query: "[@.*][0][?redis_cluster=='{{ redis_cluster }}']"
 
-        - name: Render redis cluster join script
+        - name: render redis cluster join script
           when: redis_port is not defined
           copy:
             dest: /tmp/{{ redis_cluster }}-join.sh
@@ -188,7 +160,7 @@
             owner: root
             content: |
               #!/bin/bash
-              /bin/redis-cli --cluster create --cluster-yes \
+              /bin/redis-cli {% if redis_password is defined and redis_password != '' %}-a {{ redis_password }}{% endif %} --cluster create --cluster-yes \
               {% for node in redis_cluster_members %}
               {% for port in node.redis_instances %}
                 {{ node.inventory_hostname }}:{{ port }} \
@@ -196,9 +168,10 @@
               {% endfor %}
                 --cluster-replicas {{ redis_cluster_replicas|default(1) }}
 
-        - name: Join redis clusters
+        - name: execute redis cluster join script
           ignore_errors: true
+          run_once: true
           when: redis_port is not defined
           shell: "/tmp/{{ redis_cluster }}-join.sh"
-
+          args: { executable: /bin/bash }
 ...

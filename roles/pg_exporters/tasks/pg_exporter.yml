@@ -2,37 +2,46 @@
 #------------------------------------------------------------------------------
 # Config pg_exporter
 #------------------------------------------------------------------------------
-- name: Setup pg_exporter
+- name: config pg_exporter
   block:
 
-    - name: Set pg_exporter facts
-      set_fact:
-        pg_instance:        "{{ insvar.pg_cluster }}-{{ insvar.pg_seq }}"
-        pg_address:         "{{ insvar.inventory_hostname }}-{{ insvar.pg_port }}"
-        pg_exporter_unit:   "pg_exporter_{{ insvar.pg_cluster }}-{{ insvar.pg_seq }}"
-        pg_exporter_target: "{% if pg_exporter_url != '' %}{{ pg_exporter_url }}{% else %}postgres://{{ pg_monitor_username }}:{{ pg_monitor_password }}@{{ inventory_hostname }}:{{ item.key }}/postgres{% if pg_exporter_params != '' %}?{{ pg_exporter_params }}{% if pg_localhost != '' %}&host={{ pg_localhost }}{% endif %}{% endif %}{% endif %}"
+    - name: print pg_exporter summary
+      debug:
+        msg: "{{ pg_exporter_unit }} : {{ inventory_hostname }}:{{ pg_exporter_port }} -> {{ pg_cluster }}-{{ pg_seq }} @ {{ pg_host }}:{{ pg_port }}"
 
     # create pg_exporter config dir
-    - name: Create /etc/pg_exporter conf dir
-      file: path=/etc/pg_exporter state=directory owner={{ insvar.pg_dbsu }} group=postgres mode=0775
+    - name: create /etc/pg_exporter conf dir
+      file: path=/etc/pg_exporter state=directory owner={{ pg_dbsu }} group=postgres mode=0775
 
-    # config pg_exporter config
-    - name: Copy default pg_exporter.yml config
-      copy: src={{ insvar.pg_exporter_config }} dest=/etc/pg_exporter/{{ insvar.pg_exporter_config }} owner={{ insvar.pg_dbsu }} group=postgres mode=0644
+    # if pg_exporter_config is not defined, use default template
+    - name: render default pg_exporter.yml config
+      when: pg_exporter_config == 'pg_exporter.yml'
+      template: src=pg_exporter.yml dest=/etc/pg_exporter/{{ pg_exporter_unit }}.yml owner={{ pg_dbsu }} group=postgres mode=0644
+      vars:
+        ttl_fast: "{{ pg_exporter_cache_ttls.split(',')[0]|int }}"
+        ttl_norm: "{{ pg_exporter_cache_ttls.split(',')[1]|int }}"
+        ttl_slow: "{{ pg_exporter_cache_ttls.split(',')[2]|int }}"
+        ttl_slowest: "{{ pg_exporter_cache_ttls.split(',')[3]|int }}"
+
+    # otherwise, COPY use specified file
+    - name: copy user provided pg_exporter.yml config
+      when: pg_exporter_config != 'pg_exporter.yml'
+      copy: src={{ pg_exporter_config }} dest=/etc/pg_exporter/{{ pg_exporter_unit }}.yml owner={{ pg_dbsu }} group=postgres mode=0644
 
     # config pg_exporter systemd environment options
-    - name: Config pg_exporter parameters
-      template: src=pg_exporter.j2 dest=/etc/default/{{ pg_exporter_unit }} owner={{ insvar.pg_dbsu }} group=postgres mode=0600
+    - name: config pg_exporter parameters
+      template: src=pg_exporter.j2 dest=/etc/default/{{ pg_exporter_unit }} owner={{ pg_dbsu }} group=postgres mode=0600
 
     # config pg_exporter systemd service
-    - name: Config pg_exporter systemd unit
-      template: src=pg_exporter.service.j2 dest=/usr/lib/systemd/system/{{ pg_exporter_unit }}.service
+    - name: config pg_exporter systemd unit
+      template: src=pg_exporter.service.j2 dest={{ systemd_dir }}/{{ pg_exporter_unit }}.service
+      vars: { systemd_dir: "{% if os_package is defined and os_package == 'deb' %}/lib/systemd/system/{% else %}/usr/lib/systemd/system{% endif %}" }
 
     # launch pg_exporter systemd service
-    - name: Launch pg_exporter systemd unit
+    - name: launch pg_exporter systemd unit
       systemd: name={{ pg_exporter_unit }} state=restarted enabled=yes daemon_reload=yes
 
-    - name: Wait for pg_exporter online
-      wait_for: host=127.0.0.1 port={{ insvar.pg_exporter_port }} state=started timeout=10
+    - name: wait for pg_exporter online
+      wait_for: host=127.0.0.1 port={{ pg_exporter_port }} state=started timeout=10
 
 ...

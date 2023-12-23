@@ -1,0 +1,70 @@
+---
+#--------------------------------------------------------------#
+# Create DNS Dir                                   [dns_install]
+#--------------------------------------------------------------#
+#- name: make sure dnsmasq installed
+#  tags: dns_install
+#  package: name=grafana state=latest
+
+
+#--------------------------------------------------------------#
+# Create DNS Dir                                      [dns_user]
+#--------------------------------------------------------------#
+- name: create os group dnsmasq
+  group: name=dnsmasq
+- name: create os user dnsmasq
+  ignore_errors: true
+  user: name=dnsmasq group=dnsmasq
+
+
+#--------------------------------------------------------------#
+# Create DNS Dir                                       [dns_dir]
+#--------------------------------------------------------------#
+- name: create dns records dir
+  tags: dns_dir
+  file: path=/etc/hosts.d/ state=directory mode=0755 owner=root group=dnsmasq
+
+
+#--------------------------------------------------------------#
+# Config DNS                                        [dns_config]
+#--------------------------------------------------------------#
+- name: copy dnsmasq systemd service
+  tags: dns_config
+  copy: src=dnsmasq.service dest={{ systemd_dir }}/dnsmasq.service
+  vars: { systemd_dir: "{% if os_package is defined and os_package == 'deb' %}/lib/systemd/system/{% else %}/usr/lib/systemd/system{% endif %}" }
+
+- name: render /etc/dnsmasq.d/config
+  tags: dns_config
+  template: src=dnsmasq.conf.j2 dest=/etc/dnsmasq.conf
+
+
+#--------------------------------------------------------------#
+# Write DNS Records                                 [dns_record]
+#--------------------------------------------------------------#
+- name: render default dns records
+  tags: dns_record
+  copy:
+    dest: /etc/hosts.d/default
+    owner: root
+    group: root
+    mode: 0644
+    content: |
+      {% for rec in dns_records|default([]) %}
+      {{ rec|replace('${admin_ip}', admin_ip) }}
+      {% endfor %} 
+
+
+#--------------------------------------------------------------#
+# Write DNS Records                                 [dns_launch]
+#--------------------------------------------------------------#
+- name: launch dnsmasq systemd service
+  tags: dns_launch
+  when: dns_enabled|bool
+  ignore_errors: yes
+  block:
+    - name: launch dnsmasq systemd service
+      systemd: name=dnsmasq state=restarted enabled=yes daemon_reload=yes
+    - name: wait for dnsmasq service online
+      wait_for: host=127.0.0.1 port={{ dns_port }} state=started
+
+...

@@ -2,14 +2,18 @@
 #--------------------------------------------------------------#
 # Remove postgres datasource from Grafana
 #--------------------------------------------------------------#
-- name: Remove grafana datasource on meta node
-  become: yes
+# only remove those registered databases
+- name: remove postgres datasource from grafana
   ignore_errors: yes
-  delegate_to: meta
+  delegate_to: "{{ admin_ip }}"
+  when: item.register_data_source is not defined or item.register_data_source|bool
   shell: |
-    curl -X DELETE "{{ grafana_endpoint }}/api/datasources/name/{{ insdb }}" -u "{{ grafana_admin_username }}:{{ grafana_admin_password }}"  -H 'Content-Type: application/json' || true
+    curl -X DELETE "{{ endpoint }}/api/datasources/name/{{ name }}" -u "{{ username }}:{{ password }}" -H 'Content-Type: application/json'
+  args: { executable: /bin/bash }
   vars:
-    datname: "{{ item.name }}"
-    insdb: "{{ pg_cluster }}-{{ pg_seq }}.{{ datname }}"
+    name: "{{ pg_cluster }}-{{ pg_seq }}.{{ item.name }}"
+    endpoint: "http://{{ infra_portal.grafana.endpoint|replace('${admin_ip}' ,admin_ip) }}"
+    username: "{{ grafana_admin_username|default('admin') }}"
+    password: "{{ grafana_admin_password|default('pigsty') }}"
   with_items: "{{ pg_databases }}"
 ...

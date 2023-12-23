@@ -1,0 +1,147 @@
+---
+#--------------------------------------------------------------#
+# Clean                                               [pg_clean]
+#--------------------------------------------------------------#
+- import_tasks: clean.yml
+  tags: pg_clean
+
+#--------------------------------------------------------------#
+# User                                                 [pg_dbsu]
+#--------------------------------------------------------------#
+- import_tasks: dbsu.yml
+  tags: pg_dbsu
+
+#--------------------------------------------------------------#
+# Install                                           [pg_install]
+#--------------------------------------------------------------#
+# pg_pkg, pg_extension, pg_path, pg_env
+- import_tasks: install.yml
+  tags: pg_install
+
+#--------------------------------------------------------------#
+# Directory                                             [pg_dir]
+#--------------------------------------------------------------#
+- import_tasks: dir.yml
+  tags: pg_dir
+
+#--------------------------------------------------------------#
+# Utils                                                [pg_util]
+#--------------------------------------------------------------#
+# pg_bin, pg_alias, pg_psql, pg_dummy
+- import_tasks: util.yml
+  tags: pg_util
+
+#--------------------------------------------------------------#
+# Config                                      [patroni] [config]
+#--------------------------------------------------------------#
+# pg_spec, pg_conf, pg_systemd
+- import_tasks: config.yml
+  tags: [ patroni, pg_config ]
+  when: patroni_enabled|bool
+
+#--------------------------------------------------------------#
+# Cert                                       [patroni] [pg_cert]
+#--------------------------------------------------------------#
+# pg_cert_private, pg_cert_issue, pg_cert_copy
+- import_tasks: cert.yml
+  tags: [ patroni, pg_cert ]
+
+#--------------------------------------------------------------#
+# Launch                                   [patroni] [pg_launch]
+#--------------------------------------------------------------#
+# pg_watchdog, pg_primary, pg_init, pg_pass， pg_replica
+# pg_hba, patroni_reload, pg_patroni
+- import_tasks: patroni.yml
+  tags: [ patroni, pg_launch ]
+  when: patroni_enabled|bool
+
+#--------------------------------------------------------------#
+# Users                                                [pg_user]
+#--------------------------------------------------------------#
+# pg_user_config, pg_user_create
+- include_tasks: user.yml
+  tags: pg_user
+  when: pg_provision|bool
+  vars: {user: "{{ item }}" }
+  with_items: "{{ pg_users }}"
+
+#--------------------------------------------------------------#
+# Databases                                              [pg_db]
+#--------------------------------------------------------------#
+# pg_db_config, pg_db_create
+- include_tasks: database.yml
+  when: pg_provision|bool
+  tags: pg_db
+  vars: { database: "{{ item }}" }
+  with_items: "{{ pg_databases }}"
+
+#--------------------------------------------------------------#
+# Backup                                             [pg_backup]
+#--------------------------------------------------------------#
+# pgbackrest_init, pgbackrest_backup
+- import_tasks: pgbackrest.yml
+  tags: pgbackrest
+  when: pgbackrest_enabled|bool
+
+#--------------------------------------------------------------#
+# Pgbouncer                                          [pgbouncer]
+#--------------------------------------------------------------#
+# pgbouncer_clean, pgbouncer_dir, pgbouncer_config, pgbouncer_launch
+# pgbouncer_svc, pgbouncer_ini, pgbouncer_hba, pgbouncer_db pgbouncer_user pgbouncer_reload
+- import_tasks: pgbouncer.yml
+  tags: pgbouncer
+  when: pgbouncer_enabled|bool
+
+#--------------------------------------------------------------#
+# VIP                                                   [pg_vip]
+#--------------------------------------------------------------#
+# pg_vip_config, pg_vip_launch
+- import_tasks: vip.yml
+  tags: pg_vip
+
+#--------------------------------------------------------------#
+# Domain Name                                           [pg_dns]
+#--------------------------------------------------------------#
+# pg_dns_ins, pg_dns_cls
+- import_tasks: dns.yml
+  tags: pg_dns
+
+#--------------------------------------------------------------#
+# Service (Local HAProxy Provider)                  [pg_service]
+#--------------------------------------------------------------#
+# pg_service_config, pg_service_reload
+- import_tasks: service_local.yml
+  tags: pg_service
+  when: pg_service_provider == '' or pg_service_provider not in groups
+
+#--------------------------------------------------------------#
+# Service (Remote HAProxy Provider)                  [pg_service]
+#--------------------------------------------------------------#
+# pg_service_config, pg_service_reload
+- import_tasks: service_remote.yml
+  tags: pg_service
+  when: pg_service_provider != '' and pg_service_provider in groups and pg_role == 'primary'
+
+#--------------------------------------------------------------#
+# Monitor                                          [pg_exporter]
+#--------------------------------------------------------------#
+# pg_exporter_config, pg_exporter_launch, pgbouncer_exporter_launch
+- import_tasks: exporter.yml
+  tags: pg_exporter
+
+#--------------------------------------------------------------#
+# Register Prometheus         [pg_register, register_prometheus]
+#--------------------------------------------------------------#
+- import_tasks: register_prometheus.yml
+  tags: [ pg_register, register_prometheus ]
+
+#--------------------------------------------------------------#
+# Register Grafana               [pg_register, register_grafana]
+#--------------------------------------------------------------#
+- include_tasks: register_grafana.yml
+  when: pg_provision|bool
+  tags: [ pg_register, register_grafana ]
+  vars: { database: "{{ item }}" }
+  with_items: "{{ pg_databases }}"
+
+...

@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+set -uo pipefail
+#==============================================================#
+# File      :   pg-init
+# Desc      :   shell script to init postgres cluster
+# Time      :   {{ '%Y-%m-%d %H:%M' | strftime }}
+# Host      :   {{ pg_instance }} @ {{ inventory_hostname }}:{{ patroni_port }}
+# Path      :   /pg/bin/pg-init
+# Deps      :   psql, /pg/tmp/pg-init-*.sql
+# Author    :   Ruohang Feng (rh@vonng.com)
+# License   :   AGPLv3
+#==============================================================#
+PROG_NAME="$(basename $0)"
+PROG_DIR="$(cd $(dirname $0) && pwd)"
+
+
+#--------------------------------------------------------------#
+#                        Default Roles                         #
+#--------------------------------------------------------------#
+psql postgres -qAXwtf /pg/tmp/pg-init-roles.sql
+
+
+#--------------------------------------------------------------#
+#                        System Template                       #
+#--------------------------------------------------------------#
+# system default template
+psql template1 -qAXwtf /pg/tmp/pg-init-template.sql
+
+# make postgres same as templated database (optional)
+psql postgres  -qAXwtf /pg/tmp/pg-init-template.sql
+
+{% if pg_mode == 'citus' and patroni_citus_db != 'postgres' %}
+# patroni_citus_db are created by patroni, init with templates
+psql {{ patroni_citus_db }}  -qAXwtf /pg/tmp/pg-init-template.sql
+{% endif %}
+
+#--------------------------------------------------------------#
+#                        Customize Logic                       #
+#--------------------------------------------------------------#
+# add your template logic here

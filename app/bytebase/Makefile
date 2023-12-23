@@ -1,8 +1,7 @@
 default: up view
 
-# minimal setup with internal pg & dir
 up: view
-	docker-compose up -d
+	docker compose up -d
 
 # run with local data dir & external pg
 run: pg
@@ -11,11 +10,11 @@ run: pg
         --restart always --detach \
         --publish 8887:8887 \
         --volume /data/bytebase/data:/var/opt/bytebase \
-        bytebase/bytebase:1.0.5 \
+        bytebase/bytebase:2.11.1 \
         --data /var/opt/bytebase \
-        --host http://ddl.pigsty \
+        --external-url http://ddl.pigsty \
         --port 8887 \
-        --pg postgres://dbuser_bytebase:DBUser.Bytebase@10.10.10.10:5432/bytebase
+        --pg=postgresql://dbuser_bytebase:DBUser.Bytebase@10.10.10.10:5432/bytebase
 
 view:
 	@echo "visit http://ddl.pigsty  or  http://10.10.10.10:8887"
@@ -30,7 +29,7 @@ info:
 pg:
 	@echo "pg_users:     { name: dbuser_bytebase , password: DBUser.Bytebase, roles: [ dbrole_admin ] }"
 	@echo "pg_databases: { name: bytebase, owner: dbuser_bytebase, comment: bytebase primary database }"
-	@echo "bin/createuser pg-meta dbuser_bytebase ; bin/createdb pg-meta bytebase"
+	@echo "bin/pgsql-user pg-meta dbuser_bytebase ; bin/pgsql-db pg-meta bytebase"
 
 stop:
 	docker stop bytebase;
@@ -38,20 +37,17 @@ stop:
 clean:
 	docker stop bytebase; docker rm -f bytebase
 
-dump:
-	docker exec -it bytebase /venv/bin/python3 /bytebase4/setup.py --user admin@pigsty.cc --dump-servers /tmp/servers.json
-	docker cp bytebase:/tmp/servers.json /tmp/servers.json
-
 pull:
-	docker pull bytebase/bytebase4
+	docker pull bytebase/bytebase:2.11.1
 
 rmi:
-	docker rmi bytebase/bytebase4
+	docker rmi bytebase/bytebase:2.11.1
 
 save:
-	docker save bytebase/bytebase4 | lz4 -c > /tmp/bytebase.tlz
+	mkdir -p /tmp/docker
+	docker save bytebase/bytebase:2.11.1 | gzip -9 -c > /tmp/docker/bytebase.tgz
 
 load:
-	cat /tmp/bytebase.tlz | lz4 -d -c - | docker load
+	cat /tmp/docker/bytebase.tgz | gzip -d -c - | docker load
 
 .PHONY: default up run view log info stop clean conf dump pull rmi save load

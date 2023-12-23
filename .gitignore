@@ -1,26 +1,33 @@
 #########################################################
+# root-ca (self-signed)
+#########################################################
+files/*.key
+files/*.crt
+files/pki/*
+
+#########################################################
 # binaries
 #########################################################
 dist/
-pigsty
 bin/publish
-
+build/
 
 #########################################################
-# vagrant
+# vagrant &
 #########################################################
 # vm files
+vagrant/Vagranfile
 vagrant/.vagrant
+.vagrant/
 
 #########################################################
 # terraform
 #########################################################
-terraform/mxdb
+.terraform/
 terraform/.terraform/
 terraform/*.hcl
-terraform/*.tfstate
-terraform/*.tfstate.backup
-terraform/alicloud.sh
+terraform/*.tfstate*
+terraform/.terraform*
 
 #########################################################
 # packages cache
@@ -36,8 +43,6 @@ files/release/
 # IDE files
 .idea/
 .code/
-
-# macos files
 .DS_Store
 
 #########################################################
@@ -57,14 +62,4 @@ test.yml
 # image
 #########################################################
 img/
-
-
-#########################################################
-# applications
-#########################################################
-app/isd/bin/*.tar.gz
-app/isd/bin/isdh
-app/isd/bin/isdd
-app/isd/data
-app/covid/data
-
+pigsty.wiki/

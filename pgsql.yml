@@ -2,70 +2,116 @@
 ---
 #==============================================================#
 # File      :   pgsql.yml
-# Mtime     :   2020-05-12
-# Mtime     :   2021-03-20
 # Desc      :   init postgres cluster/instance
+# Ctime     :   2020-05-12
+# Mtime     :   2023-02-26
 # Path      :   pgsql.yml
-# Copyright (C) 2018-2022 Ruohang Feng (rh@vonng.com)
+# Author    :   Ruohang Feng (rh@vonng.com)
+# License   :   AGPLv3
 #==============================================================#
-
-
-#==============================================================#
-# Playbook : Init PGSQL Cluster/Instance on Pigsty Node
-#==============================================================#
-#  Warning: You have to run this playbook on provisioned nodes
-#  which should be provisioned by ./nodes.yml playbook ahead
-#  you can run both at once with bin/createpg <cluster|ip>
-#    bin/createpg pg-test
-#
-#  Init cluster `pg-test`
-#     pgsql.yml -l pg-test
-#
-#  Init instance (10.10.10.13) among cluster `pg-test`
-#     pgsql.yml -l 10.10.10.13
-#
-#  Re-init postgres instance only on node 10.10.10.13
-#     pgsql.yml -l10.10.10.13 --tags=postgres
-#
-#  Re-deploy monitor component
-#     pgsql.yml --tags=monitor
-#
-#  Replace exporter with new binary version
-#     pgsql.yml --tags=monitor -e exporter_install=binary
-#
-#  Refresh (haproxy) services
-#     pgsql.yml --tags=service (or bin/reloadha <cluster>)
-#
-#  Refresh HBA rules
-#     pgsql.yml --tags=pg_hba  (or bin/reloadhba <cluster>)
-#
-#  Register cluster/instance to infrastructure
-#     pgsql.yml --tags=register             # register all
-#     pgsql.yml --tags=register_consul      # service discovery
-#     pgsql.yml --tags=register_prometheus  # monitor target
-#     pgsql.yml --tags=register_grafana     # pgsql datasource
-#     pgsql.yml --tags=register_nginx       # haproxy admin page
-#==============================================================#
-
-# init postgres cluster/instance
-- name: Pgsql Init
+- name: PGSQL
   become: yes
   hosts: all
   gather_facts: no
-  tags: pgsql-init
   roles:
+    - { role: node_id , tags: node-id  } # get node identity (always)
+    - { role: pg_id   , tags: pg-id    } # get pgsql identity (always)
+    - { role: pgsql   , tags: pgsql    } # init postgres cluster/instance
 
-    - role: postgres        # init postgres pgbouncer patroni
-      tags: postgres
 
-    - role: service         # init service , haproxy , vip
-      tags: service
-
-    - role: pg_exporter     # init monitor exporters
-      tags: pg-exporter
-
-    - role: pg_register     # register postgres cluster/instance to infra
-      tags: pg-register
-
-#---------------------------------------------------------------
+#--------------------------------------------------------------#
+# Usage
+#--------------------------------------------------------------#
+#
+#  Init a cluster  (e.g. pg-meta)
+#    ./pgsql.yml -l pg-meta
+#
+#  Add/ReInit a replica to cluster (e.g. add 10.10.10.13 of pg-test)
+#    ./pgsql.yml -l 10.10.10.13   # refresh pg_services after expansion
+#    ./pgsql.yml -l 'pg-test,!10.10.10.13' -t pg_service
+#
+#  Refresh Postgres Cluster Service (e.g. pg-test)
+#    ./pgsql.yml -l pg-test --tags=pg_service
+#
+#  Reload Postgres/Pgbouncer HBA Rules (e.g. pg-test)
+#    ./pgsql.yml -l pg-test --tags=pg_hba,pgbouncer_hba,pgbouncer_reload -e pg_reload=true
+#
+#--------------------------------------------------------------#
+# Utils
+#--------------------------------------------------------------#
+#
+#  bin/pgsql-add pg-meta             # init pgsql cluster pg-meta
+#  bin/pgsql-add 10.10.10.10         # init pgsql instance 10.10.10.10
+#  bin/pgsql-add pg-test 10.10.10.13 # add 10.10.10.13 to cluster pg-test (with service refresh)
+#  bin/pgsql-svc pg-test             # refresh haproxy service of pg-test (when membership changed)
+#  bin/pgsql-hba pg-test             # reload pg/pgb hba rules of pg-test (when role/hba changed)
+#
+#--------------------------------------------------------------#
+# Tasks
+#--------------------------------------------------------------#
+# pg_clean      : cleanup existing postgres if necessary
+# pg_dbsu       : setup os user sudo for postgres dbsu
+# pg_install    : install postgres packages & extensions
+#   - pg_pkg              : install postgres related packages
+#   - pg_extension        : install postgres extensions only
+#   - pg_path             : link pgsql version bin to /usr/pgsql
+#   - pg_env              : add pgsql bin to system path
+# pg_dir        : create postgres directories and setup fhs
+# pg_util       : copy utils scripts, setup alias and env
+#   - pg_bin              : sync postgres util scripts /pg/bin
+#   - pg_alias            : write /etc/profile.d/pg-alias.sh
+#   - pg_psql             : create psqlrc file for psql
+#   - pg_dummy            : create dummy placeholder file
+# patroni       : bootstrap postgres with patroni
+#   - pg_config           : generate postgres config
+#     - pg_conf           : generate patroni config
+#     - pg_systemd        : generate patroni systemd config
+#     - pgbackrest_config : generate pgbackrest config
+#   -  pg_cert            : issues certificates for postgres
+#   -  pg_launch          : launch postgres primary & replicas
+#     - pg_watchdog       : grant watchdog permission to postgres
+#     - pg_primary        : launch patroni/postgres primary
+#     - pg_init           : init pg cluster with roles/templates
+#     - pg_pass           : write .pgpass file to pg home
+#     - pg_replica        : launch patroni/postgres replicas
+#     - pg_hba            : generate pg HBA rules
+#     - patroni_reload    : reload patroni config
+#     - pg_patroni        : pause or remove patroni if necessary
+# pg_user       : provision postgres business users
+#   - pg_user_config      : render create user sql
+#   - pg_user_create      : create user on postgres
+# pg_db         : provision postgres business databases
+#   - pg_db_config        : render create database sql
+#   - pg_db_create        : create database on postgres
+# pg_backup               : init pgbackrest repo & basebackup
+#   - pgbackrest_init     : init pgbackrest repo
+#   - pgbackrest_backup   : make a initial backup after bootstrap
+# pgbouncer     : deploy a pgbouncer sidecar with postgres
+#   - pgbouncer_clean     : cleanup existing pgbouncer
+#   - pgbouncer_dir       : create pgbouncer directories
+#   - pgbouncer_config    : generate pgbouncer config
+#     -  pgbouncer_svc    : generate pgbouncer systemd config
+#     -  pgbouncer_ini    : generate pgbouncer main config
+#     -  pgbouncer_hba    : generate pgbouncer hba config
+#     -  pgbouncer_db     : generate pgbouncer database config
+#     -  pgbouncer_user   : generate pgbouncer user config
+#   -  pgbouncer_launch   : launch pgbouncer pooling service
+#   -  pgbouncer_reload   : reload pgbouncer config
+# pg_vip        : bind vip to pgsql primary with vip-manager
+#   - pg_vip_config       : generate config for vip-manager
+#   - pg_vip_launch       : launch vip-manager to bind vip
+# pg_dns        : register dns name to infra dnsmasq
+#   - pg_dns_ins          : register pg instance name
+#   - pg_dns_cls          : register pg cluster name
+# pg_service    : expose pgsql service with haproxy
+#   - pg_service_config   : generate local haproxy config for pg services
+#   - pg_service_reload   : expose postgres services with haproxy
+# pg_exporter   : expose pgsql service with haproxy
+#   - pg_exporter_config  : config pg_exporter & pgbouncer_exporter
+#   - pg_exporter_launch  : launch pg_exporter
+#   - pgbouncer_exporter_launch : launch pgbouncer exporter
+# pg_register   : register postgres to pigsty infrastructure
+#   - register_prometheus : register pg as prometheus monitor targets
+#   - register_grafana    : register pg database as grafana datasource
+#--------------------------------------------------------------#
 ...

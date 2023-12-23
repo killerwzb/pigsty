@@ -2,79 +2,137 @@
 #-----------------------------------------------------------------
 # NODE_IDENTITY
 #-----------------------------------------------------------------
-meta_node: false                  # node with meta_node flag will be marked as admin node
-# nodename:          # [OPTIONAL] # node instance identity, used as `ins`, hostname by default
-node_cluster: nodes  # [OPTIONAL] # node cluster identity, used as `cls`, 'nodes' by default
+#nodename:           # [INSTANCE] # node instance identity, use hostname if missing, optional
+node_cluster: nodes   # [CLUSTER] # node cluster identity, use 'nodes' if missing, optional
 nodename_overwrite: true          # overwrite node's hostname with nodename?
 nodename_exchange: false          # exchange nodename among play hosts?
+node_id_from_pg: true             # use postgres identity as node identity if applicable?
 
 #-----------------------------------------------------------------
 # NODE_DNS
 #-----------------------------------------------------------------
-node_etc_hosts_default:           # static dns records in /etc/hosts
-  - 10.10.10.10 meta pigsty c.pigsty g.pigsty l.pigsty p.pigsty a.pigsty api.pigsty adm.pigsty cli.pigsty ddl.pigsty lab.pigsty
-node_etc_hosts: []                # extra static dns records in /etc/hosts
-node_dns_method: none             # add (default) | none (skip) | overwrite (remove old settings)
-node_dns_servers: [ ]                # dynamic nameserver in /etc/resolv.conf
-node_dns_options:                 # dns resolv options
-  - options single-request-reopen timeout:1 rotate
-  - domain service.consul
+node_default_etc_hosts:           # static dns records in `/etc/hosts`
+  - "${admin_ip} h.pigsty a.pigsty p.pigsty g.pigsty"
+node_etc_hosts: []                # extra static dns records in `/etc/hosts`
+node_dns_method: add              # how to handle dns servers: add,none,overwrite
+node_dns_servers: ['${admin_ip}'] # dynamic nameserver in `/etc/resolv.conf`
+node_dns_options:                 # dns resolv options in `/etc/resolv.conf`
+  - options single-request-reopen timeout:1
 
 #-----------------------------------------------------------------
-# NODE_REPO
+# NODE_PACKAGE
 #-----------------------------------------------------------------
-node_repo_method: local           # none|local: ad local repo|public: add upstream directly
-node_repo_remove: true            # remove existing repo on nodes?
-node_repo_local_urls:             # list local repo url, if node_repo_method = local
-  - http://pigsty/pigsty.repo
-
-node_packages: [ ]                # extra packages for all nodes
-node_packages_default:            # common packages for all nodes
-  - wget,sshpass,ntp,chrony,tuned,uuid,lz4,make,patch,bash,lsof,wget,unzip,git,ftp,vim-minimal,ca-certificates
-  - numactl,grubby,sysstat,dstat,iotop,bind-utils,net-tools,tcpdump,socat,ipvsadm,telnet,tuned,nc,pv,jq,perf
-  - readline,zlib,openssl,openssl-libs,openssh-clients,python3,python36-requests,node_exporter,consul,etcd,promtail
-node_packages_meta:               # extra packages for meta nodes
-  - grafana,prometheus2,alertmanager,loki,nginx_exporter,blackbox_exporter,pushgateway,redis,postgresql14
-  - nginx,ansible,pgbadger,python-psycopg2,dnsmasq,coreutils,diffutils,polysh,docker-ce,docker-compose
-node_packages_meta_pip: jupyterlab
+node_repo_method: local           # how to set up node repo: none,local,public,both
+node_repo_remove: true            # remove existing repo on node?
+node_repo_local_urls:             # local repo url, if node_repo_method = local or both
+  - http://${admin_ip}/pigsty.repo
+node_packages: [ ]                # packages to be installed current nodes
+node_default_packages:            # default packages to be installed on all nodes
+  - lz4,unzip,bzip2,zlib,yum,pv,jq,git,ncdu,make,patch,bash,lsof,wget,uuid,tuned,nvme-cli,numactl,grubby,sysstat,iotop,htop,rsync,tcpdump,python3,python3-pip
+  - netcat,socat,ftp,lrzsz,net-tools,ipvsadm,bind-utils,telnet,audit,ca-certificates,openssl,readline,vim-minimal,node_exporter,etcd,haproxy
 
 #-----------------------------------------------------------------
 # NODE_TUNE
 #-----------------------------------------------------------------
-node_disable_firewall: true       # disable firewall
-node_disable_selinux: true        # disable selinux
-node_disable_numa: false          # disable numa (node reboot required)
-node_disable_swap: false          # disable swap, use with caution
-node_static_network: true         # keep dns resolver settings after reboot
+node_disable_firewall: true       # disable node firewall? true by default
+node_disable_selinux: true        # disable node selinux? true by default
+node_disable_numa: false          # disable node numa, reboot required
+node_disable_swap: false          # disable node swap, use with caution
+node_static_network: true         # preserve dns resolver settings after reboot
 node_disk_prefetch: false         # setup disk prefetch on HDD to increase performance
-node_kernel_modules: [ softdog, br_netfilter, ip_vs, ip_vs_rr, ip_vs_rr, ip_vs_wrr, ip_vs_sh ]
-node_tune: tiny                   # install and activate tuned profile: none|oltp|olap|crit|tiny
-node_sysctl_params: { }           # set additional sysctl parameters, k:v format
+node_kernel_modules: [ softdog, br_netfilter, ip_vs, ip_vs_rr, ip_vs_wrr, ip_vs_sh ]
+node_hugepage_count: 0            # number of 2MB hugepage, take precedence over ratio
+node_hugepage_ratio: 0            # node mem hugepage ratio, 0 disable it by default
+node_overcommit_ratio: 0          # node mem overcommit ratio, 0 disable it by default
+node_tune: oltp                   # node tuned profile: none,oltp,olap,crit,tiny
+node_sysctl_params: { }           # sysctl parameters in k:v format in addition to tuned
 
 #-----------------------------------------------------------------
-# NODE ADMIN
+# NODE_ADMIN
 #-----------------------------------------------------------------
-node_data_dir: /data              # main data directory
-node_admin_enabled: true          # create a default admin user defined by `node_admin_*` ?
-node_admin_uid: 88                # uid and gid for this admin user
-node_admin_username: dba          # name of this admin user, dba by default
-node_admin_ssh_exchange: true     # exchange admin ssh key among each pgsql cluster ?
-node_admin_pk_current: true       # add current user's ~/.ssh/id_rsa.pub to admin authorized_keys ?
-node_admin_pk_list: [ ]           # ssh public keys to be added to admin user (REPLACE WITH YOURS!)
+node_data: /data                  # node main data directory, `/data` by default
+node_admin_enabled: true          # create a admin user on target node?
+node_admin_uid: 88                # uid and gid for node admin user
+node_admin_username: dba          # name of node admin user, `dba` by default
+node_admin_ssh_exchange: true     # exchange admin ssh key among node cluster
+node_admin_pk_current: true       # add current user's ssh pk to admin authorized_keys
+node_admin_pk_list: []            # ssh public keys to be added to admin user
 
 #-----------------------------------------------------------------
 # NODE_TIME
 #-----------------------------------------------------------------
-node_timezone: Asia/Hong_Kong     # default node timezone, empty will not change
-node_ntp_enabled: true            # enable ntp service? false will leave ntp service untouched
-node_ntp_service: ntp             # ntp service provider: ntp|chrony
-node_ntp_servers:                 # default NTP servers
+node_timezone: ''                 # setup node timezone, empty string to skip
+node_ntp_enabled: true            # enable chronyd time sync service?
+node_ntp_servers:                 # ntp servers in `/etc/chrony.conf`
   - pool pool.ntp.org iburst
-node_crontab_overwrite: true      # true will overwrite /etc/crontab, false will append crontab
-node_crontab: [ ]                 # crontab entries in /etc/crontab
+node_crontab_overwrite: true      # overwrite or append to `/etc/crontab`?
+node_crontab: [ ]                 # crontab entries in `/etc/crontab`
 
+#-----------------------------------------------------------------
+# NODE_VIP
+#-----------------------------------------------------------------
+vip_enabled: false                # enable vip on this node cluster?
+# vip_address:         [IDENTITY] # node vip address in ipv4 format, required if vip is enabled
+# vip_vrid:            [IDENTITY] # required, integer, 1-254, should be unique among same VLAN
+vip_role: backup                  # optional, `master|backup`, backup by default, use as init role
+vip_preempt: false                # optional, `true/false`, false by default, enable vip preemption
+vip_interface: eth0               # node vip network interface to listen, `eth0` by default
+#vip_dns_suffix: ''               # node vip dns name suffix, empty string by default
+#vip_exporter_port: 9650          # keepalived exporter listen port, 9650 by default
+
+#-----------------------------------------------------------------
+# META (Reference)
+#-----------------------------------------------------------------
+region: default                   # upstream mirror region: default|china|europe
+proxy_env:                        # global proxy env when downloading packages
+  no_proxy: "localhost,127.0.0.1,10.0.0.0/8,192.168.0.0/16,*.pigsty,*.aliyun.com,mirrors.*,*.myqcloud.com,*.tsinghua.edu.cn"
+  # http_proxy:  # set your proxy here: e.g http://user:pass@proxy.xxx.com
+  # https_proxy: # set your proxy here: e.g http://user:pass@proxy.xxx.com
+  # all_proxy:   # set your proxy here: e.g http://user:pass@proxy.xxx.com
+#-----------------------------------------------------------------
+# NGINX (Reference)
+#-----------------------------------------------------------------
+nginx_enabled: true               # enable nginx on this infra node?
+nginx_home: /www                  # default nginx content home dir
 #-----------------------------------------------------------------
 # REPO (Reference)
 #-----------------------------------------------------------------
-repo_upstreams: []
+repo_name: pigsty                 # repo name, pigsty by default
+repo_modules: infra,node,pgsql,redis,minio # which repo modules are installed in repo_upstream
+repo_upstream:                    # where to download #
+  - { name: pigsty-infra   ,description: 'Pigsty Infra'      ,module: infra ,releases: [7,8,9] ,baseurl: { default: 'https://repo.pigsty.cc/rpm/infra/$basearch' }}
+  - { name: nginx          ,description: 'Nginx Repo'        ,module: infra ,releases: [7,8,9] ,baseurl: { default: 'https://nginx.org/packages/centos/$releasever/$basearch/' }}
+  - { name: docker-ce      ,description: 'Docker CE'         ,module: infra ,releases: [7,8,9] ,baseurl: { default: 'https://download.docker.com/linux/centos/$releasever/$basearch/stable'   ,china: 'https://mirrors.aliyun.com/docker-ce/linux/centos/$releasever/$basearch/stable'   ,europe: 'https://mirrors.xtom.de/docker-ce/linux/centos/$releasever/$basearch/stable' }}
+  - { name: prometheus     ,description: 'Prometheus'        ,module: infra ,releases: [7,8,9] ,baseurl: { default: 'https://packagecloud.io/prometheus-rpm/release/el/$releasever/$basearch' ,china: 'https://repo.pigsty.cc/rpm/prometheus/el$releasever.$basearch' }}
+  - { name: grafana        ,description: 'Grafana'           ,module: infra ,releases: [7,8,9] ,baseurl: { default: 'https://rpm.grafana.com' ,china: 'https://repo.pigsty.cc/rpm/grafana/$basearch' }}
+  - { name: base           ,description: 'EL 7 Base'         ,module: node  ,releases: [7    ] ,baseurl: { default: 'http://mirror.centos.org/centos/$releasever/os/$basearch/'                    ,china: 'https://mirrors.tuna.tsinghua.edu.cn/centos/$releasever/os/$basearch/'       ,europe: 'https://mirrors.xtom.de/centos/$releasever/os/$basearch/'           }}
+  - { name: updates        ,description: 'EL 7 Updates'      ,module: node  ,releases: [7    ] ,baseurl: { default: 'http://mirror.centos.org/centos/$releasever/updates/$basearch/'               ,china: 'https://mirrors.tuna.tsinghua.edu.cn/centos/$releasever/updates/$basearch/'  ,europe: 'https://mirrors.xtom.de/centos/$releasever/updates/$basearch/'      }}
+  - { name: extras         ,description: 'EL 7 Extras'       ,module: node  ,releases: [7    ] ,baseurl: { default: 'http://mirror.centos.org/centos/$releasever/extras/$basearch/'                ,china: 'https://mirrors.tuna.tsinghua.edu.cn/centos/$releasever/extras/$basearch/'   ,europe: 'https://mirrors.xtom.de/centos/$releasever/extras/$basearch/'       }}
+  - { name: epel           ,description: 'EL 7 EPEL'         ,module: node  ,releases: [7    ] ,baseurl: { default: 'http://download.fedoraproject.org/pub/epel/$releasever/$basearch/'            ,china: 'https://mirrors.tuna.tsinghua.edu.cn/epel/$releasever/$basearch/'            ,europe: 'https://mirrors.xtom.de/epel/$releasever/$basearch/'                }}
+  - { name: centos-sclo    ,description: 'EL 7 SCLo'         ,module: node  ,releases: [7    ] ,baseurl: { default: 'http://mirror.centos.org/centos/$releasever/sclo/$basearch/sclo/'             ,china: 'https://mirrors.aliyun.com/centos/$releasever/sclo/$basearch/sclo/'          ,europe: 'https://mirrors.xtom.de/centos/$releasever/sclo/$basearch/sclo/'    }}
+  - { name: centos-sclo-rh ,description: 'EL 7 SCLo rh'      ,module: node  ,releases: [7    ] ,baseurl: { default: 'http://mirror.centos.org/centos/$releasever/sclo/$basearch/rh/'               ,china: 'https://mirrors.aliyun.com/centos/$releasever/sclo/$basearch/rh/'            ,europe: 'https://mirrors.xtom.de/centos/$releasever/sclo/$basearch/rh/'      }}
+  - { name: baseos         ,description: 'EL 8+ BaseOS'      ,module: node  ,releases: [  8,9] ,baseurl: { default: 'https://dl.rockylinux.org/pub/rocky/$releasever/BaseOS/$basearch/os/'         ,china: 'https://mirrors.aliyun.com/rockylinux/$releasever/BaseOS/$basearch/os/'      ,europe: 'https://mirrors.xtom.de/rocky/$releasever/BaseOS/$basearch/os/'     }}
+  - { name: appstream      ,description: 'EL 8+ AppStream'   ,module: node  ,releases: [  8,9] ,baseurl: { default: 'https://dl.rockylinux.org/pub/rocky/$releasever/AppStream/$basearch/os/'      ,china: 'https://mirrors.aliyun.com/rockylinux/$releasever/AppStream/$basearch/os/'   ,europe: 'https://mirrors.xtom.de/rocky/$releasever/AppStream/$basearch/os/'  }}
+  - { name: extras         ,description: 'EL 8+ Extras'      ,module: node  ,releases: [  8,9] ,baseurl: { default: 'https://dl.rockylinux.org/pub/rocky/$releasever/extras/$basearch/os/'         ,china: 'https://mirrors.aliyun.com/rockylinux/$releasever/extras/$basearch/os/'      ,europe: 'https://mirrors.xtom.de/rocky/$releasever/extras/$basearch/os/'     }}
+  - { name: epel           ,description: 'EL 8+ EPEL'        ,module: node  ,releases: [  8,9] ,baseurl: { default: 'http://download.fedoraproject.org/pub/epel/$releasever/Everything/$basearch/' ,china: 'https://mirrors.tuna.tsinghua.edu.cn/epel/$releasever/Everything/$basearch/' ,europe: 'https://mirrors.xtom.de/epel/$releasever/Everything/$basearch/'     }}
+  - { name: powertools     ,description: 'EL 8 PowerTools'   ,module: node  ,releases: [  8  ] ,baseurl: { default: 'https://dl.rockylinux.org/pub/rocky/$releasever/PowerTools/$basearch/os/'     ,china: 'https://mirrors.aliyun.com/rockylinux/$releasever/PowerTools/$basearch/os/'  ,europe: 'https://mirrors.xtom.de/rocky/$releasever/PowerTools/$basearch/os/' }}
+  - { name: crb            ,description: 'EL 9 CRB'          ,module: node  ,releases: [    9] ,baseurl: { default: 'https://dl.rockylinux.org/pub/rocky/$releasever/CRB/$basearch/os/'            ,china: 'https://mirrors.aliyun.com/rockylinux/$releasever/CRB/$basearch/os/'         ,europe: 'https://mirrors.xtom.de/rocky/$releasever/CRB/$basearch/os/'        }}
+  - { name: pigsty-pgsql   ,description: 'Pigsty PgSQL'      ,module: pgsql ,releases: [7,8,9] ,baseurl: { default: 'https://repo.pigsty.cc/rpm/pgsql/el$releasever.$basearch'  }}
+  - { name: pgdg-common    ,description: 'PostgreSQL Common' ,module: pgsql ,releases: [7,8,9] ,baseurl: { default: 'https://download.postgresql.org/pub/repos/yum/common/redhat/rhel-$releasever-$basearch' ,china: 'https://mirrors.tuna.tsinghua.edu.cn/postgresql/repos/yum/common/redhat/rhel-$releasever-$basearch' , europe: 'https://mirrors.xtom.de/postgresql/repos/yum/common/redhat/rhel-$releasever-$basearch' }}
+  - { name: pgdg-extras    ,description: 'PostgreSQL Extra'  ,module: pgsql ,releases: [7,8,9] ,baseurl: { default: 'https://download.postgresql.org/pub/repos/yum/common/pgdg-rhel$releasever-extras/redhat/rhel-$releasever-$basearch' ,china: 'https://mirrors.tuna.tsinghua.edu.cn/postgresql/repos/yum/common/pgdg-rhel$releasever-extras/redhat/rhel-$releasever-$basearch' , europe: 'https://mirrors.xtom.de/postgresql/repos/yum/common/pgdg-rhel$releasever-extras/redhat/rhel-$releasever-$basearch' }}
+  - { name: pgdg-el8fix    ,description: 'PostgreSQL EL8FIX' ,module: pgsql ,releases: [  8  ] ,baseurl: { default: 'https://download.postgresql.org/pub/repos/yum/common/pgdg-centos8-sysupdates/redhat/rhel-8-x86_64/' ,china: 'https://mirrors.tuna.tsinghua.edu.cn/postgresql/repos/yum/common/pgdg-centos8-sysupdates/redhat/rhel-8-x86_64/' , europe: 'https://mirrors.xtom.de/postgresql/repos/yum/common/pgdg-centos8-sysupdates/redhat/rhel-8-x86_64/' }}
+  - { name: pgdg-el9fix    ,description: 'PostgreSQL EL9FIX' ,module: pgsql ,releases: [    9] ,baseurl: { default: 'https://download.postgresql.org/pub/repos/yum/common/pgdg-rocky9-sysupdates/redhat/rhel-9-x86_64/'  ,china: 'https://mirrors.tuna.tsinghua.edu.cn/postgresql/repos/yum/common/pgdg-rocky9-sysupdates/redhat/rhel-9-x86_64/' , europe: 'https://mirrors.xtom.de/postgresql/repos/yum/common/pgdg-rocky9-sysupdates/redhat/rhel-9-x86_64/' }}
+  - { name: pgdg12         ,description: 'PostgreSQL 12'     ,module: pgsql ,releases: [7,8,9] ,baseurl: { default: 'https://download.postgresql.org/pub/repos/yum/12/redhat/rhel-$releasever-$basearch' ,china: 'https://mirrors.tuna.tsinghua.edu.cn/postgresql/repos/yum/12/redhat/rhel-$releasever-$basearch' ,europe: 'https://mirrors.xtom.de/postgresql/repos/yum/12/redhat/rhel-$releasever-$basearch' }}
+  - { name: pgdg13         ,description: 'PostgreSQL 13'     ,module: pgsql ,releases: [7,8,9] ,baseurl: { default: 'https://download.postgresql.org/pub/repos/yum/13/redhat/rhel-$releasever-$basearch' ,china: 'https://mirrors.tuna.tsinghua.edu.cn/postgresql/repos/yum/13/redhat/rhel-$releasever-$basearch' ,europe: 'https://mirrors.xtom.de/postgresql/repos/yum/13/redhat/rhel-$releasever-$basearch' }}
+  - { name: pgdg14         ,description: 'PostgreSQL 14'     ,module: pgsql ,releases: [7,8,9] ,baseurl: { default: 'https://download.postgresql.org/pub/repos/yum/14/redhat/rhel-$releasever-$basearch' ,china: 'https://mirrors.tuna.tsinghua.edu.cn/postgresql/repos/yum/14/redhat/rhel-$releasever-$basearch' ,europe: 'https://mirrors.xtom.de/postgresql/repos/yum/14/redhat/rhel-$releasever-$basearch' }}
+  - { name: pgdg15         ,description: 'PostgreSQL 15'     ,module: pgsql ,releases: [7,8,9] ,baseurl: { default: 'https://download.postgresql.org/pub/repos/yum/15/redhat/rhel-$releasever-$basearch' ,china: 'https://mirrors.tuna.tsinghua.edu.cn/postgresql/repos/yum/15/redhat/rhel-$releasever-$basearch' ,europe: 'https://mirrors.xtom.de/postgresql/repos/yum/15/redhat/rhel-$releasever-$basearch' }}
+  - { name: pgdg16         ,description: 'PostgreSQL 16'     ,module: pgsql ,releases: [  8,9] ,baseurl: { default: 'https://download.postgresql.org/pub/repos/yum/16/redhat/rhel-$releasever-$basearch' ,china: 'https://mirrors.tuna.tsinghua.edu.cn/postgresql/repos/yum/16/redhat/rhel-$releasever-$basearch' ,europe: 'https://mirrors.xtom.de/postgresql/repos/yum/16/redhat/rhel-$releasever-$basearch' }}
+  - { name: timescaledb    ,description: 'TimescaleDB'       ,module: pgsql ,releases: [7,8,9] ,baseurl: { default: 'https://packagecloud.io/timescale/timescaledb/el/$releasever/$basearch'  }}
+  - { name: pigsty-redis   ,description: 'Pigsty Redis'      ,module: redis ,releases: [7,8,9] ,baseurl: { default: 'https://repo.pigsty.cc/rpm/redis/el$releasever.$basearch'  }}
+  - { name: pigsty-minio   ,description: 'Pigsty MinIO'      ,module: minio ,releases: [7,8,9] ,baseurl: { default: 'https://repo.pigsty.cc/rpm/minio/$basearch'  }}
+
+#-----------------------------------------------------------------
+# CA (Reference)
+#-----------------------------------------------------------------
+cert_validity: 7300d              # cert validity, 20 years by default
 ...

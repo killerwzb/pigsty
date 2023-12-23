@@ -1,0 +1,28 @@
+[Unit]
+Description=A lightweight connection pooler for PostgreSQL
+Documentation=https://www.pgbouncer.org/
+After=syslog.target
+After=network.target
+# After=postgres.service
+# Wants=postgres.service
+
+[Service]
+LimitNOFILE=655360
+Type=simple
+User={{ pg_dbsu }}
+Group=postgres
+Environment=BOUNCERCONF=/etc/pgbouncer/pgbouncer.ini
+PIDFile=/var/run/postgres/pgbouncer.pid
+{% if os_package is defined and os_package == 'deb' %}
+ExecStart=/usr/sbin/pgbouncer ${BOUNCERCONF}
+{% else %}
+ExecStart=/usr/bin/pgbouncer ${BOUNCERCONF}
+{% endif %}
+ExecReload=/usr/bin/kill -HUP $MAINPID
+KillSignal=SIGINT
+TimeoutSec=300
+Restart=on-failure
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target

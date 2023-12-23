@@ -1,0 +1,96 @@
+#==============================================================#
+# File      :   pgbackrest.conf
+# Desc      :   PgBackrest Config for {{ pg_instance }} {{ pg_role }}
+# Time      :   {{ '%Y-%m-%d %H:%M' | strftime }}
+# Host      :   {{ pg_instance }} @ {{ inventory_hostname }}:{{ pg_port }}
+# Path      :   /etc/pgbackrest/pgbackrest.conf
+# Note      :   ANSIBLE MANAGED, DO NOT CHANGE!
+# Author    :   Ruohang Feng (rh@vonng.com)
+# License   :   AGPLv3
+#==============================================================#
+[{{ pg_cluster }}]
+
+
+#--------------------------------------------------------------#
+# 1. stanza                                                    #
+# https://pgbackrest.org/configuration.html#section-stanza     #
+#--------------------------------------------------------------#
+pg1-path={{ pg_data }}
+pg1-port={{ pg_port }}
+
+
+[global]
+#--------------------------------------------------------------#
+# 2. archive                                                   #
+# https://pgbackrest.org/configuration.html#section-archive    #
+#--------------------------------------------------------------#
+archive-async=y
+
+
+#--------------------------------------------------------------#
+# 3. backup                                                    #
+# https://pgbackrest.org/configuration.html#section-backup     #
+#--------------------------------------------------------------#
+annotation=pg_cluster={{ pg_cluster }}
+start-fast=y
+expire-auto=y
+#archive-copy=n
+
+
+#--------------------------------------------------------------#
+# 4. general                                                   #
+# https://pgbackrest.org/configuration.html#section-general    #
+#--------------------------------------------------------------#
+compress-type=lz4
+spool-path=/pg/tmp
+
+
+#--------------------------------------------------------------#
+# 5. log                                                       #
+# https://pgbackrest.org/configuration.html#section-log        #
+#--------------------------------------------------------------#
+log-level-console=info
+log-level-file=detail
+log-path={{ pgbackrest_log_dir }}
+
+
+#--------------------------------------------------------------#
+# 6. repository                                                #
+# https://pgbackrest.org/configuration.html#section-repository #
+#--------------------------------------------------------------#
+{% for k,v in pgbackrest_repo[pgbackrest_method].items() %}
+repo1-{{ k|replace('_', '-') }}={{ v|replace('${pg_cluster}', pg_cluster) }}
+{% endfor %}
+
+
+#--------------------------------------------------------------#
+# 7. restore                                                   #
+# https://pgbackrest.org/configuration.html#section-restore    #
+#--------------------------------------------------------------#
+link-all=y
+delta=y
+archive-mode=off
+
+
+#--------------------------------------------------------------#
+# 8. server                                                    #
+# https://pgbackrest.org/configuration.html#section-server     #
+#--------------------------------------------------------------#
+#tls-server-address=*
+#tls-server-port=9638
+#tls-server-ca-file=/etc/pki/ca.crt
+#tls-server-cert-file=/pg/cert/server.crt
+#tls-server-key-file=/pg/cert/server.key
+
+
+#--------------------------------------------------------------#
+# 9. adhoc (parallel)                                          #
+#--------------------------------------------------------------#
+[global:restore]
+process-max={{ ([node_cpu|int, 8])|min|int }}
+
+[global:archive-push]
+process-max={{ ([(node_cpu|int / 2)|round(0,'ceil'), 4])|min|int }}
+
+[global:archive-get]
+process-max={{ ([(node_cpu|int / 4)|round(0,'ceil'), 2])|min|int }}

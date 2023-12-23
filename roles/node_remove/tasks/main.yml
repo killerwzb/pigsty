@@ -1,0 +1,94 @@
+---
+#--------------------------------------------------------------#
+# remove prometheus register                        [prometheus]
+#--------------------------------------------------------------#
+- name: remove node target from prometheus
+  tags: [ register, prometheus ]
+  become: yes
+  ignore_errors: yes
+  delegate_to: '{{ item }}'
+  with_items: '{{ groups["infra"] }}'
+  file: state=absent path=/etc/prometheus/targets/node/{{ inventory_hostname }}.yml
+
+- name: remove node ping target from prometheus
+  tags: [ register, prometheus ]
+  become: yes
+  ignore_errors: yes
+  delegate_to: '{{ item }}'
+  with_items: '{{ groups["infra"] }}'
+  file: state=absent path=/etc/prometheus/targets/ping/{{ inventory_hostname }}.yml
+
+- name: remove vip ping target from prometheus
+  tags: [ register, prometheus ]
+  when: vip_enabled|bool and vip_address is defined and vip_address != ''
+  become: yes
+  ignore_errors: yes
+  delegate_to: '{{ item }}'
+  with_items: '{{ groups["infra"] }}'
+  file: state=absent path=/etc/prometheus/targets/ping/{{ vip_address }}---{{ inventory_hostname }}.yml
+
+
+#--------------------------------------------------------------#
+# remove nginx register (haproxy admin page)             [nginx]
+#--------------------------------------------------------------#
+- import_tasks: nginx.yml
+  tags: [ register, nginx ]
+
+#--------------------------------------------------------------#
+# remove keepalived_exporter                               [vip]
+#--------------------------------------------------------------#
+- name: stop and disable keepalived service
+  tags: vip
+  when: vip_enabled|bool
+  ignore_errors: yes
+  systemd: name=keepalived state=stopped enabled=no daemon_reload=yes
+
+#--------------------------------------------------------------#
+# remove haproxy services                              [haproxy]
+#--------------------------------------------------------------#
+- name: stop and disable haproxy
+  tags: haproxy
+  ignore_errors: yes
+  block:
+    - name: stop and disable haproxy
+      systemd: name=haproxy state=stopped enabled=no daemon_reload=yes
+    - name: remove haproxy config dir
+      file: state=absent path=/etc/haproxy
+
+#--------------------------------------------------------------#
+# remove node exporter                           [node_exporter]
+#--------------------------------------------------------------#
+- name: stop and disable node_exporter service
+  tags: node_exporter
+  ignore_errors: yes
+  systemd: name=node_exporter state=stopped enabled=no daemon_reload=yes
+
+#--------------------------------------------------------------#
+# remove keepalived_exporter                      [vip_exporter]
+#--------------------------------------------------------------#
+- name: stop and disable keepalived_exporter service
+  tags: vip_exporter
+  when: vip_enabled|bool
+  ignore_errors: yes
+  systemd: name=keepalived_exporter state=stopped enabled=no daemon_reload=yes
+
+#--------------------------------------------------------------#
+# remove promtail                                     [promtail]
+#--------------------------------------------------------------#
+- name: stop and disable promtail service
+  tags: promtail
+  ignore_errors: yes
+  block:
+    - name: stop promtail service
+      systemd: name=promtail state=stopped enabled=no daemon_reload=yes
+    - name: remove promtail log positions
+      file: path={{ promtail_positions }} state=absent
+
+#--------------------------------------------------------------#
+# remove node etc profile                              [profile]
+#--------------------------------------------------------------#
+- name: remove node etc profile
+  tags: profile
+  ignore_errors: yes
+  file: path=/etc/profile.d/node.sh state=absent
+...
